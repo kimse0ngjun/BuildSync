@@ -36,7 +36,7 @@
   font-size: 17px;
 }
 
-.logo-text {
+.landing-logo-text {
   display: flex;
   align-items: center;
 
@@ -45,12 +45,12 @@
   letter-spacing: -0.5px;
 }
 
-.logo-build {
+.landing-logo-text .logo-build {
   color: #1f2937;
 }
 
-.logo-sync {
-  color: #1565d8;
+.landing-logo-text .logo-sync {
+  color: #2563eb;
 }
 
 .nav {
@@ -73,7 +73,7 @@
   background: white;
   color: #1565d8;
   border-radius: 8px;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -121,7 +121,7 @@
 .hero h1 {
   font-size: 50px;
   line-height: 1.2;
-  font-weight: 800;
+  font-weight: 700;
   color: #10284a;
   margin-bottom: 30px;
 }

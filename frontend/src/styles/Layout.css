@@ -61,7 +61,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .logo-text {
@@ -69,7 +69,7 @@
   transform: translateX(-8px);
   transition: 0.3s ease;
   font-size: 21px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.5px;
 }
 
@@ -222,7 +222,7 @@
   flex-direction: column;
 }
 
-/* bottom submenu - 아래에서 위로 올라오는 느낌 */
+/* bottom submenu */
 .bottom-submenu {
   margin-left: 38px;
   display: flex;

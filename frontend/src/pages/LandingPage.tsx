@@ -11,7 +11,7 @@ function LandingPage() {
       <header className="landing-header">
         <div className="logo">
           <div className="logo-icon">B</div>
-          <span className="logo-text">
+          <span className="landing-logo-text">
             <span className="logo-build">Build</span>
             <span className="logo-sync">Sync</span>
           </span>
