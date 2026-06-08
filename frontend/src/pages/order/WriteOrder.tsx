@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { writeOrderApi } from "../../api/api";
+import { writeOrderApi } from "../../api/OrderApi";
 import type {
   Company,
   Contact,
@@ -286,6 +286,7 @@ export const WriteOrder = () => {
             value={inputQuantity === 0 ? "" : inputQuantity}
             onChange={(e) => setInputQuantity(Number(e.target.value))}
             className="selected-quantity"
+            min={1}
           />
           <p className="unit">
             {currentSelectedMaterialInfo
