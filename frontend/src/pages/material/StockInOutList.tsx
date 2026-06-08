@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   FiPlus,
   FiSearch,
@@ -111,6 +112,8 @@ const stockItems = [
 ];
 
 function StockInOutList() {
+  const navigate = useNavigate();
+
   return (
     <div className="stock-page">
       <div className="stock-header">
@@ -122,7 +125,10 @@ function StockInOutList() {
           </p>
         </div>
 
-        <button className="stock-add-btn">
+        <button
+          className="stock-add-btn"
+          onClick={() => navigate("/stock/write")}
+        >
           <FiPlus />
           입출고 등록
         </button>

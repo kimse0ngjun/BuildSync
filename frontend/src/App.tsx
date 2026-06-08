@@ -9,6 +9,7 @@ import MaterialList from "./pages/material/MeterialList";
 import MaterialWrite from "./pages/material/MaterialWrite";
 import CompanyEdit from "./pages/company/CompanyEdit";
 import StockInOutList from "./pages/material/StockInOutList";
+import StockInOutWrite from "./pages/material/StockInOutWrite";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/material/write" element={<MaterialWrite />} />
           <Route path="/company/:id/edit" element={<CompanyEdit />} />
           <Route path="/stock" element={<StockInOutList />} />
+          <Route path="/stock/write" element={<StockInOutWrite />} />
         </Route>
       </Routes>
     </BrowserRouter>
