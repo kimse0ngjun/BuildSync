@@ -57,7 +57,7 @@ function CompanyDetail() {
 
       <div className="detail-grid">
         <section className="detail-section">
-          <div className="section-title">
+          <div className="detail-section-title">
             <FiBriefcase />
             <h3>업체 기본 정보</h3>
           </div>
@@ -83,7 +83,7 @@ function CompanyDetail() {
         </section>
 
         <section className="detail-section">
-          <div className="section-title">
+          <div className="detail-section-title">
             <FiPhone />
             <h3>연락 및 주소 정보</h3>
           </div>
