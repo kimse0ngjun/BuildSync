@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, Link } from "react-router-dom";
 import {
   FiHome,
   FiUsers,
@@ -191,12 +191,12 @@ function Layout() {
 
       <main className="main-area">
         <header className="topbar">
-          <div className="topbar-logo">
+          <Link to="/dashboard" className="topbar-logo">
             <span className="topbar-logo-text">
               <span className="logo-build">Build</span>
               <span className="logo-sync">Sync</span>
             </span>
-          </div>
+          </Link>
         </header>
 
         <section className="page-content">
