@@ -12,7 +12,7 @@
   margin-bottom: 28px;
 }
 
-.page-label {
+.material-page-label {
   margin: 0 0 10px;
   color: #2563eb;
   font-size: 14px;
@@ -27,7 +27,7 @@
   letter-spacing: -0.8px;
 }
 
-.page-desc {
+.material-page-desc {
   margin-top: 10px;
   color: #64748b;
   font-size: 15px;
@@ -110,6 +110,52 @@
 
 .material-main {
   min-width: 0;
+}
+
+.material-tabs {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: 1px solid #dbe6f4;
+  background: transparent;
+  margin-bottom: 18px;
+}
+
+.material-tabs button {
+  width: 130px;
+  height: 48px;
+  border: 1px solid #dbe6f4;
+  border-bottom: none;
+  background: #fff;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  position: relative;
+}
+
+.material-tabs button:first-child {
+  border-radius: 12px 0 0 0;
+}
+
+.material-tabs button:last-child {
+  border-left: none;
+  border-radius: 0 12px 0 0;
+}
+
+.material-tabs button.active {
+  color: #2563eb;
+  background: #fff;
+}
+
+.material-tabs button.active::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  height: 2px;
+  background: #2563eb;
 }
 
 .material-toolbar {
