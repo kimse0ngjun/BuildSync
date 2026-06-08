@@ -111,7 +111,10 @@ function CompanyDetail() {
           목록으로
         </button>
 
-        <button className="edit-btn">
+        <button
+          className="edit-btn"
+          onClick={() => navigate("/company/1/edit")}
+        >
           <FiEdit3 />
           수정
         </button>
