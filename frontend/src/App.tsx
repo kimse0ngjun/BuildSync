@@ -8,6 +8,7 @@ import CompanyDetail from "./pages/company/CompanyDetail";
 import MaterialList from "./pages/material/MeterialList";
 import MaterialWrite from "./pages/material/MaterialWrite";
 import CompanyEdit from "./pages/company/CompanyEdit";
+import StockInOutList from "./pages/material/StockInOutList";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/material" element={<MaterialList />} />
           <Route path="/material/write" element={<MaterialWrite />} />
           <Route path="/company/:id/edit" element={<CompanyEdit />} />
+          <Route path="/stock" element={<StockInOutList />} />
         </Route>
       </Routes>
     </BrowserRouter>
