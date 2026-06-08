@@ -181,10 +181,12 @@ function Layout() {
             <div className="login-avatar">
               <FiLogIn />
             </div>
-            <div className="login-info">
-              <strong>로그인</strong>
-              <small>서비스 이용하기</small>
-            </div>
+            <NavLink to="/login">
+              <div className="login-info">
+                <strong>로그인</strong>
+                <small>서비스 이용하기</small>
+              </div>
+            </NavLink>
           </div>
         </div>
       </aside>
