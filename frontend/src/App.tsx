@@ -10,6 +10,7 @@ import MaterialWrite from "./pages/material/MaterialWrite";
 import { WriteOrder } from "./pages/order/WriteOrder";
 import SuccessInput from "./pages/inoutput/SuccessInput";
 import SuccessOutput from "./pages/inoutput/SuccessOutput";
+import { OrderList } from "./pages/order/OrderList";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/material/write" element={<MaterialWrite />} />
 
           <Route path="/order/write" element={<WriteOrder />} />
+          <Route path="/order/list" element={<OrderList />} />
 
           <Route path="/input/success-input" element={<SuccessInput />} />
           <Route path="/output/success-output" element={<SuccessOutput />} />

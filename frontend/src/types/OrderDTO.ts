@@ -59,3 +59,13 @@ export interface OrderDetail extends Orders {
   amount: number;
   quantity: number;
 }
+
+export interface OrderList {
+  orderId: number;
+  orderDate: Date;
+  companyName: string;
+  representativeItem: string;
+  itemCount: number;
+  totalAmount: number;
+  status: string;
+}
