@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { writeOrderApi } from "../api/api";
+import { writeOrderApi } from "../../api/api";
 import type {
   Company,
   Contact,
   Material,
-  OrderDetail,
   SelectedMaterialItem,
-} from "../types/OrderDTO";
-import "../css/WriteOrder.css";
+} from "../../types/OrderDTO";
 import { FiUser } from "react-icons/fi";
 import { MdCalendarToday } from "react-icons/md";
 import { IoOptionsOutline } from "react-icons/io5";
@@ -19,57 +17,50 @@ import { TbBlocks } from "react-icons/tb";
 
 export const WriteOrder = () => {
   const nav = useNavigate();
-
-  // 발주서 작성 오늘 날짜 표시
   const orderDate = new Date().toISOString().split("T")[0];
 
-  // 공급업체 목록 상태
   const [supplierList, setSupplierList] = useState<Company[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null); // 선택한 공급업체 ID
+  const [selectedMaterial, setSelectMaterial] = useState<Material[]>([]); // 공급업체의 취급 자재 목록
+  const [inputMaterialId, setInputMaterialId] = useState<number>(0);
+  const [inputQuantity, setInputQuantity] = useState<number>(0);
+  const [basketList, setBasketList] = useState<SelectedMaterialItem[]>([]); // 장바구니
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [memo, setMemo] = useState<string>(""); // 기타 메모 입력 칸
+
   useEffect(() => {
     writeOrderApi
       .getSupplierList()
-      .then((data) => setSupplierList(data))
+      .then((data) => setSupplierList(Array.isArray(data) ? data : []))
       .catch(console.error);
   }, []);
 
-  // 발주서에 선택한 공급업체 ID
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-
-  // 발주서에 선택한 자재 정보
-  const [selectedMaterial, setSelectMaterial] = useState<Material[]>([]);
   useEffect(() => {
+    if (!selectedId) {
+      setSelectMaterial([]);
+      return;
+    }
     writeOrderApi
-      .getOurCompanyMaterial()
-      .then((data) => setSelectMaterial(data))
+      .getOurCompanyMaterial(selectedId)
+      .then((data) => setSelectMaterial(Array.isArray(data) ? data : []))
       .catch(console.error);
-  }, []);
+  }, [selectedId]);
 
-  // 자재&수량 입력 받기
-  const [inputMaterialId, setInputMaterialId] = useState<number>(0);
-  const [inputQuantity, setInputQuantity] = useState<number>(0);
-
-  // 하단 표에 데이터 담기
-  const [basketList, setBasketList] = useState<SelectedMaterialItem[]>([]);
-
-  // 선택한 자재 ID로 자재 정보 자동 출력
-  const ourCompanyMaterialInfo = selectedMaterial.find(
+  const currentSelectedMaterialInfo = selectedMaterial.find(
     (m) => m.materialId === inputMaterialId,
   );
 
-  // 선택한 회사의 담당자
-  const [contact, setContact] = useState<Contact | null>(null);
-
-  // 회사 선택 핸들러
   const handleCompanyChange = async (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const companyId = Number(e.target.value);
     setSelectedId(companyId);
+    setInputMaterialId(0);
+    setBasketList([]);
 
-    if (!companyId) {
+    if (companyId) {
       try {
         const data = await writeOrderApi.getContactList(companyId);
-
         if (data && data.length > 0) {
           setContact(data[0]);
         } else {
@@ -84,11 +75,10 @@ export const WriteOrder = () => {
     }
   };
 
-  // 자재 추가 핸들러
   const handleAddMaterial = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    if (!ourCompanyMaterialInfo) {
+    if (!currentSelectedMaterialInfo) {
       alert("자재를 선택해 주세요.");
       return;
     }
@@ -99,37 +89,35 @@ export const WriteOrder = () => {
     }
 
     const isExist = basketList.some(
-      (item) => item.materialId === ourCompanyMaterialInfo.materialId,
+      (item) => item.materialId === currentSelectedMaterialInfo.materialId,
     );
     if (isExist) {
-      alert(
-        "이미 목록에 추가된 자재입니다. 수정이 필요하시면 삭제 후 다시 추가해 주세요.",
-      );
+      alert("이미 목록에 추가된 자재입니다. 삭제 후 다시 추가해 주세요.");
       return;
     }
 
     const newItem: SelectedMaterialItem = {
-      ...ourCompanyMaterialInfo,
+      ...currentSelectedMaterialInfo,
+      currentStock: currentSelectedMaterialInfo.currentStock,
+      minimumStock: currentSelectedMaterialInfo.minimumStock,
       orderQuantity: inputQuantity,
-      totalAmount: ourCompanyMaterialInfo.price * inputQuantity,
+      totalAmount: currentSelectedMaterialInfo.price * inputQuantity,
     };
 
     setBasketList([...basketList, newItem]);
     setInputQuantity(0);
+    setInputMaterialId(0);
   };
 
-  // 자재 선택 삭제 핸들러
   const handleRemoveItem = (id: number) => {
-    setSelectMaterial(basketList.filter((item) => item.materialId !== id));
+    setBasketList(basketList.filter((item) => item.materialId !== id));
   };
 
-  // 선택 자재 총 합계 금액 계산
   const totalAmountSum = basketList.reduce(
     (sum, item) => sum + item.totalAmount,
     0,
   );
 
-  // 발주서 업로드
   const handleUploadOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -144,32 +132,33 @@ export const WriteOrder = () => {
     }
 
     try {
-      const orderQuest = basketList.map((item) => {
-        const order: OrderDetail = {
-          orderId: 0,
-          contactId: contact?.contactId || 0,
-          companyId: selectedId,
-          orderDate: new Date(orderDate),
-          totalAmount: totalAmountSum,
+      const orderPayload = {
+        orders: {
+          order_id: null,
+          contact_id: contact?.contactId || null,
+          company_id: selectedId,
+          order_date: orderDate,
+          expected_delivery_date: orderDate,
+          total_amount: totalAmountSum,
           status: "PENDING",
-          memo: "",
-
-          orderItemId: 0,
-          materialId: item.materialId,
-          unitPrice: item.price,
-          unit: item.unit,
+          memo: memo,
+        },
+        orderItems: basketList.map((item) => ({
+          order_item_id: null,
+          order_id: null,
+          material_id: item.materialId,
+          unit_price: item.price,
           amount: item.totalAmount,
           quantity: item.orderQuantity,
-        };
+        })),
+      };
 
-        return writeOrderApi.writeOrder(order);
-      });
-      await Promise.all(orderQuest);
+      await writeOrderApi.writeOrder(orderPayload);
       alert("발주서 전송이 완료되었습니다.");
-      nav("");
+      nav("/orders");
     } catch (error) {
       console.error("발주서 전송 실패: ", error);
-      alert("서버 오류로 발주서 전송에 실패했습니다. 다시 시도해 주세요.");
+      alert("서버 오류로 발주서 전송에 실패했습니다.");
     }
   };
 
@@ -193,7 +182,6 @@ export const WriteOrder = () => {
             type="text"
             required
           />
-
           <label className="label-date">발주일</label>
           <input
             type="date"
@@ -213,8 +201,12 @@ export const WriteOrder = () => {
 
         <div className="contact-input-area">
           <IoOptionsOutline className="option-icon" />
-          <select className="select-company" onChange={handleCompanyChange}>
-            <option disabled selected className="selected-default">
+          <select
+            className="select-company"
+            onChange={handleCompanyChange}
+            defaultValue=""
+          >
+            <option disabled value="" className="selected-default">
               거래처 선택
             </option>
             {supplierList && supplierList.length > 0 ? (
@@ -228,7 +220,9 @@ export const WriteOrder = () => {
                 </option>
               ))
             ) : (
-              <option className="no-data">등록된 거래처가 없습니다.</option>
+              <option disabled value="">
+                등록된 공급업체가 없습니다.
+              </option>
             )}
           </select>
 
@@ -241,7 +235,6 @@ export const WriteOrder = () => {
                 value={contact.contactName}
                 readOnly
               />
-
               <BsTelephone className="tel-icon" />
               <input
                 type="tel"
@@ -249,7 +242,6 @@ export const WriteOrder = () => {
                 value={contact.phone}
                 readOnly
               />
-
               <IoMailOutline className="email-icon" />
               <input
                 type="email"
@@ -296,7 +288,9 @@ export const WriteOrder = () => {
             className="selected-quantity"
           />
           <p className="unit">
-            {ourCompanyMaterialInfo ? ourCompanyMaterialInfo.unit : "-"}
+            {currentSelectedMaterialInfo
+              ? currentSelectedMaterialInfo.unit
+              : "-"}
           </p>
           <button type="button" className="btn-add" onClick={handleAddMaterial}>
             추가
@@ -304,7 +298,7 @@ export const WriteOrder = () => {
 
           <div className="container-table">
             <small className="explain-table">
-              현재 귀사의 재고 현황이 표시됩니다.
+              현재 귀사(건축업체)의 자재별 재고 현황이 표시됩니다.
             </small>
             <table className="wish-table">
               <thead className="thead">
@@ -323,7 +317,7 @@ export const WriteOrder = () => {
               <tbody className="tbody">
                 {basketList && basketList.length > 0 ? (
                   basketList.map((material) => (
-                    <tr className="tbody-tr">
+                    <tr className="tbody-tr" key={material.materialId}>
                       <td>
                         <strong className="name">
                           {material.materialName}
@@ -337,8 +331,12 @@ export const WriteOrder = () => {
                       <td className="specification">
                         {material.specification}
                       </td>
-                      <td className="price">{material.price}</td>
-                      <td className="amount">{material.totalAmount}</td>
+                      <td className="price">
+                        {material.price.toLocaleString()}
+                      </td>
+                      <td className="amount">
+                        {material.totalAmount.toLocaleString()}
+                      </td>
                       <td className="icon">
                         <RiDeleteBin6Line
                           className="click-icon"
@@ -356,14 +354,20 @@ export const WriteOrder = () => {
                 )}
               </tbody>
             </table>
-            <div className="total">합계 {totalAmountSum}원</div>
+            <div className="total">
+              합계 {totalAmountSum.toLocaleString()}원
+            </div>
           </div>
         </div>
 
         <div className="container-etc">
           <h2 className="form-title">기타</h2>
           <p className="explain">추가 사항을 작성해 주세요.</p>
-          <textarea className="write-etc" />
+          <textarea
+            className="write-etc"
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+          />
         </div>
         <div className="btn-area">
           <button className="btn-order" type="submit">

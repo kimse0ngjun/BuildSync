@@ -1,10 +1,5 @@
 import axios from "axios";
-import type {
-  Company,
-  Contact,
-  Material,
-  OrderDetail,
-} from "../types/OrderDTO";
+import type { Company, Contact, Material } from "../types/OrderDTO";
 
 const api = axios.create({
   baseURL: "",
@@ -14,10 +9,19 @@ const api = axios.create({
 });
 
 export const writeOrderApi = {
-  getSupplierList: () => api<Company[]>("").then((res) => res.data),
-  getContactList: (companyId: number) =>
-    api<Contact[]>(`/contact?companyId=${companyId}`).then((res) => res.data),
-  getOurCompanyMaterial: () => api<Material[]>("").then((res) => res.data),
+  getSupplierList: () =>
+    api<Company[]>("/order/company").then((res) => res.data),
 
-  writeOrder: (data: OrderDetail) => api.post("", data).then((res) => res.data),
+  getContactList: (companyId: number) =>
+    api<Contact[]>(`/order/contact?companyId=${companyId}`).then(
+      (res) => res.data,
+    ),
+
+  getOurCompanyMaterial: (companyId: number) =>
+    api<Material[]>(`/order/material?companyId=${companyId}`).then(
+      (res) => res.data,
+    ),
+
+  writeOrder: (data: any) =>
+    api.post("/order/write", data).then((res) => res.data),
 };

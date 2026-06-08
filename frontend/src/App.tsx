@@ -7,6 +7,7 @@ import CompanyList from "./pages/company/CompantList";
 import CompanyDetail from "./pages/company/CompanyDetail";
 import MaterialList from "./pages/material/MeterialList";
 import MaterialWrite from "./pages/material/MaterialWrite";
+import { WriteOrder } from "./pages/order/WriteOrder";
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
           <Route path="/company/:id" element={<CompanyDetail />} />
           <Route path="/material" element={<MaterialList />} />
           <Route path="/material/write" element={<MaterialWrite />} />
+
+          <Route path="/order/write" element={<WriteOrder />} />
         </Route>
       </Routes>
     </BrowserRouter>
