@@ -1,0 +1,244 @@
+.company-detail-page {
+  width: 100%;
+  min-height: 100%;
+  background: #fafafa;
+  padding: 0 40px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 42px;
+}
+
+.detail-label {
+  margin: 0 0 10px;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.detail-header h1 {
+  margin: 0;
+  color: #10284a;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+
+.detail-desc {
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* 상단 요약 */
+.company-detail-summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 34px;
+  margin-bottom: 34px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.company-detail-summary p {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.summary-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex: 0 0 64px;
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.summary-title h2 {
+  margin: 0;
+  color: #10284a;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+
+.type-badge {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 기본정보 + 연락정보 좌우 배치 */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 42px;
+  align-items: start;
+}
+
+.detail-section {
+  margin-bottom: 42px;
+}
+
+.detail-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  color: #2563eb;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.detail-section-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  height: 2px;
+  background: #2563eb;
+  border-radius: 999px;
+}
+
+.detail-section-title h3 {
+  margin: 0;
+  color: #10284a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.info-list {
+  width: 100%;
+}
+
+.info-row {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.info-label svg {
+  color: #2563eb;
+  font-size: 17px;
+}
+
+.info-value {
+  color: #10284a;
+  font-size: 15px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* 하단 버튼 */
+.bottom-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 48px;
+}
+
+.back-btn,
+.edit-btn,
+.delete-btn {
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 12px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-btn {
+  border: 1px solid #dbe6f4;
+  color: #64748b;
+}
+
+.edit-btn {
+  border: 1px solid #bfdbfe;
+  color: #2563eb;
+}
+
+.delete-btn {
+  border: 1px solid #fecaca;
+  color: #ef4444;
+}
+
+.back-btn:hover,
+.edit-btn:hover {
+  background: #e8f1ff;
+  color: #2563eb;
+}
+
+.delete-btn:hover {
+  background: #fff1f2;
+  color: #ef4444;
+}
+
+@media (max-width: 1000px) {
+  .detail-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .company-detail-summary {
+    align-items: flex-start;
+  }
+
+  .summary-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .info-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 14px 0;
+  }
+
+  .bottom-actions {
+    flex-wrap: wrap;
+  }
+}
