@@ -162,7 +162,14 @@ function SitePage() {
                   </td>
                   <td>
                     <div className="site-actions">
-                      <button className="edit">
+                      <button
+                        className="edit"
+                        onClick={() =>
+                          navigate(`/site/edit/${site.id}`, {
+                            state: site,
+                          })
+                        }
+                      >
                         <FiEdit3 />
                       </button>
                       <button className="delete">
