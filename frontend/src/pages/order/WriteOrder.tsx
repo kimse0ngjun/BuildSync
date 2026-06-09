@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RiDeleteBin6Line } from "react-icons/ri";
+import {
+  FiArrowLeft,
+  FiUser,
+  FiCalendar,
+  FiBriefcase,
+  FiPhone,
+  FiMail,
+  FiPackage,
+  FiPlus,
+  FiTrash2,
+  FiFileText,
+  FiSave,
+} from "react-icons/fi";
 import { writeOrderApi } from "../../api/OrderApi";
 import type {
   Company,
@@ -8,25 +20,20 @@ import type {
   Material,
   SelectedMaterialItem,
 } from "../../types/OrderDTO";
-import { FiUser } from "react-icons/fi";
-import { MdCalendarToday } from "react-icons/md";
-import { IoOptionsOutline } from "react-icons/io5";
-import { BsTelephone } from "react-icons/bs";
-import { IoMailOutline } from "react-icons/io5";
-import { TbBlocks } from "react-icons/tb";
+import "../../styles/WriteOrder.css";
 
 export const WriteOrder = () => {
-  const nav = useNavigate();
+  const navigate = useNavigate();
   const orderDate = new Date().toISOString().split("T")[0];
 
   const [supplierList, setSupplierList] = useState<Company[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null); // 선택한 공급업체 ID
-  const [selectedMaterial, setSelectMaterial] = useState<Material[]>([]); // 공급업체의 취급 자재 목록
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material[]>([]);
   const [inputMaterialId, setInputMaterialId] = useState<number>(0);
   const [inputQuantity, setInputQuantity] = useState<number>(0);
-  const [basketList, setBasketList] = useState<SelectedMaterialItem[]>([]); // 장바구니
+  const [basketList, setBasketList] = useState<SelectedMaterialItem[]>([]);
   const [contact, setContact] = useState<Contact | null>(null);
-  const [memo, setMemo] = useState<string>(""); // 기타 메모 입력 칸
+  const [memo, setMemo] = useState<string>("");
 
   useEffect(() => {
     writeOrderApi
@@ -37,12 +44,13 @@ export const WriteOrder = () => {
 
   useEffect(() => {
     if (!selectedId) {
-      setSelectMaterial([]);
+      setSelectedMaterial([]);
       return;
     }
+
     writeOrderApi
       .getOurCompanyMaterial(selectedId)
-      .then((data) => setSelectMaterial(Array.isArray(data) ? data : []))
+      .then((data) => setSelectedMaterial(Array.isArray(data) ? data : []))
       .catch(console.error);
   }, [selectedId]);
 
@@ -50,27 +58,30 @@ export const WriteOrder = () => {
     (m) => m.materialId === inputMaterialId,
   );
 
+  const totalAmountSum = basketList.reduce(
+    (sum, item) => sum + item.totalAmount,
+    0,
+  );
+
   const handleCompanyChange = async (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const companyId = Number(e.target.value);
+
     setSelectedId(companyId);
     setInputMaterialId(0);
     setBasketList([]);
 
-    if (companyId) {
-      try {
-        const data = await writeOrderApi.getContactList(companyId);
-        if (data && data.length > 0) {
-          setContact(data[0]);
-        } else {
-          setContact(null);
-        }
-      } catch (error) {
-        console.error("담당자 로드 실패:", error);
-        setContact(null);
-      }
-    } else {
+    if (!companyId) {
+      setContact(null);
+      return;
+    }
+
+    try {
+      const data = await writeOrderApi.getContactList(companyId);
+      setContact(data && data.length > 0 ? data[0] : null);
+    } catch (error) {
+      console.error("담당자 로드 실패:", error);
       setContact(null);
     }
   };
@@ -91,8 +102,9 @@ export const WriteOrder = () => {
     const isExist = basketList.some(
       (item) => item.materialId === currentSelectedMaterialInfo.materialId,
     );
+
     if (isExist) {
-      alert("이미 목록에 추가된 자재입니다. 삭제 후 다시 추가해 주세요.");
+      alert("이미 목록에 추가된 자재입니다.");
       return;
     }
 
@@ -112,11 +124,6 @@ export const WriteOrder = () => {
   const handleRemoveItem = (id: number) => {
     setBasketList(basketList.filter((item) => item.materialId !== id));
   };
-
-  const totalAmountSum = basketList.reduce(
-    (sum, item) => sum + item.totalAmount,
-    0,
-  );
 
   const handleUploadOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +148,7 @@ export const WriteOrder = () => {
           expected_delivery_date: orderDate,
           total_amount: totalAmountSum,
           status: "PENDING",
-          memo: memo,
+          memo,
         },
         orderItems: basketList.map((item) => ({
           order_item_id: null,
@@ -155,230 +162,252 @@ export const WriteOrder = () => {
 
       await writeOrderApi.writeOrder(orderPayload);
       alert("발주서 전송이 완료되었습니다.");
-      nav("/orders");
+      navigate("/orders");
     } catch (error) {
-      console.error("발주서 전송 실패: ", error);
+      console.error("발주서 전송 실패:", error);
       alert("서버 오류로 발주서 전송에 실패했습니다.");
     }
   };
 
   return (
-    <div className="container">
-      <h1 className="main-title">발주서</h1>
+    <div className="order-write-page">
+      <div className="order-write-header">
+        <button className="order-back-btn" onClick={() => navigate(-1)}>
+          <FiArrowLeft />
+        </button>
 
-      <form className="write-order-form" onSubmit={handleUploadOrder}>
-        <div className="basic-header-area">
-          <h2 className="form-title">
-            기본 정보<span className="point"> *</span>
-          </h2>
-          <small className="explain">기본 정보를 작성해 주세요.</small>
-        </div>
-
-        <div className="basic-input-area">
-          <FiUser className="user-icon" />
-          <input
-            placeholder="주문자명"
-            className="write-name"
-            type="text"
-            required
-          />
-          <label className="label-date">발주일</label>
-          <input
-            type="date"
-            defaultValue={orderDate}
-            className="write-date"
-            readOnly
-          />
-          <MdCalendarToday className="date-icon" />
-        </div>
-
-        <div className="contact-header-area">
-          <h2 className="form-title">
-            거래처 정보<span className="point"> *</span>
-          </h2>
-          <small className="explain">거래처 정보를 작성해 주세요.</small>
-        </div>
-
-        <div className="contact-input-area">
-          <IoOptionsOutline className="option-icon" />
-          <select
-            className="select-company"
-            onChange={handleCompanyChange}
-            defaultValue=""
-          >
-            <option disabled value="" className="selected-default">
-              거래처 선택
-            </option>
-            {supplierList && supplierList.length > 0 ? (
-              supplierList.map((list) => (
-                <option
-                  key={list.companyId}
-                  value={list.companyId}
-                  className="company-list"
-                >
-                  {list.companyName}
-                </option>
-              ))
-            ) : (
-              <option disabled value="">
-                등록된 공급업체가 없습니다.
-              </option>
-            )}
-          </select>
-
-          {contact && (
-            <div>
-              <FiUser className="user-icon" />
-              <input
-                type="text"
-                className="company-contact-name"
-                value={contact.contactName}
-                readOnly
-              />
-              <BsTelephone className="tel-icon" />
-              <input
-                type="tel"
-                className="company-contact-tel"
-                value={contact.phone}
-                readOnly
-              />
-              <IoMailOutline className="email-icon" />
-              <input
-                type="email"
-                className="company-contact-email"
-                value={contact.email}
-                readOnly
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="order-header-area">
-          <h2 className="form-title">
-            발주 품목<span className="point"> *</span>
-          </h2>
-          <small className="explain">발주를 요청할 품목을 선택해 주세요.</small>
-        </div>
-
-        <div className="order-input-area">
-          <TbBlocks className="block-icon" />
-          <select
-            className="select-material"
-            value={inputMaterialId}
-            onChange={(e) => setInputMaterialId(Number(e.target.value))}
-          >
-            <option value={0} className="selected-default">
-              자재 선택
-            </option>
-            {selectedMaterial.map((m) => (
-              <option
-                key={m.materialId}
-                value={m.materialId}
-                className="option"
-              >
-                {m.materialName}
-              </option>
-            ))}
-          </select>
-          <input
-            placeholder="수량을 입력해 주세요."
-            type="number"
-            value={inputQuantity === 0 ? "" : inputQuantity}
-            onChange={(e) => setInputQuantity(Number(e.target.value))}
-            className="selected-quantity"
-            min={1}
-          />
-          <p className="unit">
-            {currentSelectedMaterialInfo
-              ? currentSelectedMaterialInfo.unit
-              : "-"}
+        <div>
+          <p className="order-page-label">발주 관리</p>
+          <h1>발주 요청</h1>
+          <p className="order-page-desc">
+            공급업체와 자재 품목을 선택하여 발주서를 작성하세요.
           </p>
-          <button type="button" className="btn-add" onClick={handleAddMaterial}>
-            추가
-          </button>
+        </div>
+      </div>
 
-          <div className="container-table">
-            <small className="explain-table">
-              현재 귀사(건축업체)의 자재별 재고 현황이 표시됩니다.
-            </small>
-            <table className="wish-table">
-              <thead className="thead">
-                <tr className="thead-tr">
-                  <th className="material-name">자재명</th>
-                  <th className="current-stock">현재 재고</th>
-                  <th className="min-stock">최소 재고</th>
-                  <th className="order-stock">발주 수량</th>
-                  <th className="specification">규격</th>
-                  <th className="price">단가</th>
-                  <th className="amount">금액</th>
+      <form className="order-write-form" onSubmit={handleUploadOrder}>
+        <section className="order-section">
+          <div className="order-section-title">
+            <FiFileText />
+            <div>
+              <h2>기본 정보</h2>
+              <p>발주 담당자와 발주일을 확인하세요.</p>
+            </div>
+          </div>
+
+          <div className="order-form-grid">
+            <FormField label="담당자" required icon={<FiUser />}>
+              <input placeholder="주문자명" required />
+            </FormField>
+
+            <FormField label="발주일" required icon={<FiCalendar />}>
+              <input type="date" defaultValue={orderDate} readOnly />
+            </FormField>
+          </div>
+        </section>
+
+        <section className="order-section">
+          <div className="order-section-title">
+            <FiBriefcase />
+            <div>
+              <h2>거래처 정보</h2>
+              <p>발주를 요청할 공급업체를 선택하세요.</p>
+            </div>
+          </div>
+
+          <div className="order-form-grid">
+            <FormField label="거래처 선택" required icon={<FiBriefcase />}>
+              <select onChange={handleCompanyChange} defaultValue="">
+                <option disabled value="">
+                  거래처를 선택하세요
+                </option>
+
+                {supplierList.length > 0 ? (
+                  supplierList.map((item) => (
+                    <option key={item.companyId} value={item.companyId}>
+                      {item.companyName}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>등록된 공급업체가 없습니다</option>
+                )}
+              </select>
+            </FormField>
+
+            <FormField label="담당자명" icon={<FiUser />}>
+              <input value={contact?.contactName || ""} readOnly />
+            </FormField>
+
+            <FormField label="연락처" icon={<FiPhone />}>
+              <input value={contact?.phone || ""} readOnly />
+            </FormField>
+
+            <FormField label="이메일" icon={<FiMail />}>
+              <input value={contact?.email || ""} readOnly />
+            </FormField>
+          </div>
+        </section>
+
+        <section className="order-section">
+          <div className="order-section-title">
+            <FiPackage />
+            <div>
+              <h2>발주 품목</h2>
+              <p>발주할 자재와 수량을 선택하세요.</p>
+            </div>
+          </div>
+
+          <div className="order-item-add">
+            <select
+              value={inputMaterialId}
+              onChange={(e) => setInputMaterialId(Number(e.target.value))}
+            >
+              <option value={0}>자재 선택</option>
+              {selectedMaterial.map((item) => (
+                <option key={item.materialId} value={item.materialId}>
+                  {item.materialName}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="number"
+              min={1}
+              value={inputQuantity === 0 ? "" : inputQuantity}
+              onChange={(e) => setInputQuantity(Number(e.target.value))}
+              placeholder="수량을 입력하세요"
+            />
+
+            <span className="order-unit">
+              {currentSelectedMaterialInfo
+                ? currentSelectedMaterialInfo.unit
+                : "-"}
+            </span>
+
+            <button type="button" onClick={handleAddMaterial}>
+              <FiPlus />
+              추가
+            </button>
+          </div>
+
+          <p className="order-table-help">
+            선택한 공급업체의 취급 자재와 재고 정보가 표시됩니다.
+          </p>
+
+          <div className="order-table-box">
+            <table className="order-item-table">
+              <thead>
+                <tr>
+                  <th>자재명</th>
+                  <th>현재 재고</th>
+                  <th>최소 재고</th>
+                  <th>발주 수량</th>
+                  <th>규격</th>
+                  <th>단가</th>
+                  <th>금액</th>
                   <th></th>
                 </tr>
               </thead>
 
-              <tbody className="tbody">
-                {basketList && basketList.length > 0 ? (
-                  basketList.map((material) => (
-                    <tr className="tbody-tr" key={material.materialId}>
+              <tbody>
+                {basketList.length > 0 ? (
+                  basketList.map((item) => (
+                    <tr key={item.materialId}>
+                      <td className="order-material-name">
+                        {item.materialName}
+                      </td>
+                      <td>{item.currentStock}</td>
+                      <td>{item.minimumStock}</td>
                       <td>
-                        <strong className="name">
-                          {material.materialName}
-                        </strong>
+                        {item.orderQuantity} {item.unit}
                       </td>
-                      <td className="current-stock">{material.currentStock}</td>
-                      <td className="min-stock">{material.minimumStock}</td>
-                      <td className="order-stock">
-                        {material.orderQuantity} {material.unit}
-                      </td>
-                      <td className="specification">
-                        {material.specification}
-                      </td>
-                      <td className="price">
-                        {material.price.toLocaleString()}
-                      </td>
-                      <td className="amount">
-                        {material.totalAmount.toLocaleString()}
-                      </td>
-                      <td className="icon">
-                        <RiDeleteBin6Line
-                          className="click-icon"
-                          onClick={() => handleRemoveItem(material.materialId)}
-                        />
+                      <td>{item.specification}</td>
+                      <td>{item.price.toLocaleString()}</td>
+                      <td>{item.totalAmount.toLocaleString()}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="delete-item-btn"
+                          onClick={() => handleRemoveItem(item.materialId)}
+                        >
+                          <FiTrash2 />
+                        </button>
                       </td>
                     </tr>
                   ))
                 ) : (
-                  <tr className="tr-no-data">
-                    <td className="td-no-data" colSpan={8}>
+                  <tr>
+                    <td className="empty-table" colSpan={8}>
                       표시할 목록이 없습니다.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-            <div className="total">
-              합계 {totalAmountSum.toLocaleString()}원
+
+            <div className="order-total">
+              <span>총 금액</span>
+              <strong>{totalAmountSum.toLocaleString()} 원</strong>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="container-etc">
-          <h2 className="form-title">기타</h2>
-          <p className="explain">추가 사항을 작성해 주세요.</p>
+        <section className="order-section">
+          <div className="order-section-title">
+            <FiFileText />
+            <div>
+              <h2>기타</h2>
+              <p>발주 요청 관련 추가 사항을 작성하세요.</p>
+            </div>
+          </div>
+
           <textarea
-            className="write-etc"
+            className="order-memo"
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
+            placeholder="메모를 입력하세요. (선택사항)"
+            maxLength={300}
           />
-        </div>
-        <div className="btn-area">
-          <button className="btn-order" type="submit">
-            발주
-          </button>
-          <button className="btn-cancel" onClick={() => nav(-1)} type="button">
+        </section>
+
+        <div className="order-write-actions">
+          <button
+            type="button"
+            className="order-cancel-btn"
+            onClick={() => navigate(-1)}
+          >
             취소
+          </button>
+
+          <button type="submit" className="order-submit-btn">
+            <FiSave />
+            승인 요청
           </button>
         </div>
       </form>
     </div>
   );
 };
+
+function FormField({
+  label,
+  required,
+  icon,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="order-form-field">
+      <span>
+        {icon}
+        {label}
+        {required && <em>*</em>}
+      </span>
+      {children}
+    </label>
+  );
+}
