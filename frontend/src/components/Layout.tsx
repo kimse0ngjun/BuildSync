@@ -177,17 +177,18 @@ function Layout() {
             </NavLink>
           </BottomGroup>
 
-          <div className="login-profile">
-            <div className="login-avatar">
-              <FiLogIn />
-            </div>
-            <NavLink to="/login">
+          <NavLink to="/login">
+            <div className="login-profile">
+              <div className="login-avatar">
+                <FiLogIn />
+              </div>
+
               <div className="login-info">
                 <strong>로그인</strong>
                 <small>서비스 이용하기</small>
               </div>
-            </NavLink>
-          </div>
+            </div>
+          </NavLink>
         </div>
       </aside>
 

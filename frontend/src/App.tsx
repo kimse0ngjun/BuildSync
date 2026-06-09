@@ -15,6 +15,7 @@ import { OrderList } from "./pages/order/OrderList";
 import SuccessInput from "./pages/inoutput/SuccessInput";
 import SuccessOutput from "./pages/inoutput/SuccessOutput";
 import LoginPage from "./pages/user/LoginPage";
+import JoinPage from "./pages/user/JoinPage";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="/output/success-output" element={<SuccessOutput />} />
 
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/join" element={<JoinPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
