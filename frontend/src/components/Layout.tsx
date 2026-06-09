@@ -147,7 +147,7 @@ function Layout() {
             isOpen={openBottom === "setting"}
             onClick={() => toggleBottom("setting")}
           >
-            <NavLink to="/setting/profile">
+            <NavLink to="/settings/account">
               <FiUser />
               계정 설정
             </NavLink>
