@@ -172,31 +172,43 @@
 
 .write-actions {
   display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 18px;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
 }
 
 .write-actions button {
-  height: 44px;
+  height: 46px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .cancel-btn {
-  width: 130px;
+  width: 140px;
   border: 1px solid #dbe6f4;
-  background: transparent;
+  background: #fff;
   color: #64748b;
+  transition: 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #f8fafc;
 }
 
 .submit-btn {
-  width: 260px;
+  width: 180px;
   border: none;
   background: #2563eb;
-  color: white;
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+  transition: 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #1d4ed8;
 }
 
 .write-preview {
