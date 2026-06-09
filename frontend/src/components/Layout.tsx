@@ -93,7 +93,7 @@ function Layout() {
               <FiEdit3 />
               발주 요청
             </NavLink>
-            <NavLink to="/order">
+            <NavLink to="/order/list">
               <FiFileText />
               발주 내역
             </NavLink>
