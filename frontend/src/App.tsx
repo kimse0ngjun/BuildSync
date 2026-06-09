@@ -4,22 +4,35 @@ import { useEffect } from "react";
 import Layout from "./components/Layout";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
+
 import CompanyList from "./pages/company/CompanyList";
 import CompanyDetail from "./pages/company/CompanyDetail";
 import CompanyEdit from "./pages/company/CompanyEdit";
+
 import MaterialList from "./pages/material/MeterialList";
 import MaterialWrite from "./pages/material/MaterialWrite";
 import StockInOutList from "./pages/material/StockInOutList";
 import StockInOutWrite from "./pages/material/StockInOutWrite";
+
 import { WriteOrder } from "./pages/order/WriteOrder";
 import { OrderList } from "./pages/order/OrderList";
+
 import SuccessInput from "./pages/inoutput/SuccessInput";
 import SuccessOutput from "./pages/inoutput/SuccessOutput";
+
 import LoginPage from "./pages/user/LoginPage";
 import JoinPage from "./pages/user/JoinPage";
+
 import AccountSetting from "./pages/settings/AccountSetting";
 import SecuritySetting from "./pages/settings/SecuritySetting";
 import ScreenSetting from "./pages/settings/ScreenSetting";
+
+import SitePage from "./pages/site/SitePage";
+import SiteCreatePage from "./pages/site/SiteCreatePage";
+import SiteEditPage from "./pages/site/SiteEditPage";
+import MaterialUsagePage from "./pages/material/MaterialUsagePage";
+import SchedulePage from "./pages/schedule/SchedulePage";
+import CostAnalysisPage from "./pages/analysis/CostAnalysisPage";
 
 function App() {
   useEffect(() => {
@@ -36,8 +49,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+
           <Route path="/company" element={<CompanyList />} />
           <Route path="/company/:id" element={<CompanyDetail />} />
           <Route path="/company/:id/edit" element={<CompanyEdit />} />
@@ -60,6 +75,15 @@ function App() {
           <Route path="/settings/account" element={<AccountSetting />} />
           <Route path="/settings/security" element={<SecuritySetting />} />
           <Route path="/settings/display" element={<ScreenSetting />} />
+
+          <Route path="/site" element={<SitePage />} />
+          <Route path="/site/create" element={<SiteCreatePage />} />
+          <Route path="/site/edit/:id" element={<SiteEditPage />} />
+          <Route path="/site/material" element={<MaterialUsagePage />} />
+
+          <Route path="/schedule" element={<SchedulePage />} />
+
+          <Route path="/analysis" element={<CostAnalysisPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
