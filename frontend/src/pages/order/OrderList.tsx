@@ -6,7 +6,12 @@ export const OrderList = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [keyword, setKeyword] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const pageSize = 10; // 한 페이지에 보여줄 게시글 수
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const pageSize = 7; // 한 페이지에 보여줄 게시글 수
+
+  // modal 추가 예정
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   useEffect(() => {
     const filterParams = {
@@ -18,11 +23,27 @@ export const OrderList = () => {
 
     orderListApi
       .getOrderList(filterParams)
-      .then((data) => setOrders(data))
+      .then((res: any) => {
+        if (res.content) {
+          setOrders(res.content);
+          setTotalCount(res.totalElements);
+        } else if (Array.isArray(res)) {
+          setOrders(res);
+          setTotalCount(res.length);
+        }
+      })
       .catch((err) => {
         console.error("발주 리스트 로드 실패: ", err);
       });
   }, [selectedStatus, keyword, page]);
+
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  const handleModalClick = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedStatus(e.target.value);
@@ -63,7 +84,7 @@ export const OrderList = () => {
               value={keyword}
               onChange={handleSearchChange}
             />
-            <button type="button" className="btn-search">
+            <button type="submit" className="btn-search">
               검색
             </button>
           </form>
@@ -114,7 +135,11 @@ export const OrderList = () => {
                 const itemCount = items.length;
 
                 return (
-                  <tr className="order-tbody-tr" key={order.orderId}>
+                  <tr
+                    className="order-tbody-tr"
+                    key={order.orderId}
+                    onClick={() => handleModalClick(order)}
+                  >
                     <td className="order-num-data">{order.orderId}</td>
                     <td className="order-company-name-data">
                       {order.companyName}
@@ -140,6 +165,33 @@ export const OrderList = () => {
             )}
           </tbody>
         </table>
+        <div className="paging-area">
+          <button
+            className="paging-btn-prev"
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
+          >
+            &1t;
+          </button>
+
+          {pageNums.map((num) => (
+            <button
+              key={num}
+              onClick={() => setPage(num)}
+              className={`paging-num ${page === num ? "active" : ""}`}
+            >
+              {num}
+            </button>
+          ))}
+
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="paging-btn-next"
+          >
+            &gt;
+          </button>
+        </div>
       </div>
     </div>
   );

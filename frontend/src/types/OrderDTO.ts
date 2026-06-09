@@ -6,7 +6,7 @@ export interface Company {
   businessNumber: string;
   address: string;
   homepageUrl: string;
-  phone: string;
+  // phone: string;
   createdAt: string;
 }
 
