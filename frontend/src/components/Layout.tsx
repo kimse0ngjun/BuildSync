@@ -155,7 +155,7 @@ function Layout() {
               <FiShield />
               보안 설정
             </NavLink>
-            <NavLink to="/settings/theme">
+            <NavLink to="/settings/display">
               <FiMoon />
               화면 설정
             </NavLink>

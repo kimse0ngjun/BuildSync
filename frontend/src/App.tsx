@@ -18,6 +18,7 @@ import LoginPage from "./pages/user/LoginPage";
 import JoinPage from "./pages/user/JoinPage";
 import AccountSetting from "./pages/settings/AccountSetting";
 import SecuritySetting from "./pages/settings/SecuritySetting";
+import ScreenSetting from "./pages/settings/ScreenSetting";
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
 
           <Route path="/settings/account" element={<AccountSetting />} />
           <Route path="/settings/security" element={<SecuritySetting />} />
+          <Route path="/settings/display" element={<ScreenSetting />} />
         </Route>
       </Routes>
     </BrowserRouter>
