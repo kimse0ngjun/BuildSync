@@ -151,11 +151,11 @@ function Layout() {
               <FiUser />
               계정 설정
             </NavLink>
-            <NavLink to="/setting/security">
+            <NavLink to="/settings/security">
               <FiShield />
               보안 설정
             </NavLink>
-            <NavLink to="/setting/theme">
+            <NavLink to="/settings/theme">
               <FiMoon />
               화면 설정
             </NavLink>

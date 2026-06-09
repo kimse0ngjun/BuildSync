@@ -17,6 +17,7 @@ import SuccessOutput from "./pages/inoutput/SuccessOutput";
 import LoginPage from "./pages/user/LoginPage";
 import JoinPage from "./pages/user/JoinPage";
 import AccountSetting from "./pages/settings/AccountSetting";
+import SecuritySetting from "./pages/settings/SecuritySetting";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
           <Route path="/join" element={<JoinPage />} />
 
           <Route path="/settings/account" element={<AccountSetting />} />
+          <Route path="/settings/security" element={<SecuritySetting />} />
         </Route>
       </Routes>
     </BrowserRouter>
