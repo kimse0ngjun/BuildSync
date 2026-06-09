@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 
 import Layout from "./components/Layout";
 import LandingPage from "./pages/LandingPage";
@@ -21,6 +22,16 @@ import SecuritySetting from "./pages/settings/SecuritySetting";
 import ScreenSetting from "./pages/settings/ScreenSetting";
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

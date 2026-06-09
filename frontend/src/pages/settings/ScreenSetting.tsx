@@ -13,8 +13,6 @@ function ScreenSetting() {
       document.body.classList.remove("dark-mode");
       localStorage.setItem("theme", "light");
     }
-
-    alert("화면 설정이 저장되었습니다.");
   };
 
   return (
