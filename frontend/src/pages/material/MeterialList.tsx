@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiPlus,
@@ -23,6 +24,7 @@ const materials = [
     price: "30,000",
     status: "정상",
     supplier: "대한자재",
+    isMyCompany: true,
   },
   {
     code: "MAT-002",
@@ -34,6 +36,7 @@ const materials = [
     price: "12,000",
     status: "부족",
     supplier: "쌍용양회",
+    isMyCompany: false,
   },
   {
     code: "MAT-003",
@@ -45,6 +48,7 @@ const materials = [
     price: "25,000",
     status: "정상",
     supplier: "대한자재",
+    isMyCompany: true,
   },
   {
     code: "MAT-004",
@@ -56,6 +60,7 @@ const materials = [
     price: "5,000",
     status: "부족",
     supplier: "벽돌마트",
+    isMyCompany: false,
   },
   {
     code: "MAT-005",
@@ -66,7 +71,8 @@ const materials = [
     unit: "EA",
     price: "8,500",
     status: "정상",
-    supplier: "우드코리아",
+    supplier: "대한자재",
+    isMyCompany: true,
   },
   {
     code: "MAT-006",
@@ -78,6 +84,7 @@ const materials = [
     price: "45,000",
     status: "정상",
     supplier: "삼화페인트",
+    isMyCompany: false,
   },
   {
     code: "MAT-007",
@@ -89,6 +96,7 @@ const materials = [
     price: "70,000",
     status: "정상",
     supplier: "대한전선",
+    isMyCompany: false,
   },
   {
     code: "MAT-008",
@@ -99,21 +107,29 @@ const materials = [
     unit: "EA",
     price: "3,500",
     status: "부족",
-    supplier: "금강PVC",
+    supplier: "대한자재",
+    isMyCompany: true,
   },
 ];
 
 function MaterialList() {
-  const selected = materials[0];
   const navigate = useNavigate();
+  const [tab, setTab] = useState<"all" | "my">("all");
+
+  const filteredMaterials =
+    tab === "all" ? materials : materials.filter((item) => item.isMyCompany);
+
+  const selected = filteredMaterials[0] ?? materials[0];
 
   return (
     <div className="material-page">
       <div className="material-header">
         <div>
-          <p className="page-label">자재 관리</p>
+          <p className="material-page-label">자재 관리</p>
           <h1>자재 목록</h1>
-          <p className="page-desc">보유 자재 현황 및 재고를 관리하세요.</p>
+          <p className="material-page-desc">
+            보유 자재 현황 및 재고를 관리하세요.
+          </p>
         </div>
 
         <button
@@ -145,6 +161,21 @@ function MaterialList() {
 
       <div className="material-layout">
         <section className="material-main">
+          <div className="material-tabs">
+            <button
+              className={tab === "all" ? "active" : ""}
+              onClick={() => setTab("all")}
+            >
+              전체 자재
+            </button>
+            <button
+              className={tab === "my" ? "active" : ""}
+              onClick={() => setTab("my")}
+            >
+              내 회사 자재
+            </button>
+          </div>
+
           <div className="material-toolbar">
             <div className="material-search">
               <input placeholder="자재명, 코드, 규격 검색..." />
@@ -176,12 +207,12 @@ function MaterialList() {
                 <th>단위</th>
                 <th>단가</th>
                 <th>상태</th>
-                <th>공급업체</th>
+                <th>{tab === "all" ? "공급업체" : "관리 업체"}</th>
               </tr>
             </thead>
 
             <tbody>
-              {materials.map((item) => (
+              {filteredMaterials.map((item) => (
                 <tr key={item.code}>
                   <td>{item.code}</td>
                   <td className="material-name">{item.name}</td>
@@ -232,7 +263,13 @@ function MaterialList() {
             <div className="material-thumb">▥</div>
             <div>
               <h2>{selected.name}</h2>
-              <span className="status normal">정상</span>
+              <span
+                className={
+                  selected.status === "정상" ? "status normal" : "status low"
+                }
+              >
+                {selected.status}
+              </span>
               <p>
                 {selected.code} · {selected.category}
               </p>
