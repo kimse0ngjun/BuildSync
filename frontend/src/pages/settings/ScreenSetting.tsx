@@ -1,12 +1,27 @@
-import { useState } from "react";
-import { FiMoon, FiSun, FiMonitor, FiSave } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { FiMoon, FiSun, FiMonitor } from "react-icons/fi";
 import "../../styles/ScreenSetting.css";
 
 function ScreenSetting() {
   const [darkMode, setDarkMode] = useState(false);
 
-  const handleSave = () => {
-    if (darkMode) {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+      setDarkMode(true);
+      document.body.classList.add("dark-mode");
+    } else {
+      setDarkMode(false);
+      document.body.classList.remove("dark-mode");
+    }
+  }, []);
+
+  const handleToggle = () => {
+    const nextMode = !darkMode;
+    setDarkMode(nextMode);
+
+    if (nextMode) {
       document.body.classList.add("dark-mode");
       localStorage.setItem("theme", "dark");
     } else {
@@ -49,22 +64,11 @@ function ScreenSetting() {
           </div>
 
           <label className="switch">
-            <input
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(!darkMode)}
-            />
+            <input type="checkbox" checked={darkMode} onChange={handleToggle} />
             <span className="slider"></span>
           </label>
         </div>
       </section>
-
-      <div className="screen-actions">
-        <button className="screen-save-btn" onClick={handleSave}>
-          <FiSave />
-          저장하기
-        </button>
-      </div>
     </div>
   );
 }
