@@ -86,7 +86,7 @@ public class AuthService {
 	 public void resetPassword(FindPasswordRequest req) {
 
 		    try {
-		        String loginId = jwtUtil.generateResetToken(req.getToken());
+		    	String loginId = jwtUtil.getLoginId(req.getToken());
 
 		        Company company = companyRepository.findByLoginId(loginId)
 		                .orElseThrow(() -> new RuntimeException("유효하지 않은 사용자입니다."));
@@ -110,6 +110,10 @@ public class AuthService {
 
 		    String link = "http://localhost:3000/reset-password?token=" + token;
 
-		    mailService.sendResetPasswordMail(email, link);
+		    try {
+		        mailService.sendResetPasswordMail(email, link);
+		    } catch (Exception e) {
+		        throw new RuntimeException("메일 전송 실패");
+		    }
 		}
 }

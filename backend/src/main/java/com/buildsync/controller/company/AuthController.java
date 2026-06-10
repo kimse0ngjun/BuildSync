@@ -56,6 +56,7 @@ public class AuthController {
 	}
 	
 	// 비밀번호 찾기
+	@PostMapping("/find-password")
     public ResponseEntity<String> findPassword(@RequestBody FindPasswordEmailRequest request) {
 
         authService.sendResetPasswordLink(request.getEmail());
