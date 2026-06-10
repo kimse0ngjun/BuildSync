@@ -1,4 +1,4 @@
-import { orderListApi } from "../api/OrderApi";
+import { orderListApi } from "../../../api/OrderApi";
 
 export const OrderModalDetailForSupplier = ({
   selectedOrder,

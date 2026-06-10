@@ -15,6 +15,7 @@ import { OrderList } from "./pages/order/OrderList";
 import SuccessInput from "./pages/inoutput/SuccessInput";
 import SuccessOutput from "./pages/inoutput/SuccessOutput";
 import LoginPage from "./pages/user/LoginPage";
+import { CostAnalysis } from "./pages/analysis/CostAnalysis";
 
 function App() {
   return (
@@ -38,6 +39,8 @@ function App() {
 
           <Route path="/input/success-input" element={<SuccessInput />} />
           <Route path="/output/success-output" element={<SuccessOutput />} />
+
+          <Route path="/analysis" element={<CostAnalysis />} />
 
           <Route path="/login" element={<LoginPage />} />
         </Route>

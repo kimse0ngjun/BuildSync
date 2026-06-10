@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { orderListApi } from "../api/OrderApi";
 import { OrderModalDetailForConstruct } from "./OrderModalDetailForConstruct";
 import { OrderModalDetailForSupplier } from "./OrderModalDetailForSupplier";
+import { orderListApi } from "../../../api/OrderApi";
 
 interface OrderModalDetailProps {
   selectedOrder: any;
