@@ -6,8 +6,9 @@ export interface Company {
   businessNumber: string;
   address: string;
   homepageUrl: string;
-  // phone: string;
+  phone: string;
   createdAt: string;
+  status: string;
 }
 
 export interface Contact {
@@ -29,7 +30,7 @@ export interface Material {
   minimumStock: number;
   unit: string;
   specification: string;
-  price: number;
+  unitPrice: number;
 }
 
 export interface WriteOrderInfo {
@@ -60,7 +61,7 @@ export interface OrderDetail extends Orders {
   quantity: number;
 }
 
-export interface OrderList {
+export interface OrderList extends OrderDetail {
   orderId: number;
   orderDate: Date;
   companyName: string;
@@ -68,4 +69,9 @@ export interface OrderList {
   itemCount: number;
   totalAmount: number;
   status: string;
+}
+
+export interface OrderDetailProps {
+  selectedOrder: any | null;
+  onClose: () => void;
 }

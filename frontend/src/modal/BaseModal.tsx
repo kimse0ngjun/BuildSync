@@ -7,6 +7,7 @@ export default function BaseModal({
   title,
   subtitle,
   content,
+  deleteIcon,
 }: BaseModalProps) {
   if (!isOpen) {
     return null;
@@ -14,11 +15,16 @@ export default function BaseModal({
 
   return (
     <div className="back-ground" onClick={onClose}>
-      <div className="modal-card">
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="title-area">
           <div className="icon">{icon}</div>
           <h2 className="title">{title}</h2>
           <p className="subtitle">{subtitle}</p>
+          <div className="delete-icon">
+            {deleteIcon && (
+              <div className="modal-delete-icon-wrapper">{deleteIcon}</div>
+            )}
+          </div>
         </div>
         <hr />
 

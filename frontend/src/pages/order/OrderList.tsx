@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { orderListApi } from "../../api/OrderApi";
+import BaseModal from "../../modal/BaseModal";
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { IoIosClose } from "react-icons/io";
+import { OrderModalDetail } from "../../modal/OrderModalDetail";
 
 export const OrderList = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -9,9 +13,12 @@ export const OrderList = () => {
   const [totalCount, setTotalCount] = useState<number>(0);
   const pageSize = 7; // 한 페이지에 보여줄 게시글 수
 
-  // modal 추가 예정
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const myCompanyType = localStorage.getItem("companyType") as
+    | "CONSTRUCTION"
+    | "SUPPLIER";
 
   useEffect(() => {
     const filterParams = {
@@ -64,6 +71,9 @@ export const OrderList = () => {
     setKeyword(keyword);
     setPage(1);
   };
+
+  const icon = <FaRegCircleCheck />;
+  const deleteIcon = <IoIosClose onClick={() => setIsModalOpen(false)} />;
 
   return (
     <div className="container">
@@ -151,8 +161,22 @@ export const OrderList = () => {
                       <strong>{representativeItem}</strong>
                       {itemCount > 1 && <span> 외 {itemCount - 1}건</span>}
                     </td>
-                    <td className="order-status-data">{order.status}</td>
-                    <td className="order-date-data">{order.orderDate}</td>
+                    <td className="order-status-data-container">
+                      <div className={`status-badge ${order.status}`}>
+                        {order.status === "PENDING"
+                          ? "접수 대기"
+                          : order.status === "ACCEPTED"
+                            ? "접수 완료"
+                            : order.status === "END"
+                              ? "발주 완료"
+                              : "취소"}
+                      </div>
+                    </td>
+                    <td className="order-date-data">
+                      {order.orderDate
+                        ? String(order.orderDate).split("T")[0]
+                        : "-"}
+                    </td>
                   </tr>
                 );
               })
@@ -171,7 +195,7 @@ export const OrderList = () => {
             onClick={() => setPage(page - 1)}
             disabled={page === 1}
           >
-            &1t;
+            &lt;
           </button>
 
           {pageNums.map((num) => (
@@ -193,6 +217,21 @@ export const OrderList = () => {
           </button>
         </div>
       </div>
+      <BaseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="발주서 상세 정보 확인"
+        subtitle="제출한 발주서의 상세 정보를 확인할 수 있습니다."
+        content={
+          <OrderModalDetail
+            selectedOrder={selectedOrder}
+            onClose={() => setIsModalOpen(false)}
+            myCompanyType={myCompanyType}
+          />
+        }
+        icon={icon}
+        deleteIcon={deleteIcon}
+      />
     </div>
   );
 };
