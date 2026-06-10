@@ -64,10 +64,11 @@
   color: #0f2544;
   font-size: 15px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.login-btn {
-  width: 86px;
+.landing-login-btn {
+  width: 66px;
   height: 44px;
   border: 1.5px solid #1565d8;
   background: white;

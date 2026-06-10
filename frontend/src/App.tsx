@@ -1,36 +1,36 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import { AuthProvider } from "./context/AuthContext";
+
 import Layout from "./components/Layout";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
-
-import SitePage from "./pages/site/SitePage";
-import SiteCreatePage from "./pages/site/SiteCreatePage";
-import SiteEditPage from "./pages/site/SiteEditPage";
-import MaterialUsagePage from "./pages/material/MaterialUsagePage";
-import SchedulePage from "./pages/schedule/SchedulePage";
-import CostAnalysisPage from "./pages/analysis/CostAnalysisPage";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
+import FindIdPage from "./pages/auth/FindIdPage";
+import FindPasswordPage from "./pages/auth/FindPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-        <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          {/* sidebar 있음 */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
 
-          <Route path="/site" element={<SitePage />} />
-          <Route path="/site/create" element={<SiteCreatePage />} />
-          <Route path="/site/edit/:id" element={<SiteEditPage />} />
-          <Route path="/site/material" element={<MaterialUsagePage />} />
-
-          <Route path="/schedule" element={<SchedulePage />} />
-
-          <Route path="/analysis" element={<CostAnalysisPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/find-id" element={<FindIdPage />} />
+            <Route path="/find-password" element={<FindPasswordPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

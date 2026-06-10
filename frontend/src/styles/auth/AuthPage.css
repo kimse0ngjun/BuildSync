@@ -1,0 +1,153 @@
+.auth-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+.auth-inner {
+  width: 100%;
+  max-width: 640px;
+  align-self: flex-start;
+}
+
+.page-content {
+  min-height: calc(100vh - 72px);
+  padding: 40px;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.auth-card {
+  width: 480px;
+  max-width: 100%;
+  padding: 52px 48px 44px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #dbe6f4;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+}
+
+.auth-card--wide {
+  width: 640px;
+}
+
+.auth-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+.auth-desc {
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.auth-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5eaf2;
+}
+
+.auth-required {
+  font-weight: 400;
+  color: #d41717;
+  margin-left: 6px;
+}
+
+.auth-result-box {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #f0f5ff;
+  border: 1px solid #dbe6f4;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0 0 28px;
+}
+
+.auth-btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.auth-btn {
+  flex: none;
+  width: 120px;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.auth-btn-single {
+  margin-top: 28px;
+}
+
+.auth-btn-single .auth-btn {
+  width: 100%;
+  height: 44px;
+}
+
+.auth-btn:active {
+  transform: scale(0.98);
+}
+
+.auth-btn--primary {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+.auth-btn--primary:hover {
+  background: #111827;
+}
+
+.auth-btn--ghost {
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #dbe6f4;
+}
+
+.auth-btn--ghost:hover {
+  background: #f4f8ff;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 20px;
+
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.back-btn:hover {
+  color: #2563eb;
+}

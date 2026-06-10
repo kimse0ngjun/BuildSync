@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, NavLink, Link } from "react-router-dom";
+import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import {
   FiHome,
   FiUsers,
@@ -24,11 +24,15 @@ import {
   FiMail,
   FiAlertCircle,
 } from "react-icons/fi";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Layout.css";
 
 function Layout() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openBottom, setOpenBottom] = useState<string | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const { isLogin, ceoName, companyName, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = (menu: string) => {
     setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -177,15 +181,51 @@ function Layout() {
             </NavLink>
           </BottomGroup>
 
-          <div className="login-profile">
-            <div className="login-avatar">
-              <FiLogIn />
+          {isLogin ? (
+            <div className="profile-wrapper">
+              <div
+                className="login-profile"
+                onClick={() => setProfileOpen((v) => !v)}
+              >
+                <div className="login-avatar">{ceoName?.charAt(0)}</div>
+
+                <div className="login-info">
+                  <strong>{ceoName}</strong>
+                  <small>{companyName}</small>
+                </div>
+
+                <span className="arrow">›</span>
+              </div>
+
+              {profileOpen && (
+                <div className="profile-dropdown">
+                  <div className="profile-header">
+                    <div>
+                      <div className="name">{ceoName}</div>
+                      <div className="email">{companyName}</div>
+                    </div>
+                  </div>
+
+                  <div className="divider" />
+
+                  <button className="menu-item logout" onClick={logout}>
+                    로그아웃
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="login-info">
-              <strong>로그인</strong>
-              <small>서비스 이용하기</small>
+          ) : (
+            <div className="login-profile" onClick={() => navigate("/login")}>
+              <div className="login-avatar">
+                <FiLogIn />
+              </div>
+
+              <div className="login-info">
+                <strong>로그인</strong>
+                <small>서비스 이용하기</small>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </aside>
 
