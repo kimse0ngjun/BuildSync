@@ -2,6 +2,13 @@
   width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
+  background: #f8fbff;
+  color: #10284a;
+}
+
+body.dark-mode .landing {
+  background: #f8fbff;
+  color: #10284a;
 }
 
 .landing-header {
@@ -16,6 +23,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+body.dark-mode .landing-header {
+  background: rgba(248, 251, 255, 0.94);
+  border-bottom: none;
 }
 
 .logo {
@@ -39,17 +51,18 @@
 .landing-logo-text {
   display: flex;
   align-items: center;
-
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.5px;
 }
 
-.landing-logo-text .logo-build {
+.landing-logo-text .logo-build,
+body.dark-mode .landing-logo-text .logo-build {
   color: #1f2937;
 }
 
-.landing-logo-text .logo-sync {
+.landing-logo-text .logo-sync,
+body.dark-mode .landing-logo-text .logo-sync {
   color: #2563eb;
 }
 
@@ -59,7 +72,8 @@
   gap: 44px;
 }
 
-.nav a {
+.nav a,
+body.dark-mode .nav a {
   text-decoration: none;
   color: #0f2544;
   font-size: 15px;
@@ -77,6 +91,12 @@
   cursor: pointer;
 }
 
+body.dark-mode .login-btn {
+  background: white;
+  color: #1565d8;
+  border-color: #1565d8;
+}
+
 .hero {
   position: relative;
   width: 100%;
@@ -92,7 +112,16 @@
 .hero-overlay {
   position: absolute;
   inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.75) 35%,
+    rgba(255, 255, 255, 0.15) 70%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
 
+body.dark-mode .hero-overlay {
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.92) 0%,
@@ -105,20 +134,20 @@
 .hero-content {
   position: relative;
   z-index: 2;
-
   width: 100%;
   max-width: 1400px;
-
   padding: 0 8%;
 }
 
-.eyebrow {
+.eyebrow,
+body.dark-mode .eyebrow {
   color: #1565d8;
   font-weight: 700;
   margin-bottom: 24px;
 }
 
-.hero h1 {
+.hero h1,
+body.dark-mode .hero h1 {
   font-size: 50px;
   line-height: 1.2;
   font-weight: 700;
@@ -126,11 +155,13 @@
   margin-bottom: 30px;
 }
 
-.hero h1 span {
+.hero h1 span,
+body.dark-mode .hero h1 span {
   color: #1565d8;
 }
 
-.hero-desc {
+.hero-desc,
+body.dark-mode .hero-desc {
   font-size: 20px;
   line-height: 1.5;
   color: #4a5870;
@@ -152,14 +183,16 @@
   cursor: pointer;
 }
 
-.primary-btn {
+.primary-btn,
+body.dark-mode .primary-btn {
   border: none;
   background: #1565d8;
   color: white;
   box-shadow: 0 12px 24px rgba(21, 101, 216, 0.18);
 }
 
-.outline-btn {
+.outline-btn,
+body.dark-mode .outline-btn {
   border: 1.5px solid #1565d8;
   background: white;
   color: #1565d8;
@@ -173,7 +206,8 @@
   align-self: flex-end;
 }
 
-.intro {
+.intro,
+body.dark-mode .intro {
   width: 100%;
   padding: 80px 7.5vw;
   background: #eef6ff;
@@ -183,7 +217,8 @@
   gap: 60px;
 }
 
-.intro-text h2 {
+.intro-text h2,
+body.dark-mode .intro-text h2 {
   margin: 0 0 28px;
   color: #10284a;
   font-size: 38px;
@@ -191,11 +226,13 @@
   letter-spacing: -0.04em;
 }
 
-.intro-text h2 span {
+.intro-text h2 span,
+body.dark-mode .intro-text h2 span {
   color: #1565d8;
 }
 
-.intro-text p {
+.intro-text p,
+body.dark-mode .intro-text p {
   margin: 0;
   color: #4d5b6f;
   font-size: 17px;
@@ -208,7 +245,8 @@
   gap: 22px;
 }
 
-.intro-icons div {
+.intro-icons div,
+body.dark-mode .intro-icons div {
   width: 120px;
   height: 120px;
   border-radius: 28px;
@@ -221,13 +259,16 @@
 }
 
 .features,
-.process {
+body.dark-mode .features,
+.process,
+body.dark-mode .process {
   width: 100%;
   padding: 78px 7.5vw;
   background: #f8fbff;
 }
 
-.section-title {
+.section-title,
+body.dark-mode .section-title {
   margin: 0;
   color: #10284a;
   font-size: 38px;
@@ -245,7 +286,8 @@
   border-radius: 10px;
 }
 
-.section-desc {
+.section-desc,
+body.dark-mode .section-desc {
   margin: 18px 0 0;
   color: #536277;
   font-size: 16px;
@@ -258,7 +300,8 @@
   gap: 28px;
 }
 
-.feature-card {
+.feature-card,
+body.dark-mode .feature-card {
   min-height: 285px;
   padding: 28px;
   background: white;
@@ -267,7 +310,8 @@
   box-shadow: 0 16px 38px rgba(15, 37, 68, 0.06);
 }
 
-.feature-number {
+.feature-number,
+body.dark-mode .feature-number {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -279,7 +323,8 @@
   font-weight: 700;
 }
 
-.feature-icon {
+.feature-icon,
+body.dark-mode .feature-icon {
   width: 92px;
   height: 92px;
   margin: 20px auto 26px;
@@ -291,21 +336,24 @@
   font-size: 46px;
 }
 
-.feature-card h3 {
+.feature-card h3,
+body.dark-mode .feature-card h3 {
   margin: 0 0 14px;
   color: #10284a;
   font-size: 22px;
   font-weight: 700;
 }
 
-.feature-card p {
+.feature-card p,
+body.dark-mode .feature-card p {
   margin: 0;
   color: #536277;
   font-size: 15px;
   line-height: 1.75;
 }
 
-.process {
+.process,
+body.dark-mode .process {
   background: white;
 }
 
@@ -331,7 +379,8 @@
   border-top: 2px dashed #9bbbe8;
 }
 
-.process-circle {
+.process-circle,
+body.dark-mode .process-circle {
   width: 82px;
   height: 82px;
   margin: 0 auto 18px;
@@ -347,7 +396,8 @@
   z-index: 2;
 }
 
-.process-circle.active {
+.process-circle.active,
+body.dark-mode .process-circle.active {
   background: #1565d8;
   color: white;
 }
@@ -360,7 +410,8 @@
   font-size: 22px;
 }
 
-.process-item p {
+.process-item p,
+body.dark-mode .process-item p {
   margin: 0;
   color: #10284a;
   font-size: 15px;
@@ -383,7 +434,8 @@
   object-fit: cover;
 }
 
-.ads-overlay {
+.ads-overlay,
+body.dark-mode .ads-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -403,21 +455,26 @@
   color: white;
 }
 
-.ads-content h2 {
+.ads-content h2,
+body.dark-mode .ads-content h2 {
   margin: 0 0 18px;
   font-size: 36px;
   line-height: 1.35;
   font-weight: 700;
   letter-spacing: -0.04em;
+  color: #ffffff;
 }
 
-.ads-content p {
+.ads-content p,
+body.dark-mode .ads-content p {
   margin: 0;
   font-size: 16px;
   line-height: 1.8;
+  color: #ffffff;
 }
 
-.ads-content button {
+.ads-content button,
+body.dark-mode .ads-content button {
   width: 170px;
   height: 58px;
   border: none;
@@ -429,11 +486,8 @@
   cursor: pointer;
 }
 
-.ads-content h2 {
-  color: #ffffff;
-}
-
-.footer {
+.footer,
+body.dark-mode .footer {
   width: 100%;
   padding: 56px 7.5vw;
   margin-top: 30px;
@@ -444,19 +498,23 @@
   color: #536277;
 }
 
-.footer h3 {
+.footer h3,
+body.dark-mode .footer h3 {
   margin: 0 0 10px;
   color: #1565d8;
   font-size: 24px;
   font-weight: 900;
 }
 
-.footer p {
+.footer p,
+body.dark-mode .footer p {
   margin: 0 0 28px;
   font-size: 15px;
+  color: #536277;
 }
 
-.footer small {
+.footer small,
+body.dark-mode .footer small {
   color: #8b98aa;
 }
 
@@ -466,13 +524,13 @@
   align-items: center;
 }
 
-.footer-links a {
+.footer-links a,
+body.dark-mode .footer-links a {
   color: #536277;
   text-decoration: none;
   font-weight: 700;
 }
 
-/* 반응형 */
 @media (max-width: 1200px) {
   .feature-grid {
     grid-template-columns: repeat(2, 1fr);

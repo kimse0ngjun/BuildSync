@@ -219,6 +219,83 @@
   background: #1d4ed8;
 }
 
+/* dark mode */
+body.dark-mode .account-setting-page {
+  background: #0f172a;
+}
+
+body.dark-mode .account-setting-label {
+  color: #93c5fd;
+}
+
+body.dark-mode .account-setting-header h1,
+body.dark-mode .account-profile-title h2,
+body.dark-mode .account-section-title h2,
+body.dark-mode .account-form-field > span {
+  color: #f8fafc;
+}
+
+body.dark-mode .account-setting-desc,
+body.dark-mode .account-profile-summary p,
+body.dark-mode .account-section-title p {
+  color: #94a3b8;
+}
+
+body.dark-mode .account-profile-summary {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .account-profile-title span {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+
+body.dark-mode .account-setting-section {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .account-section-title,
+body.dark-mode .account-form-field svg {
+  color: #60a5fa;
+}
+
+body.dark-mode .account-form-field input {
+  background: #111827;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .account-form-field input:focus {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .account-form-field input:read-only {
+  background: #111827;
+  color: #cbd5e1;
+}
+
+body.dark-mode .account-cancel-btn {
+  background: #111827;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .account-cancel-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+body.dark-mode .account-save-btn {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+body.dark-mode .account-save-btn:hover {
+  background: #1d4ed8;
+}
+
 @media (max-width: 900px) {
   .account-setting-page {
     padding: 0 24px;

@@ -313,6 +313,117 @@
   color: #ffffff;
 }
 
+/* dark mode */
+body.dark-mode .material-usage-page {
+  background: #0f172a;
+}
+
+body.dark-mode .usage-page-label {
+  color: #93c5fd;
+}
+
+body.dark-mode .usage-header h1,
+body.dark-mode .usage-stat-card strong,
+body.dark-mode .usage-site-name,
+body.dark-mode .usage-material-name,
+body.dark-mode .usage-detail-panel h3,
+body.dark-mode .usage-detail-top h2,
+body.dark-mode .usage-info-row strong,
+body.dark-mode .usage-mini-card strong {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .usage-page-desc,
+body.dark-mode .usage-stat-card p,
+body.dark-mode .usage-stat-card span,
+body.dark-mode .usage-detail-top p,
+body.dark-mode .usage-info-row span,
+body.dark-mode .usage-mini-card div {
+  color: #94a3b8;
+}
+
+body.dark-mode .usage-stat-card,
+body.dark-mode .usage-detail-panel,
+body.dark-mode .usage-mini-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .usage-stat-icon,
+body.dark-mode .usage-detail-icon {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+body.dark-mode .usage-search,
+body.dark-mode .usage-toolbar select {
+  background: #111827;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .usage-search input {
+  color: #f8fafc;
+}
+
+body.dark-mode .usage-search input::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .usage-table {
+  background: #1e293b;
+}
+
+body.dark-mode .usage-table thead {
+  background: #111827;
+}
+
+body.dark-mode .usage-table th {
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .usage-table td {
+  color: #e5e7eb;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .usage-table tbody tr:hover {
+  background: #243247;
+}
+
+body.dark-mode .usage-actions button {
+  background: #111827;
+  border-color: #334155;
+}
+
+body.dark-mode .usage-actions .edit {
+  color: #60a5fa;
+}
+
+body.dark-mode .usage-actions .delete {
+  color: #f87171;
+}
+
+body.dark-mode .usage-detail-list,
+body.dark-mode .usage-info-row {
+  border-color: #334155;
+}
+
+body.dark-mode .usage-mini-card svg {
+  color: #60a5fa;
+}
+
+body.dark-mode .usage-pagination button {
+  color: #cbd5e1;
+}
+
+body.dark-mode .usage-pagination button.active,
+body.dark-mode .usage-pagination button:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
 @media (max-width: 1200px) {
   .usage-layout {
     grid-template-columns: 1fr;

@@ -159,14 +159,11 @@
 
 .company-table tbody tr {
   transition: 0.2s ease;
+  cursor: pointer;
 }
 
 .company-table tbody tr:hover {
   background: #f8fbff;
-}
-
-.company-table tbody tr {
-  cursor: pointer;
 }
 
 .company-name {
@@ -219,6 +216,101 @@
 .pagination button:hover {
   background: #2563eb;
   color: white;
+}
+
+/* dark mode */
+body.dark-mode .company-page {
+  background: #0f172a;
+}
+
+body.dark-mode .page-label {
+  color: #93c5fd;
+}
+
+body.dark-mode .company-header h1 {
+  color: #f8fafc;
+}
+
+body.dark-mode .page-desc,
+body.dark-mode .company-summary {
+  color: #94a3b8;
+}
+
+body.dark-mode .company-summary strong {
+  color: #f8fafc;
+}
+
+body.dark-mode .company-search {
+  background: #111827;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+body.dark-mode .company-search input {
+  color: #f8fafc;
+}
+
+body.dark-mode .company-search input::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .company-filter button {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .company-filter button.active,
+body.dark-mode .company-filter button:hover {
+  background: #1e3a5f;
+  color: #93c5fd;
+  border-color: #2563eb;
+}
+
+body.dark-mode .company-table {
+  background: #1e293b;
+}
+
+body.dark-mode .company-table thead {
+  background: #111827;
+}
+
+body.dark-mode .company-table th {
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .company-table td {
+  color: #e5e7eb;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .company-table tbody tr:hover {
+  background: #243247;
+}
+
+body.dark-mode .company-name {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .type-badge.supplier {
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+body.dark-mode .type-badge.builder {
+  background: #334155;
+  color: #e5e7eb;
+}
+
+body.dark-mode .pagination button {
+  color: #cbd5e1;
+}
+
+body.dark-mode .pagination button.active,
+body.dark-mode .pagination button:hover {
+  background: #2563eb;
+  color: #ffffff;
 }
 
 @media (max-width: 1100px) {

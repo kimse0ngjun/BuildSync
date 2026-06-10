@@ -113,7 +113,6 @@
   padding: 24px;
 }
 
-/* FullCalendar custom */
 .schedule-calendar-card .fc {
   color: #10284a;
   font-family: inherit;
@@ -205,6 +204,114 @@
 .schedule-calendar-card .schedule-event-stock {
   background: #10b981;
   color: #ffffff;
+}
+
+/* dark mode */
+body.dark-mode .schedule-page {
+  background: #0f172a;
+}
+
+body.dark-mode .schedule-back-btn {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+body.dark-mode .schedule-back-btn:hover {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+
+body.dark-mode .schedule-label {
+  color: #93c5fd;
+}
+
+body.dark-mode .schedule-header h1,
+body.dark-mode .schedule-stat-card strong,
+body.dark-mode .schedule-calendar-card .fc-toolbar-title {
+  color: #f8fafc;
+}
+
+body.dark-mode .schedule-desc,
+body.dark-mode .schedule-stat-card p,
+body.dark-mode .schedule-stat-card span {
+  color: #94a3b8;
+}
+
+body.dark-mode .schedule-stat-card,
+body.dark-mode .schedule-calendar-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .schedule-stat-icon {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+body.dark-mode .schedule-calendar-card .fc {
+  color: #e5e7eb;
+}
+
+body.dark-mode .schedule-calendar-card .fc-button {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+body.dark-mode .schedule-calendar-card .fc-button:hover {
+  background: #1d4ed8;
+}
+
+body.dark-mode .schedule-calendar-card .fc-today-button {
+  background: #111827;
+  color: #93c5fd;
+  border: 1px solid #334155;
+}
+
+body.dark-mode .schedule-calendar-card .fc-today-button:hover {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+
+body.dark-mode .schedule-calendar-card .fc-theme-standard th,
+body.dark-mode .schedule-calendar-card .fc-theme-standard td,
+body.dark-mode .schedule-calendar-card .fc-theme-standard .fc-scrollgrid {
+  border-color: #334155;
+}
+
+body.dark-mode .schedule-calendar-card .fc-col-header-cell {
+  background: #111827;
+}
+
+body.dark-mode .schedule-calendar-card .fc-col-header-cell-cushion {
+  color: #cbd5e1;
+}
+
+body.dark-mode .schedule-calendar-card .fc-daygrid-day {
+  background: #1e293b;
+}
+
+body.dark-mode .schedule-calendar-card .fc-daygrid-day-number {
+  color: #cbd5e1;
+}
+
+body.dark-mode .schedule-calendar-card .fc-day-other .fc-daygrid-day-number {
+  color: #64748b;
+}
+
+body.dark-mode .schedule-calendar-card .fc-day-today {
+  background: rgba(250, 204, 21, 0.12) !important;
+}
+
+body.dark-mode .schedule-calendar-card .fc-event {
+  color: #ffffff;
+}
+
+body.dark-mode .schedule-calendar-card .schedule-event-site {
+  background: #2563eb;
+}
+
+body.dark-mode .schedule-calendar-card .schedule-event-stock {
+  background: #10b981;
 }
 
 @media (max-width: 900px) {

@@ -425,6 +425,167 @@
   font-weight: 700;
 }
 
+/* dark mode */
+body.dark-mode .stock-write-page {
+  background: #0f172a;
+}
+
+body.dark-mode .stock-back-btn {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+body.dark-mode .stock-write-label {
+  color: #93c5fd;
+}
+
+body.dark-mode .stock-write-header h1,
+body.dark-mode .stock-write-section h2,
+body.dark-mode .stock-form-field > span,
+body.dark-mode .preview-card h3,
+body.dark-mode .preview-material h4,
+body.dark-mode .preview-info-row strong,
+body.dark-mode .total-row span,
+body.dark-mode .expected-row span {
+  color: #f8fafc;
+}
+
+body.dark-mode .stock-write-desc,
+body.dark-mode .stock-form-field small,
+body.dark-mode .memo-count,
+body.dark-mode .preview-title button,
+body.dark-mode .preview-material p,
+body.dark-mode .preview-info-row span {
+  color: #94a3b8;
+}
+
+body.dark-mode .stock-write-section,
+body.dark-mode .preview-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .stock-form-field input,
+body.dark-mode .stock-form-field select,
+body.dark-mode .stock-form-field textarea {
+  background: #111827;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .stock-form-field input::placeholder,
+body.dark-mode .stock-form-field textarea::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .stock-form-field input:focus,
+body.dark-mode .stock-form-field select:focus,
+body.dark-mode .stock-form-field textarea:focus {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .type-toggle {
+  background: #111827;
+  border-color: #334155;
+}
+
+body.dark-mode .type-toggle button {
+  background: #111827;
+  color: #94a3b8;
+}
+
+body.dark-mode .type-toggle button:first-child {
+  border-right-color: #334155;
+}
+
+body.dark-mode .type-toggle button.active.in {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+  border-color: #34d399;
+}
+
+body.dark-mode .type-toggle button.active.out {
+  background: rgba(249, 115, 22, 0.14);
+  color: #fb923c;
+  border-color: #fb923c;
+}
+
+body.dark-mode .input-icon svg,
+body.dark-mode .select-with-thumb svg {
+  color: #94a3b8;
+}
+
+body.dark-mode .select-with-thumb,
+body.dark-mode .quantity-input {
+  background: #111827;
+  border-color: #334155;
+}
+
+body.dark-mode .material-mini-thumb,
+body.dark-mode .preview-thumb {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+body.dark-mode .select-with-thumb select,
+body.dark-mode .quantity-input input,
+body.dark-mode .quantity-input select {
+  background: #111827;
+  color: #f8fafc;
+}
+
+body.dark-mode .quantity-input select {
+  border-left-color: #334155;
+}
+
+body.dark-mode .quantity-input:focus-within,
+body.dark-mode .select-with-thumb:focus-within {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .stock-cancel-btn {
+  background: #111827;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .stock-cancel-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+body.dark-mode .stock-submit-btn {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+body.dark-mode .stock-submit-btn:hover {
+  background: #1d4ed8;
+}
+
+body.dark-mode .preview-material span {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+}
+
+body.dark-mode .preview-info-row {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .preview-in {
+  color: #34d399 !important;
+}
+
+body.dark-mode .preview-out {
+  color: #fb923c !important;
+}
+
+body.dark-mode .total-row strong,
+body.dark-mode .expected-row strong {
+  color: #93c5fd;
+}
+
 @media (max-width: 1100px) {
   .stock-write-layout {
     grid-template-columns: 1fr;

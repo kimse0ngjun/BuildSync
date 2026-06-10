@@ -469,3 +469,143 @@
   color: #64748b;
   font-size: 12px;
 }
+
+/* dark mode */
+body.dark-mode .stock-page {
+  background: #0f172a;
+}
+
+body.dark-mode .stock-page-label {
+  color: #93c5fd;
+}
+
+body.dark-mode .stock-header h1,
+body.dark-mode .stock-stat-card strong,
+body.dark-mode .stock-material-name,
+body.dark-mode .filter-title h3,
+body.dark-mode .quick-filter-card h3,
+body.dark-mode .stock-summary h3,
+body.dark-mode .stock-flow h3,
+body.dark-mode .filter-group span,
+body.dark-mode .summary-item strong {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .stock-page-desc,
+body.dark-mode .stock-stat-card p,
+body.dark-mode .stock-stat-card span,
+body.dark-mode .filter-title button,
+body.dark-mode .summary-item p,
+body.dark-mode .summary-item span,
+body.dark-mode .flow-header div,
+body.dark-mode .chart-dates {
+  color: #94a3b8;
+}
+
+body.dark-mode .stock-stat-card,
+body.dark-mode .filter-card,
+body.dark-mode .quick-filter-card,
+body.dark-mode .stock-summary,
+body.dark-mode .stock-flow {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .stock-stat-icon {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+body.dark-mode .stock-stat-icon.out {
+  background: rgba(249, 115, 22, 0.16);
+  color: #fb923c;
+}
+
+body.dark-mode .stock-search,
+body.dark-mode .stock-toolbar select,
+body.dark-mode .date-btn,
+body.dark-mode .filter-group select,
+body.dark-mode .filter-group input {
+  background: #111827;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .stock-search input {
+  color: #f8fafc;
+}
+
+body.dark-mode .stock-search input::placeholder,
+body.dark-mode .filter-group input::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .stock-table {
+  background: #1e293b;
+}
+
+body.dark-mode .stock-table thead {
+  background: #111827;
+}
+
+body.dark-mode .stock-table th {
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .stock-table td {
+  color: #e5e7eb;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .stock-table tbody tr:hover {
+  background: #243247;
+}
+
+body.dark-mode .stock-badge.in {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+}
+
+body.dark-mode .stock-badge.out {
+  background: rgba(249, 115, 22, 0.16);
+  color: #fb923c;
+}
+
+body.dark-mode .qty-in,
+body.dark-mode .summary-in {
+  color: #34d399 !important;
+}
+
+body.dark-mode .qty-out,
+body.dark-mode .summary-out {
+  color: #f87171 !important;
+}
+
+body.dark-mode .pagination button {
+  color: #cbd5e1;
+}
+
+body.dark-mode .pagination button.active,
+body.dark-mode .pagination button:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+body.dark-mode .quick-grid button {
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .quick-grid button:hover {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+
+body.dark-mode .summary-item {
+  border-right-color: #334155;
+}
+
+body.dark-mode .flow-chart {
+  border-bottom-color: #334155;
+}
