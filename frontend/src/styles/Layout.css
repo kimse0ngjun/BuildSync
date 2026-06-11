@@ -143,7 +143,7 @@
 .menu-group.open .menu-group-title,
 .bottom-title:hover,
 .bottom-group.open .bottom-title {
-  background: #e8f1ff;
+  background: #dce8fb;
   color: #2563eb;
 }
 
@@ -203,7 +203,7 @@
 
 .submenu a:hover,
 .submenu a.active {
-  background: #e8f1ff;
+  background: #dce8fb;
   color: #2563eb;
 }
 
@@ -267,7 +267,7 @@
 
 .bottom-submenu a:hover,
 .bottom-submenu a.active {
-  background: #e8f1ff;
+  background: #dce8fb;
   color: #2563eb;
 }
 
@@ -285,6 +285,11 @@
   white-space: nowrap;
   cursor: pointer;
   overflow: hidden;
+  text-decoration: none;
+}
+
+.login-profile a {
+  text-decoration: none;
 }
 
 .login-avatar {
@@ -337,6 +342,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  text-decoration: none;
 }
 
 .topbar-logo-text {
@@ -351,4 +357,75 @@
   min-height: calc(100vh - 72px);
   padding: 40px;
   background: #fafafa;
+}
+
+/* dark mode */
+body.dark-mode .layout,
+body.dark-mode .main-area,
+body.dark-mode .page-content {
+  background: #0f172a;
+}
+
+body.dark-mode .sidebar {
+  background: #111827;
+  border-right-color: #334155;
+}
+
+body.dark-mode .topbar {
+  background: #111827;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .logo-build,
+body.dark-mode .topbar-logo-text .logo-build {
+  color: #f8fafc;
+}
+
+body.dark-mode .logo-sync,
+body.dark-mode .topbar-logo-text .logo-sync {
+  color: #60a5fa;
+}
+
+body.dark-mode .menu-link,
+body.dark-mode .menu-group-title,
+body.dark-mode .bottom-title,
+body.dark-mode .submenu a,
+body.dark-mode .bottom-submenu a {
+  color: #94a3b8;
+}
+
+body.dark-mode .menu-link:hover,
+body.dark-mode .menu-link.active,
+body.dark-mode .menu-group-title:hover,
+body.dark-mode .menu-group.open .menu-group-title,
+body.dark-mode .bottom-title:hover,
+body.dark-mode .bottom-group.open .bottom-title,
+body.dark-mode .submenu a:hover,
+body.dark-mode .submenu a.active,
+body.dark-mode .bottom-submenu a:hover,
+body.dark-mode .bottom-submenu a.active {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+
+body.dark-mode .sidebar-bottom {
+  border-top-color: #334155;
+}
+
+body.dark-mode .login-profile {
+  background: #ffffff;
+  border-color: #334155;
+}
+
+body.dark-mode .login-avatar {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+body.dark-mode .login-info strong {
+  color: #10284a;
+}
+
+body.dark-mode .login-info small {
+  color: #94a3b8;
 }

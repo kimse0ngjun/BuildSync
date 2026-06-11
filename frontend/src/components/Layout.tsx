@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, Link } from "react-router-dom";
 import {
   FiHome,
   FiUsers,
@@ -147,15 +147,15 @@ function Layout() {
             isOpen={openBottom === "setting"}
             onClick={() => toggleBottom("setting")}
           >
-            <NavLink to="/setting/profile">
+            <NavLink to="/settings/account">
               <FiUser />
               계정 설정
             </NavLink>
-            <NavLink to="/setting/security">
+            <NavLink to="/settings/security">
               <FiShield />
               보안 설정
             </NavLink>
-            <NavLink to="/setting/theme">
+            <NavLink to="/settings/display">
               <FiMoon />
               화면 설정
             </NavLink>
@@ -177,28 +177,29 @@ function Layout() {
             </NavLink>
           </BottomGroup>
 
-          <div className="login-profile">
-            <div className="login-avatar">
-              <FiLogIn />
-            </div>
-            <NavLink to="/login">
+          <NavLink to="/login">
+            <div className="login-profile">
+              <div className="login-avatar">
+                <FiLogIn />
+              </div>
+
               <div className="login-info">
                 <strong>로그인</strong>
                 <small>서비스 이용하기</small>
               </div>
-            </NavLink>
-          </div>
+            </div>
+          </NavLink>
         </div>
       </aside>
 
       <main className="main-area">
         <header className="topbar">
-          <div className="topbar-logo">
+          <Link to="/dashboard" className="topbar-logo">
             <span className="topbar-logo-text">
               <span className="logo-build">Build</span>
               <span className="logo-sync">Sync</span>
             </span>
-          </div>
+          </Link>
         </header>
 
         <section className="page-content">
