@@ -41,6 +41,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 로그아웃 처리
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("ceoName");
+    localStorage.removeItem("companyName");
 
     setIsLogin(false);
     setCeoName("");

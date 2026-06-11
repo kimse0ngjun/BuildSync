@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import { AuthProvider } from "./context/AuthContext";
 
 import Layout from "./components/Layout";
@@ -11,12 +10,22 @@ import FindIdPage from "./pages/auth/FindIdPage";
 import FindPasswordPage from "./pages/auth/FindPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
+import PublicRoute from "./routes/PublicRoute";
+
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            }
+          />
+
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* sidebar 있음 */}

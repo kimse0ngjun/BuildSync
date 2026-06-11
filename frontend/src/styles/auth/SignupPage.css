@@ -18,8 +18,8 @@
 
 .signup-breadcrumb {
   font-size: 12px;
-  color: #64748b;
-  margin: 0;
+  color: #1815e7;
+  margin-bottom: 5px;
 }
 
 .signup-title-row {
@@ -51,7 +51,7 @@
 
 .signup-page-title {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 800;
   color: #1f2937;
   margin: 0;
 }

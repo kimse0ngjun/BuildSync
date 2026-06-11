@@ -1,11 +1,11 @@
-.page-content {
+/* .auth-page-content {
   min-height: calc(100vh - 72px);
   padding: 40px;
   background: #ffffff;
   display: flex;
   justify-content: center;
   align-items: center;
-}
+} */
 
 .auth-card {
   width: 520px;
@@ -63,6 +63,7 @@
   padding: 40px 60px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
 
