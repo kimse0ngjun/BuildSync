@@ -8,12 +8,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.buildsync.dto.FindLoginIdRequest;
-import com.buildsync.dto.FindPasswordEmailRequest;
-import com.buildsync.dto.FindPasswordRequest;
-import com.buildsync.dto.LoginRequest;
-import com.buildsync.dto.SignupRequest;
-import com.buildsync.service.AuthService;
+import com.buildsync.dto.auth.FindLoginIdRequest;
+import com.buildsync.dto.auth.FindPasswordEmailRequest;
+import com.buildsync.dto.auth.FindPasswordRequest;
+import com.buildsync.dto.auth.LoginRequest;
+import com.buildsync.dto.auth.LoginResponse;
+import com.buildsync.dto.auth.SignupRequest;
+import com.buildsync.service.auth.AuthService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,13 +27,10 @@ public class AuthController {
 	
 	// 로그인
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+	public ResponseEntity<LoginResponse> login(
+	        @RequestBody LoginRequest req) {
 
-	    String token = authService.login(req);
-
-	    return ResponseEntity.ok(
-	            Map.of("token", token)
-	    );
+	    return ResponseEntity.ok(authService.login(req));
 	}
 	
 	// 회원가입
@@ -48,7 +46,7 @@ public class AuthController {
 	@PostMapping("/find-id")
 	public ResponseEntity<?> findId(@RequestBody FindLoginIdRequest request) {
 
-	    String loginId = authService.findLoginId(request.getEmail());
+	    String loginId = authService.findLoginId(request.getPhone());
 
 	    return ResponseEntity.ok(
 	            Map.of("loginId", loginId)

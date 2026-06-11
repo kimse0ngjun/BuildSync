@@ -1,4 +1,4 @@
-package com.buildsync.dto;
+package com.buildsync.dto.auth;
 
 public class SignupResponse {
 

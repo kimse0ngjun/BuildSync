@@ -1,4 +1,4 @@
-package com.buildsync.dto;
+package com.buildsync.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class LoginResponse {
 
-	private String accessToken;
-	private String loginId;
+	private String token;
+	private String ceoName;
 	private String companyName;
 }

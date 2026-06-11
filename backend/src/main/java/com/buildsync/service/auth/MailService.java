@@ -1,4 +1,4 @@
-package com.buildsync.service;
+package com.buildsync.service.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,22 +15,6 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
-//    public void sendFindIdMail(String to, String loginId) {
-//
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(to);
-//        message.setSubject("BuildSync 아이디 찾기 결과");
-//
-//        message.setText(
-//                "BuildSync 운영진입니다.\n\n" +
-//                "요청하신 아이디 정보입니다.\n\n" +
-//                "아이디: " + loginId + "\n\n" +
-//                "감사합니다."
-//        );
-//
-//        mailSender.send(message);
-//    }
-    
     public void sendResetPasswordMail(String to, String link) throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();
