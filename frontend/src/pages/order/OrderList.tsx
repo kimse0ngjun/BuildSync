@@ -78,6 +78,11 @@ const sampleOrders = [
   },
 ];
 
+import { FaRegCircleCheck } from "react-icons/fa6";
+import { IoIosClose } from "react-icons/io";
+import BaseModal from "./modal/BaseModal";
+import { OrderModalDetail } from "./modal/OrderModalDetail";
+
 export const OrderList = () => {
   const navigate = useNavigate();
 
@@ -87,7 +92,14 @@ export const OrderList = () => {
   const [page, setPage] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
 
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
   const pageSize = 7;
+
+  const myCompanyType = localStorage.getItem("companyType") as
+    | "CONSTRUCTION"
+    | "SUPPLIER";
 
   useEffect(() => {
     let filtered = sampleOrders;
@@ -127,6 +139,9 @@ export const OrderList = () => {
     e.preventDefault();
     setPage(1);
   };
+
+  const icon = <FaRegCircleCheck />;
+  const deleteIcon = <IoIosClose onClick={() => setIsModalOpen(false)} />;
 
   return (
     <div className="order-list-page">
@@ -233,10 +248,21 @@ export const OrderList = () => {
                     </td>
                     <td>
                       <span className={`order-status ${order.status}`}>
-                        {getStatusText(order.status)}
+                        {order.status === "PENDING"
+                          ? "접수 대기"
+                          : order.status === "ACCEPTED"
+                            ? "접수 완료"
+                            : order.status === "END"
+                              ? "발주 완료"
+                              : "취소"}
                       </span>
                     </td>
-                    <td>{order.orderDate}</td>
+
+                    <td>
+                      {order.orderDate
+                        ? String(order.orderDate).split("T")[0]
+                        : "-"}
+                    </td>
                   </tr>
                 );
               })
@@ -273,6 +299,21 @@ export const OrderList = () => {
           <FiChevronRight />
         </button>
       </div>
+      <BaseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="발주서 상세 정보 확인"
+        subtitle="제출한 발주서의 상세 정보를 확인할 수 있습니다."
+        content={
+          <OrderModalDetail
+            selectedOrder={selectedOrder}
+            onClose={() => setIsModalOpen(false)}
+            myCompanyType={myCompanyType}
+          />
+        }
+        icon={icon}
+        deleteIcon={deleteIcon}
+      />
     </div>
   );
 };

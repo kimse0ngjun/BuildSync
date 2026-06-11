@@ -23,6 +23,12 @@ import SuccessOutput from "./pages/inoutput/SuccessOutput";
 import LoginPage from "./pages/user/LoginPage";
 import JoinPage from "./pages/user/JoinPage";
 
+import { CostAnalysis } from "./pages/analysis/CostAnalysis";
+import CostAnalysisPage from "./pages/analysis/CostAnalysisPage";
+
+import { Notifications } from "./pages/notification/Notifications";
+import { NotificationStock } from "./pages/notification/NotificationStock";
+
 import AccountSetting from "./pages/settings/AccountSetting";
 import SecuritySetting from "./pages/settings/SecuritySetting";
 import ScreenSetting from "./pages/settings/ScreenSetting";
@@ -33,7 +39,6 @@ import SiteEditPage from "./pages/site/SiteEditPage";
 import MaterialUsagePage from "./pages/site/MaterialUsagePage";
 import MaterialUsageEditPage from "./pages/site/MaterialUsageEditPage";
 import SchedulePage from "./pages/schedule/SchedulePage";
-import CostAnalysisPage from "./pages/analysis/CostAnalysisPage";
 
 function App() {
   useEffect(() => {
@@ -69,6 +74,11 @@ function App() {
 
           <Route path="/input/success-input" element={<SuccessInput />} />
           <Route path="/output/success-output" element={<SuccessOutput />} />
+
+          <Route path="/analysis" element={<CostAnalysis />} />
+
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/notifications/stock" element={<NotificationStock />} />
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/join" element={<JoinPage />} />

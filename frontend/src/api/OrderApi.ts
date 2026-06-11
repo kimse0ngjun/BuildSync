@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Company, Contact, Material, OrderList } from "../types/OrderDTO";
+import type { Company, Contact, Material } from "../types/OrderDTO";
 
 const api = axios.create({
   baseURL: "/order",
@@ -27,8 +27,34 @@ export const orderListApi = {
     currentPage: number;
     size: number;
   }) => {
-    return api
-      .get<OrderList[]>("/list", { params: filters })
+    return api.get<any[]>("/list", { params: filters }).then((res) => res.data);
+  },
+
+  getOrderDetail: (orderId: number) => {
+    return api.get<any>(`/detail/${orderId}`).then((res) => res.data);
+  },
+
+  updateStockIn: (orderId: number) => {
+    api.patch<string>(`/stock-in/${orderId}`);
+  },
+
+  changeOrderCancel: (orderId: number, status: string) => {
+    api
+      .patch<string>(`/cancel/${orderId}`, null, {
+        params: { status: status },
+      })
+      .then((res) => res.data);
+  },
+
+  updateOrderDetail: (orderId: number, updateData: any) => {
+    api.patch<string>(`/update/${orderId}`, updateData).then((res) => res.data);
+  },
+
+  updateOrderStatus: (orderId: number, status: string) => {
+    api
+      .patch<string>(`/update-status/${orderId}`, null, {
+        params: { status: status },
+      })
       .then((res) => res.data);
   },
 };
