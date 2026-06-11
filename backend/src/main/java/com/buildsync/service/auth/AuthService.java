@@ -1,5 +1,7 @@
 package com.buildsync.service.auth;
 
+import java.time.LocalDate;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +12,7 @@ import com.buildsync.dto.auth.LoginRequest;
 import com.buildsync.dto.auth.LoginResponse;
 import com.buildsync.dto.auth.SignupRequest;
 import com.buildsync.entity.Company;
+import com.buildsync.entity.CompanyStatus;
 import com.buildsync.repository.company.CompanyRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,10 @@ public class AuthService {
 
 	    if (!passwordEncoder.matches(req.getPassword(), company.getPassword())) {
 	        throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+	    }
+	    
+	    if (company.getStatus() == CompanyStatus.INACTIVE) {
+	        throw new RuntimeException("비활성 계정입니다.");
 	    }
 
 	    String token = jwtUtil.generateToken(company.getLoginId());
@@ -69,7 +76,10 @@ public class AuthService {
 	        company.setHomepageUrl(req.getHomepageUrl());
 	        company.setAddress(req.getAddress());
 	        company.setEmail(req.getEmail());
+	        company.setCreatedAt(LocalDate.now());
 
+	        company.setStatus(CompanyStatus.ACTIVE);
+	        
 	        companyRepository.save(company);
 	    }
 	 
@@ -133,4 +143,15 @@ public class AuthService {
 
 	        return phone;
 	    }
+	 
+	 // 회원 삭제
+	 public void deleteAccount(String loginId) {
+		 
+		 Company company  = companyRepository.findByLoginId(loginId)
+		            .orElseThrow(() -> new IllegalArgumentException("사용자가 없습니다."));
+		 
+		    company.setStatus(CompanyStatus.INACTIVE);
+
+		    companyRepository.save(company);
+	 }
 }
