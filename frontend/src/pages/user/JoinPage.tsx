@@ -11,6 +11,7 @@ import {
   FiGlobe,
   FiCalendar,
 } from "react-icons/fi";
+import authApi from "../../api/authApi";
 import "../../styles/JoinPage.css";
 
 function JoinPage() {
@@ -30,11 +31,57 @@ function JoinPage() {
     createdAt: new Date().toISOString().split("T")[0],
   });
 
+  const [error, setError] = useState("");
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    setError("");
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const number = e.target.value.replace(/[^0-9]/g, "");
+
+    let formatted = number;
+    if (number.length > 3 && number.length <= 7) {
+      formatted = `${number.slice(0, 3)}-${number.slice(3)}`;
+    } else if (number.length > 7) {
+      formatted = `${number.slice(0, 3)}-${number.slice(3, 7)}-${number.slice(
+        7,
+        11,
+      )}`;
+    }
+
+    setForm((prev) => ({ ...prev, phone: formatted }));
+    setError("");
+  };
+
+  const handleSubmit = async () => {
+    if (!form.loginId) return setError("아이디를 입력하세요.");
+    if (!form.password) return setError("비밀번호를 입력하세요.");
+    if (form.password !== form.passwordCheck) {
+      return setError("비밀번호가 일치하지 않습니다.");
+    }
+    if (!form.companyType) return setError("업체 유형을 선택하세요.");
+    if (!form.companyName) return setError("업체명을 입력하세요.");
+    if (!form.ceoName) return setError("대표자 이름을 입력하세요.");
+    if (!form.businessNumber) return setError("사업자등록번호를 입력하세요.");
+    if (!form.phone) return setError("연락처를 입력하세요.");
+    if (!form.address) return setError("주소를 입력하세요.");
+
+    try {
+      await authApi.signup({
+        ...form,
+        phone: form.phone.replace(/-/g, ""),
+      });
+
+      alert("회원가입이 완료되었습니다.");
+      navigate("/login");
+    } catch {
+      setError("회원가입에 실패했습니다.");
+    }
   };
 
   return (
@@ -112,8 +159,8 @@ function JoinPage() {
                 onChange={handleChange}
               >
                 <option value="">업체 유형을 선택하세요</option>
-                <option value="건설업체">건설업체</option>
-                <option value="공급업체">공급업체</option>
+                <option value="CONSTRUCTION">건설업체</option>
+                <option value="SUPPLIER">공급업체</option>
               </select>
             </FormField>
 
@@ -148,8 +195,9 @@ function JoinPage() {
               <input
                 name="phone"
                 value={form.phone}
-                onChange={handleChange}
+                onChange={handlePhoneChange}
                 placeholder="예) 010-1234-5678"
+                maxLength={13}
               />
             </FormField>
 
@@ -177,6 +225,8 @@ function JoinPage() {
           </div>
         </section>
 
+        {error && <p className="join-error">{error}</p>}
+
         <div className="join-actions">
           <button
             type="button"
@@ -186,7 +236,11 @@ function JoinPage() {
             취소
           </button>
 
-          <button type="button" className="join-submit-btn">
+          <button
+            type="button"
+            className="join-submit-btn"
+            onClick={handleSubmit}
+          >
             회원가입
           </button>
         </div>

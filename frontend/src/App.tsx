@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
+import { AuthProvider } from "./context/AuthContext";
+import PublicRoute from "./routes/PublicRoute";
 
 import Layout from "./components/Layout";
 import LandingPage from "./pages/LandingPage";
@@ -23,7 +25,10 @@ import SuccessOutput from "./pages/inoutput/SuccessOutput";
 import LoginPage from "./pages/user/LoginPage";
 import JoinPage from "./pages/user/JoinPage";
 
-import { CostAnalysis } from "./pages/analysis/CostAnalysis";
+import FindIdPage from "./pages/auth/FindIdPage";
+import FindPasswordPage from "./pages/auth/FindPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+
 import CostAnalysisPage from "./pages/analysis/CostAnalysisPage";
 
 import { Notifications } from "./pages/notification/Notifications";
@@ -52,56 +57,69 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-
-        <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-
-          <Route path="/company" element={<CompanyList />} />
-          <Route path="/company/:id" element={<CompanyDetail />} />
-          <Route path="/company/:id/edit" element={<CompanyEdit />} />
-
-          <Route path="/material" element={<MaterialList />} />
-          <Route path="/material/write" element={<MaterialWrite />} />
-
-          <Route path="/stock" element={<StockInOutList />} />
-          <Route path="/stock/write" element={<StockInOutWrite />} />
-
-          <Route path="/order/write" element={<WriteOrder />} />
-          <Route path="/order/list" element={<OrderList />} />
-
-          <Route path="/input/success-input" element={<SuccessInput />} />
-          <Route path="/output/success-output" element={<SuccessOutput />} />
-
-          <Route path="/analysis" element={<CostAnalysis />} />
-
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/notifications/stock" element={<NotificationStock />} />
-
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/join" element={<JoinPage />} />
-
-          <Route path="/settings/account" element={<AccountSetting />} />
-          <Route path="/settings/security" element={<SecuritySetting />} />
-          <Route path="/settings/display" element={<ScreenSetting />} />
-
-          <Route path="/site" element={<SitePage />} />
-          <Route path="/site/create" element={<SiteCreatePage />} />
-          <Route path="/site/edit/:id" element={<SiteEditPage />} />
-          <Route path="/site/material" element={<MaterialUsagePage />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
           <Route
-            path="/site/material/edit/:id"
-            element={<MaterialUsageEditPage />}
+            path="/"
+            element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            }
           />
 
-          <Route path="/schedule" element={<SchedulePage />} />
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
 
-          <Route path="/analysis" element={<CostAnalysisPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            <Route path="/company" element={<CompanyList />} />
+            <Route path="/company/:id" element={<CompanyDetail />} />
+            <Route path="/company/:id/edit" element={<CompanyEdit />} />
+
+            <Route path="/material" element={<MaterialList />} />
+            <Route path="/material/write" element={<MaterialWrite />} />
+
+            <Route path="/stock" element={<StockInOutList />} />
+            <Route path="/stock/write" element={<StockInOutWrite />} />
+
+            <Route path="/order/write" element={<WriteOrder />} />
+            <Route path="/order/list" element={<OrderList />} />
+
+            <Route path="/input/success-input" element={<SuccessInput />} />
+            <Route path="/output/success-output" element={<SuccessOutput />} />
+
+            <Route path="/analysis" element={<CostAnalysisPage />} />
+
+            <Route path="/notifications" element={<Notifications />} />
+            <Route
+              path="/notifications/stock"
+              element={<NotificationStock />}
+            />
+
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/join" element={<JoinPage />} />
+            <Route path="/find-id" element={<FindIdPage />} />
+            <Route path="/find-password" element={<FindPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            <Route path="/settings/account" element={<AccountSetting />} />
+            <Route path="/settings/security" element={<SecuritySetting />} />
+            <Route path="/settings/display" element={<ScreenSetting />} />
+
+            <Route path="/site" element={<SitePage />} />
+            <Route path="/site/create" element={<SiteCreatePage />} />
+            <Route path="/site/edit/:id" element={<SiteEditPage />} />
+            <Route path="/site/material" element={<MaterialUsagePage />} />
+            <Route
+              path="/site/material/edit/:id"
+              element={<MaterialUsageEditPage />}
+            />
+
+            <Route path="/schedule" element={<SchedulePage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
