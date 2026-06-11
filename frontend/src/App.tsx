@@ -17,6 +17,9 @@ import SuccessOutput from "./pages/inoutput/SuccessOutput";
 import LoginPage from "./pages/user/LoginPage";
 import { CostAnalysis } from "./pages/analysis/CostAnalysis";
 
+import { Notifications } from "./pages/notification/Notifications";
+import { NotificationStock } from "./pages/notification/NotificationStock";
+
 function App() {
   return (
     <BrowserRouter>
@@ -41,6 +44,9 @@ function App() {
           <Route path="/output/success-output" element={<SuccessOutput />} />
 
           <Route path="/analysis" element={<CostAnalysis />} />
+
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/notifications/stock" element={<NotificationStock />} />
 
           <Route path="/login" element={<LoginPage />} />
         </Route>
