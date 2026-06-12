@@ -1,4 +1,4 @@
-package org.cloud.dto;
+package com.buildsync.dto.order;
 
 import java.sql.Date;
 

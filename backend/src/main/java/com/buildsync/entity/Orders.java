@@ -1,8 +1,10 @@
-package org.cloud.domain;
+package com.buildsync.entity;
 
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -57,4 +59,23 @@ public class Orders {
 	
 	@OneToMany(mappedBy = "orders", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItems> items = new ArrayList<>();
+	
+	@Transactional
+	public void modifyOrderDetails(int totalAmount, String memo, List<OrderItems> newItems) {
+        this.totalAmount = totalAmount;
+        this.memo = memo;
+        
+        this.items.clear();
+        
+        if (newItems != null) {
+            for (OrderItems item : newItems) {
+                item.setOrders(this);
+                this.items.add(item);
+            }
+        }
+    }
+	
+	public void changeStatus(String status) {
+		this.status = status;
+	}
 }

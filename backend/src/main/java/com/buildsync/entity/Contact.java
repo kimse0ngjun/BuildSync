@@ -1,6 +1,6 @@
-package org.cloud.domain;
+package com.buildsync.entity;
 
-import java.sql.Date;
+
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,36 +16,34 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "sup_material")
-public class SupMaterial {
+@Table(name = "contact")
+public class Contact {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long supMaterialId;
+	private Long contactId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "company_id")
 	private Company company;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "material_id")
-	private Material material;
-
-	@Column(nullable = true)
-	private int currentStock;
+	@Column(nullable = false, length = 50)
+	private String contactName;
 	
-	@Column(nullable = true)
-	private int minimumStock;
-
-	@Column(nullable = true)
-	private Date updatedDate;
+	@Column(nullable = true, length = 50)
+	private String department;
 	
-	@Column(nullable = true)
-	private int unitPrice;
+	@Column(nullable = true, length = 50)
+	private String position;
+	
+	@Column(nullable = true, length = 30)
+	private String phone;
+	
+	@Column(nullable = true, length = 100)
+	private String email;
 }

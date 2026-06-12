@@ -1,4 +1,4 @@
-package org.cloud.domain;
+package com.buildsync.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,11 +11,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,12 +27,12 @@ public class OrderItems {
 	private Long orderItemId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id")
+	@JoinColumn(name = "order_id", nullable = false)
 	private Orders orders;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "material_id")
-	private Material material;
+//	@ManyToOne(fetch = FetchType.LAZY)
+//	@JoinColumn(name = "material_id")
+//	private Material material;
 	
 	@Column(nullable = true)
 	private int unitPrice;
@@ -42,4 +42,5 @@ public class OrderItems {
 	
 	@Column(nullable = true)
 	private int quantity;
+	
 }
