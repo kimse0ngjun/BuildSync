@@ -1,5 +1,6 @@
 package com.buildsync.repository.company;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	Optional<Company> findByEmail(String email);
 	Optional<Company> findByPhone(String phone);
 	boolean existsByEmail(String email);
+	
+	List<Company> findByCompanyType(String companyType);
 }

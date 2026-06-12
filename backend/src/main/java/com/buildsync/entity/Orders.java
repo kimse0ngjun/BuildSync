@@ -60,11 +60,8 @@ public class Orders {
 	@OneToMany(mappedBy = "orders", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItems> items = new ArrayList<>();
 	
-	@Transactional
-	public void modifyOrderDetails(int totalAmount, String memo, List<OrderItems> newItems) {
-        this.totalAmount = totalAmount;
+	public void modifyOrderDetails(String memo, List<OrderItems> newItems) {
         this.memo = memo;
-        
         this.items.clear();
         
         if (newItems != null) {
@@ -73,6 +70,10 @@ public class Orders {
                 this.items.add(item);
             }
         }
+        
+        this.totalAmount = this.items.stream()
+        		.mapToInt(OrderItems::getAmount)
+        		.sum();
     }
 	
 	public void changeStatus(String status) {

@@ -10,10 +10,13 @@ import com.buildsync.dto.order.OrderRequest;
 import com.buildsync.dto.order.OrdersDTO;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
+import com.buildsync.entity.Material;
 import com.buildsync.entity.OrderItems;
 import com.buildsync.entity.Orders;
+import com.buildsync.entity.SupMaterial;
 import com.buildsync.repository.company.CompanyRepository;
 import com.buildsync.repository.company.ContactRepository;
+import com.buildsync.repository.material.SupMaterialRepository;
 import com.buildsync.repository.order.OrderItemsRepository;
 import com.buildsync.repository.order.OrderRepository;
 
@@ -27,7 +30,7 @@ public class OrderService {
 	private final OrderItemsRepository orderItemsRepository;
 	private final CompanyRepository companyRepository;
 	private final ContactRepository contactRepository;
-//	private final SupMaterialRepository supMaterialRepository;
+	private final SupMaterialRepository supMaterialRepository;
 	
 	// 발주서 작성 등록
 	@Transactional
@@ -57,44 +60,43 @@ public class OrderService {
 		
 		List<OrderItemsDTO> itemDto = orderReq.getOrderItems();
 		
-		if (itemDto != null) {
-		    for (OrderItemsDTO orderItemsDTO : itemDto) {
-		        
-		    	Material materialRef = Material.builder()
-		                .materialId(orderItemsDTO.getMaterialId())
+		if (itemDto != null && !itemDto.isEmpty()) {
+		    for (OrderItemsDTO dto : itemDto) { 
+
+		        Material materialRef = Material.builder()
+		                .id(dto.getMaterialId())
 		                .build();
 
-		        OrderItems.OrderItemsBuilder itemBuilder = OrderItems.builder();	        
-		        itemBuilder
-		                .orderItemId(savedOrder.getOrderId())
+		        OrderItems item = OrderItems.builder()
+		                .orders(savedOrder)
 		                .material(materialRef)
-		                .unitPrice(orderItemsDTO.getUnit_price())
-		                .quantity(orderItemsDTO.getQuantity())
-		                .amount(orderItemsDTO.getAmount());
-		                
-		        OrderItems item = itemBuilder.build();
+		                .unitPrice(dto.getUnitPrice())
+		                .quantity(dto.getQuantity())
+		                .amount(dto.getAmount())
+		                .build();
+
 		        orderItemsRepository.save(item);
 		    }
 		}
 	}
 	
-//	// 발주서 속 공급업체 목록
-//	@Transactional(readOnly = true)
-//	public List<Company> getSupplierList() {
-//		return companyRepository.findByCompanyType("공급업체");
-//	}
+	// 발주서 속 공급업체 목록
+	@Transactional(readOnly = true)
+	public List<Company> getSupplierList() {
+		return companyRepository.findByCompanyType("공급업체");
+	}
 	
 	// 발주서 속 공급업체 담당자 자동 출력
 	@Transactional(readOnly = true)
 	public List<Contact> getContactList(Long companyId) {
-		return contactRepository.findByCompanyId(companyId);
+		return contactRepository.findByCompany_Id(companyId);
 	}
 	
-//	// 발주서 속 자재 목록
-//	@Transactional(readOnly = true)
-//	public List<SupMaterial> getOurMaterialList(Long companyId) {
-//		return supMaterialRepository.findByCompanyId(companyId);
-//	}
+	// 발주서 속 자재 목록
+	@Transactional(readOnly = true)
+	public List<SupMaterial> getOurMaterialList(Long companyId) {
+		return supMaterialRepository.findByCompany_Id(companyId);
+	}
 	
 	// 건설업체 화면 발주 목록
 	@Transactional(readOnly = true)
@@ -104,8 +106,8 @@ public class OrderService {
 	
 	// 공급업체 화면 발주 목록
 	@Transactional(readOnly = true)
-	public List<Orders> getOrderListForSupplier(Long contactId) {
-		return orderRepository.findByOrdersToSupplier(contactId);
+	public List<Orders> getOrderListForSupplier(Long companyId) {
+		return orderRepository.findByOrdersToSupplier(companyId);
 	}
 	
 	// 발주서 상세 보기
@@ -114,35 +116,43 @@ public class OrderService {
 		return orderRepository.findByOrderDetail(orderId);
 	}
 	
-	// 건설업체 발주서 수정
-//	@Transactional
-//    public void modifyOrderByCompany(Long orderId, OrderRequest dto) {
-//        Orders order = orderRepository.findById(orderId)
-//                .orElseThrow(() -> new IllegalArgumentException("발주서가 없습니다."));
-//
-//        if (!"PENDING".equals(order.getStatus())) {
-//            throw new IllegalStateException("대기 중인 발주서만 수정할 수 있습니다.");
-//        }
-//
-//        List<OrderItems> newOrderItems = dto.getOrderItems().stream()
-//        		.map(itemDto -> {
-//                    OrderItems item = new OrderItems();
-//                    item.setMaterialId(itemDto.getMaterialId());
-//                    item.setUnitPrice(itemDto.getUnitPrice());
-//                    item.setQuantity(itemDto.getQuantity());
-//                    item.setAmount(itemDto.getAmount());
-//                    return item;
-//                })
-//                .toList();
-//
-//        order.modifyOrderDetails(dto.getTotalAmount(), dto.getMemo(), newOrderItems);
-//    }
+	 // 건설업체 발주서 수정
+	@Transactional
+    public void modifyOrderByCompany(Long orderId, OrderRequest dto) {
+        Orders order = orderRepository.findByOrderDetail(orderId);
+        if (order == null) {
+			throw new IllegalArgumentException("해당 발주서가 없습니다.");
+		}
+
+        if (!"PENDING".equals(order.getStatus())) {
+            throw new IllegalStateException("대기 중인 발주서만 수정할 수 있습니다.");
+        }
+
+        List<OrderItems> newOrderItems = dto.getOrderItems().stream()
+        		.map(itemDto -> {
+        		Material materialRef = Material.builder()
+        					.id(itemDto.getMaterialId())
+        					.build();
+        			
+        		return OrderItems.builder()
+        				.material(materialRef)
+        				.unitPrice(itemDto.getUnitPrice())
+        				.quantity(itemDto.getQuantity())
+        				.amount(itemDto.getAmount())
+        				.build();
+                })
+        		.toList();
+
+        order.modifyOrderDetails(dto.getOrders().getMemo(), newOrderItems);
+    }
 	
 	// 공급업체 발주서 수정
 	@Transactional
     public void updateStatusBySupplier(Long orderId, String status) {
-        Orders order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 발주서가 없습니다."));
+		Orders order = orderRepository.findByOrderDetail(orderId);
+		if (order == null) {
+			throw new IllegalArgumentException("해당 발주서가 없습니다.");
+		}
 
         order.changeStatus(status);
     }

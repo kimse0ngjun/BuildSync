@@ -27,12 +27,12 @@ public class OrderItems {
 	private Long orderItemId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id", nullable = false)
+	@JoinColumn(name = "order_id")
 	private Orders orders;
 	
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "material_id")
-//	private Material material;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "material_id")
+	private Material material;
 	
 	@Column(nullable = true)
 	private int unitPrice;

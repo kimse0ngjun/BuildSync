@@ -15,16 +15,16 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	// 발주서 목록
 	@Query("SELECT DISTINCT o FROM Orders o " +
 			"JOIN FETCH o.items " +
-			"WHERE o.company.companyId = :companyId " +
+			"WHERE o.company.id = :companyId " +
 			"ORDER BY o.orderDate DESC")
 	List<Orders> findByConstructionOrders(@Param("companyId") Long companyId);
 
 	    
 	@Query("SELECT DISTINCT o FROM Orders o " +
 	        "JOIN FETCH o.items " +
-	        "WHERE o.contact.contactId = :contactId " +
+	        "WHERE o.contact.company.id = :companyId " +
 	        "ORDER BY o.orderDate DESC")
-	List<Orders> findByOrdersToSupplier(@Param("contactId") Long contactId);
+	List<Orders> findByOrdersToSupplier(@Param("companyId") Long companyId);
 	
 	// 발주서 상세
 	@Query("SELECT o FROM Orders o " +
