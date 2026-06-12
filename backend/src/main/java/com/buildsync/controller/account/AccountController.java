@@ -55,6 +55,6 @@ public class AccountController {
 
         accountService.deleteCompanyAccount(loginId);
 
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        return ResponseEntity.ok("거래처 정보가 삭제되었습니다.");
     }
 }
