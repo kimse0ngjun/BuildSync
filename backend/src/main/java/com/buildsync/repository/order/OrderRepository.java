@@ -1,5 +1,6 @@
 package com.buildsync.repository.order;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,4 +32,19 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	        "JOIN FETCH o.items " +
 	        "WHERE o.orderId = :orderId")
 	Orders findByOrderDetail(@Param ("orderId") Long orderId);
+	
+	
+	// 자재 조회
+	@Query("""
+		    SELECT o FROM Orders o
+		    JOIN FETCH o.company c
+		    WHERE o.company.id = :companyId
+		      AND o.expectedDeliveryDate BETWEEN :firstDay AND :lastDay
+		      AND o.status <> 'CANCELLED'
+		""")
+        List<Orders> findDeliveriesByCompanyAndMonth(
+            @Param("companyId") Long companyId,
+            @Param("firstDay")  LocalDate firstDay,
+            @Param("lastDay")   LocalDate lastDay
+        );
 }

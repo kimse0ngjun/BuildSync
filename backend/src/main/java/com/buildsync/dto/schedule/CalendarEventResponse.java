@@ -8,13 +8,15 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CalendarEventResponse {
+    private Long eventId;
+    private String title;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String status;
+    private String eventType;
 
-	private Long eventId;
-	private String title;
-	private LocalDate startDate;
-	private LocalDate endDate;
-	private String eventType;
-	private String status;
-	private String site;
-	private String supplier;
+    private Long siteId;
+    private String siteName;
+    private Long supplierId;
+    private String supplierName;
 }

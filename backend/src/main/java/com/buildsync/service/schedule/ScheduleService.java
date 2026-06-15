@@ -1,18 +1,20 @@
 package com.buildsync.service.schedule;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.buildsync.dto.schedule.CalendarEventResponse;
 import com.buildsync.dto.schedule.ScheduleRequest;
 import com.buildsync.dto.schedule.ScheduleResponse;
+import com.buildsync.entity.Orders;
 import com.buildsync.entity.Schedule;
 import com.buildsync.entity.Site;
+import com.buildsync.repository.order.OrderRepository;
 import com.buildsync.repository.schedule.ScheduleRepository;
 import com.buildsync.repository.site.SiteRepository;
 
@@ -23,9 +25,8 @@ import lombok.RequiredArgsConstructor;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
-    private final SiteRepository     siteRepository;
-
-//  private final OrderRepository orderRepository;
+    private final SiteRepository siteRepository;
+    private final OrderRepository orderRepository;
 
     // 캘린더 조회
     @Transactional(readOnly = true)
@@ -35,41 +36,39 @@ public class ScheduleService {
         LocalDate firstDay = LocalDate.of(year, month, 1);
         LocalDate lastDay  = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
 
+        boolean isAll = type == null || "ALL".equals(type);
+        boolean isSites = isAll || "SITES".equals(type);
+        boolean isMaterial = isAll || "MATERIAL".equals(type);
+
         List<CalendarEventResponse> events = new ArrayList<>();
 
-        // 공사 현장 일정 (SITES)
-        if (!type.equals("MATERIAL")) {
+        // 공사 일정
+        if (isSites) {
             scheduleRepository
-                .findByCompanyIdAndMonth(companyId, firstDay, lastDay)
-                .stream()
-                .map(this::toConstructionEvent)
-                .filter(e -> matchesStatus(e, status))
-                .forEach(events::add);
+                    .findByCompanyIdAndMonth(companyId, firstDay, lastDay)
+                    .stream()
+                    .map(this::toConstructionEvent)
+                    .filter(e -> matchesStatus(e, status))
+                    .forEach(events::add);
         }
 
-     // 자재 입고 일정 (orders 기능 병합 후 자재 입고 일정 캘린더 연동)
-//        if (!type.equals("SITES")) {
-//            orderRepository
-//                .findDeliveriesByCompanyAndMonth(
-//                        companyId,
-//                        Date.valueOf(firstDay),
-//                        Date.valueOf(lastDay)
-//                )
-//                .stream()
-//                .map(this::toDeliveryEvent)
-//                .filter(e -> matchesStatus(e, status))
-//                .forEach(events::add);
-//        }
-//        events.sort(Comparator.comparing(CalendarEventResponse::getStartDate));
+        // 자재 입고 (orders)
+        if (isMaterial) {
+            orderRepository
+                    .findDeliveriesByCompanyAndMonth(companyId, firstDay, lastDay)
+                    .stream()
+                    .map(this::toDeliveryEvent)
+                    .filter(e -> matchesStatus(e, status))
+                    .forEach(events::add);
+        }
+
+        events.sort(Comparator.comparing(CalendarEventResponse::getStartDate));
         return events;
     }
 
-    // 일정 등록
+    // 일정 생성
     @Transactional
-    public ScheduleResponse createSchedule(
-            Long companyId,
-            ScheduleRequest request
-    ) {
+    public ScheduleResponse createSchedule(Long companyId, ScheduleRequest request) {
 
         Site site = siteRepository.findById(request.getSiteId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 현장입니다."));
@@ -98,11 +97,7 @@ public class ScheduleService {
 
     // 일정 수정
     @Transactional
-    public ScheduleResponse updateSchedule(
-            Long companyId,
-            Long scheduleId,
-            ScheduleRequest request
-    ) {
+    public ScheduleResponse updateSchedule(Long companyId, Long scheduleId, ScheduleRequest request) {
 
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정입니다."));
@@ -129,9 +124,10 @@ public class ScheduleService {
                 .build();
     }
 
-    // 일정 삭제
+    // 삭제
     @Transactional
     public void deleteSchedule(Long companyId, Long scheduleId) {
+
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정입니다."));
 
@@ -142,7 +138,7 @@ public class ScheduleService {
         scheduleRepository.delete(schedule);
     }
 
-    // 변환 메서드
+    // 공사 일정 상태
     private CalendarEventResponse toConstructionEvent(Schedule s) {
         return CalendarEventResponse.builder()
                 .eventId(s.getId())
@@ -150,24 +146,60 @@ public class ScheduleService {
                 .startDate(s.getStartDate())
                 .endDate(s.getEndDate())
                 .eventType("SITES")
-                .status(deriveConstructionStatus(s.getSiteName(), s.getStartDate(), s.getEndDate()))
-                .site(s.getSiteName().getSiteName())
+                .status(
+                        deriveConstructionStatus(
+                                s.getSiteName(),
+                                s.getStartDate(),
+                                s.getEndDate()
+                        )
+                )
+                .siteId(s.getSiteName().getId())
+                .siteName(s.getSiteName().getSiteName())
+                .supplierId(null)
+                .supplierName(null)
                 .build();
     }
 
-    // 상태 도출
+    // 자재 입출고 일정 상태 
+    private CalendarEventResponse toDeliveryEvent(Orders o) {
+
+        return CalendarEventResponse.builder()
+                .eventId(o.getOrderId())
+                .title("자재 입고: " + o.getCompany().getCompanyName())
+                .startDate(o.getOrderDate().toLocalDate())
+                .endDate(o.getExpectedDeliveryDate().toLocalDate())
+
+                .eventType("MATERIAL")
+
+                .status(o.getStatus() != null ? o.getStatus().name() : null)
+
+                .supplierId(o.getCompany().getId())
+                .supplierName(o.getCompany().getCompanyName())
+
+                .siteId(null)
+                .siteName(null)
+                .build();
+    }
+
+    // 공사 상태 계산
     private String deriveConstructionStatus(Site site, LocalDate start, LocalDate end) {
+
         if (site.getStatus() != null && !site.getStatus().isBlank()) {
             return site.getStatus();
         }
+
         LocalDate today = LocalDate.now();
-        if (end.isBefore(today))  return "COMPLETED";
-        if (start.isAfter(today)) return "SCHEDULED";
-        return "IN_PROGRESS";
+
+        if (end.isBefore(today)) return "END";
+        if (start.isAfter(today)) return "PENDING";
+
+        return "ACCEPTED";
     }
 
+    // 상태 필터
     private boolean matchesStatus(CalendarEventResponse e, String status) {
         if (status == null || status.equals("ALL")) return true;
+        if (e.getStatus() == null) return false;
         return e.getStatus().equals(status);
     }
 }
