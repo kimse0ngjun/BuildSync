@@ -82,6 +82,6 @@ public class AuthController {
 
 	    authService.deleteAccount(loginId);
 
-	    return ResponseEntity.ok("회원 탈퇴 완료");
+	    return ResponseEntity.ok("회원 비활성화 완료");
 	}
 }
