@@ -1,5 +1,6 @@
 package com.buildsync.service.schedule;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -46,17 +47,20 @@ public class ScheduleService {
                 .forEach(events::add);
         }
 
-        // 자재 입고 일정 (Orders 브런치 병합 후 작업 예정)
+     // 자재 입고 일정 (orders 기능 병합 후 자재 입고 일정 캘린더 연동)
 //        if (!type.equals("SITES")) {
 //            orderRepository
-//                .findDeliveriesByCompanyAndMonth(companyId, firstDay, lastDay)
+//                .findDeliveriesByCompanyAndMonth(
+//                        companyId,
+//                        Date.valueOf(firstDay),
+//                        Date.valueOf(lastDay)
+//                )
 //                .stream()
 //                .map(this::toDeliveryEvent)
 //                .filter(e -> matchesStatus(e, status))
 //                .forEach(events::add);
 //        }
-
-        events.sort(Comparator.comparing(CalendarEventResponse::getStartDate));
+//        events.sort(Comparator.comparing(CalendarEventResponse::getStartDate));
         return events;
     }
 
