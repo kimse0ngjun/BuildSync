@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.buildsync.dto.schedule.CalendarEventResponse;
 import com.buildsync.dto.schedule.ScheduleRequest;
+import com.buildsync.dto.schedule.ScheduleResponse;
 import com.buildsync.entity.Schedule;
 import com.buildsync.entity.Site;
 import com.buildsync.repository.schedule.ScheduleRepository;
@@ -61,7 +62,11 @@ public class ScheduleService {
 
     // 일정 등록
     @Transactional
-    public Long createSchedule(Long companyId, ScheduleRequest request) {
+    public ScheduleResponse createSchedule(
+            Long companyId,
+            ScheduleRequest request
+    ) {
+
         Site site = siteRepository.findById(request.getSiteId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 현장입니다."));
 
@@ -74,18 +79,29 @@ public class ScheduleService {
                 .siteName(site)
                 .build();
 
-        return scheduleRepository.save(schedule).getId();
+        Schedule saved = scheduleRepository.save(schedule);
+
+        return ScheduleResponse.builder()
+                .scheduleId(saved.getId())
+                .title(saved.getTitle())
+                .content(saved.getContent())
+                .startDate(saved.getStartDate())
+                .endDate(saved.getEndDate())
+                .siteId(site.getId())
+                .siteName(site.getSiteName())
+                .build();
     }
 
     // 일정 수정
     @Transactional
-    public Long updateSchedule(Long companyId, Long scheduleId, ScheduleRequest request) {
+    public ScheduleResponse updateSchedule(
+            Long companyId,
+            Long scheduleId,
+            ScheduleRequest request
+    ) {
+
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정입니다."));
-
-        if (!schedule.getCompanyId().equals(companyId)) {
-            throw new IllegalArgumentException("수정 권한이 없습니다.");
-        }
 
         Site site = siteRepository.findById(request.getSiteId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 현장입니다."));
@@ -96,7 +112,17 @@ public class ScheduleService {
         schedule.setEndDate(request.getEndDate());
         schedule.setSiteName(site);
 
-        return schedule.getId();
+        Schedule updated = scheduleRepository.save(schedule);
+
+        return ScheduleResponse.builder()
+                .scheduleId(updated.getId())
+                .title(updated.getTitle())
+                .content(updated.getContent())
+                .startDate(updated.getStartDate())
+                .endDate(updated.getEndDate())
+                .siteId(site.getId())
+                .siteName(site.getSiteName())
+                .build();
     }
 
     // 일정 삭제

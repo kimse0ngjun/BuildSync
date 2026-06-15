@@ -37,6 +37,7 @@ public class Schedule {
 	private LocalDate startDate;
 	private LocalDate endDate;
 	
+	@Column(name = "company_id")
 	private Long companyId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
