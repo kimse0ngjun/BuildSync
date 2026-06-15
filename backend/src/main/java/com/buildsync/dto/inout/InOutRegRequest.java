@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 public class InOutRegRequest {
 
+	private Long companyId;
 	private Long siteId;
 	private Long orderId;
 	private Long contactId;
@@ -22,4 +23,6 @@ public class InOutRegRequest {
 		private Long materialId;
 		private Integer quantity;
 	}
+	
+	private List<Long> deleteInoutIds;
 }
