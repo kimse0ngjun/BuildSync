@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.buildsync.dto.notification.NotificationResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Notification;
+import com.buildsync.entity.SupStock;
 import com.buildsync.repository.company.CompanyRepository;
+import com.buildsync.repository.material.SupStockRepository;
 import com.buildsync.repository.notification.NotificationRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class NotificationService {
 
 	private final NotificationRepository notificationRepository;
 	private final CompanyRepository companyRepository;
+	private final SupStockRepository supStockRepository;
 	
 	// 알림 발송
 	@Transactional
@@ -68,5 +71,27 @@ public class NotificationService {
 	@Transactional
 	public void readAllNotification(Long companyId) {
 		notificationRepository.markAllAsRead(companyId);
+	}
+	
+	// 부족한 재고 알림
+	@Transactional
+	public void decreaseStock(Long supStockId, int quantity) {
+		SupStock stock = supStockRepository.findById(supStockId)
+				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 재고 내역입니다."));
+		
+		int beforeQuantity = stock.getCurrentQuantity();
+		int minQuantity = stock.getMinimumQuantity();
+		
+		stock.changeCurStock(beforeQuantity - quantity);
+		
+		if (beforeQuantity >= minQuantity && stock.getCurrentQuantity() < minQuantity) {
+            sendNotification(
+                stock.getCompany().getId(),
+                "STOCK_ALERT",
+                "자재 재고 부족 경고",
+                stock.getMaterial().getMaterialName() + " 재고가 최소 기준 미만입니다.",
+                stock.getMaterial().getId()
+            );
+        }
 	}
 }

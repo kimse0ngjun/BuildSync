@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -58,6 +60,8 @@ public class Orders {
 	private String memo;
 	
 	@OneToMany(mappedBy = "orders", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonManagedReference
+	@Builder.Default
     private List<OrderItems> items = new ArrayList<>();
 	
 	public void modifyOrderDetails(String memo, List<OrderItems> newItems) {

@@ -41,23 +41,23 @@ public class StockInoutService {
 	@Transactional(readOnly = true)
 	public InOutSumResponse getInoutDashboardData(
 			Long companyId, String type, Long materialId, Long siteId, Long orderId,
-			LocalDate startDate, LocalDate endDate) {
+			LocalDate startDate, LocalDate endDate, String keyword) {
+		
+		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
 		
 		// 건수 계산
-		long totalCount = stockInoutRepository.totalCountInout(companyId); // 총 건수
-		long countIn = stockInoutRepository.countInout(companyId, "입고"); // 입고 건수
-		long countOut = stockInoutRepository.countInout(companyId, "출고"); // 출고 건수
-		long countToday = stockInoutRepository.countInoutToday(companyId); // 금일 건수
+		long totalCount = stockInoutRepository.totalCountInout(companyId); 
+		long countIn = stockInoutRepository.countInout(companyId, "입고"); 
+		long countOut = stockInoutRepository.countInout(companyId, "출고"); 
+		long countToday = stockInoutRepository.countInoutToday(companyId); 
 		
-		// 필터 적용 입출고 목록
 		List<StockInout> filteredList = stockInoutRepository.inoutListByFilters(
-				companyId, type, materialId, siteId, orderId, startDate, endDate);
+				companyId, type, materialId, siteId, orderId, startDate, endDate, searchKeyword);
 		
-		// 입출고 요약
 		long totalInQty = stockInoutRepository.calculQtyByFilters(
-				companyId, "입고", materialId, siteId, orderId, startDate, endDate);
+				companyId, "입고", materialId, siteId, orderId, startDate, endDate, searchKeyword);
 		long totalOutQty = stockInoutRepository.calculQtyByFilters(
-				companyId, "출고", materialId, siteId, orderId, startDate, endDate);
+				companyId, "출고", materialId, siteId, orderId, startDate, endDate, searchKeyword);
 		long netInOutQty = totalInQty - totalOutQty;
 		long totalProcessedCount = filteredList.size();
 		
@@ -262,7 +262,9 @@ public class StockInoutService {
 		if (orderId != null) {
 			inoutList = stockInoutRepository.findByOrderId(orderId);
 		} else {
-			java.sql.Date processedDate = java.sql.Date.valueOf(dateStr);
+			java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("[yyyy-MM-dd][yyyy/MM/dd][yyyy.MM.dd]");
+			java.time.LocalDate localDate = java.time.LocalDate.parse(dateStr, formatter);
+			java.sql.Date processedDate = java.sql.Date.valueOf(localDate);
 			inoutList = stockInoutRepository.findByProcessedDateAndSiteAndContactIdAndType(processedDate, siteId, contactId, type);
 		}
 		

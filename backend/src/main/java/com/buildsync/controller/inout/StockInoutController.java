@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,6 +31,7 @@ public class StockInoutController {
 
 	private final StockInoutService stockInoutService;
 	
+	@PreAuthorize("hasRole('공급업체')")
 	@GetMapping("/dashboard")
 	public ResponseEntity<InOutSumResponse> getInoutList(
 			@RequestParam("companyId") Long companyId,
@@ -41,20 +43,23 @@ public class StockInoutController {
 			@RequestParam(value = "startDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@RequestParam(value = "endDate", required = false)
-			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+			@RequestParam(value = "keyword", required = false) String keyword) {
 		
 		InOutSumResponse data = stockInoutService.getInoutDashboardData(
-				companyId, type, materialId, siteId, orderId, startDate, endDate);
+				companyId, type, materialId, siteId, orderId, startDate, endDate, keyword);
 		
 		return ResponseEntity.ok(data);
 	}
 	
+	@PreAuthorize("hasRole('공급업체')")
 	@GetMapping("/auto-fill")
 	public ResponseEntity<Map<String, Object>> getAutoFill(@RequestParam("orderId") Long orderId) {
 		Map<String, Object>	autoFillData = stockInoutService.getAutoFill(orderId);
 		return ResponseEntity.ok(autoFillData);
 	}
 	
+	@PreAuthorize("hasRole('공급업체')")
 	@PostMapping("/regist")
 	public ResponseEntity<String> registerInout(@RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
@@ -69,6 +74,7 @@ public class StockInoutController {
 		}		
 	}
 	
+	@PreAuthorize("hasRole('공급업체')")
 	@PatchMapping("/update")
 	public ResponseEntity<String> updateInout(@RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
@@ -83,6 +89,7 @@ public class StockInoutController {
 		}
 	}
 	
+	@PreAuthorize("hasRole('공급업체')")
 	@DeleteMapping("/delete")
 	public ResponseEntity<String> deleteInout(
 			@RequestParam("deleteInoutIds") List<Long> deleteInoutIds, 
@@ -95,6 +102,7 @@ public class StockInoutController {
 		}
 	}
 	
+	@PreAuthorize("hasRole('공급업체')")
 	@GetMapping("/detail")
 	public ResponseEntity<?> detailInout(
 			@RequestParam(value = "orderId", required = false) Long orderId,

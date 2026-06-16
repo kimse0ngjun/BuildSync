@@ -111,16 +111,22 @@ public class OrderService {
 		return supMaterialRepository.findByCompany_Id(companyId);
 	}
 	
-	// 건설업체 화면 발주 목록
+	// 건설업체 화면 발주 목록 (검색 + 상태 필터)
 	@Transactional(readOnly = true)
-	public List<Orders> getOrderListForConstruction(Long companyId) {
-		return orderRepository.findByConstructionOrders(companyId);
+	public List<Orders> getOrderListForConstruction(Long companyId, String status, String keyword) {
+		String searchStatus = (status != null && !status.trim().isEmpty()) ? status : null;
+		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
+		
+		return orderRepository.searchOrdersForConstruction(companyId, searchStatus, searchKeyword);
 	}
 	
-	// 공급업체 화면 발주 목록
+	// 공급업체 화면 발주 목록 (검색 + 상태 필터)
 	@Transactional(readOnly = true)
-	public List<Orders> getOrderListForSupplier(Long companyId) {
-		return orderRepository.findByOrdersToSupplier(companyId);
+	public List<Orders> getOrderListForSupplier(Long companyId, String status, String keyword) {
+		String searchStatus = (status != null && !status.trim().isEmpty()) ? status : null;
+		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
+		
+		return orderRepository.searchOrdersForSupplier(companyId, searchStatus, searchKeyword);
 	}
 	
 	// 발주서 상세 보기
