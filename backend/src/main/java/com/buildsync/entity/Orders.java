@@ -51,7 +51,7 @@ public class Orders {
 	@Column(nullable = true)
 	private int totalAmount;
 	
-	@Column(nullable = true, length = 30)
+	@Column(nullable = true, length = 30) // enum 처리
 	private String status;
 	
 	@Column(columnDefinition = "TEXT")
@@ -78,5 +78,12 @@ public class Orders {
 	
 	public void changeStatus(String status) {
 		this.status = status;
+	}
+	
+	public Long getConstructionCompanyId() {
+		if (this.company != null) {
+			return this.company.getId();
+		}
+		return null;
 	}
 }

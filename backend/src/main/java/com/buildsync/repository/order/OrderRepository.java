@@ -31,4 +31,12 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	        "JOIN FETCH o.items " +
 	        "WHERE o.orderId = :orderId")
 	Orders findByOrderDetail(@Param ("orderId") Long orderId);
+	
+	// 건설
+	long countByCompanyId(Long companyId);
+	long countByCompanyIdAndStatus(Long companyId, String status);
+	
+	// 공급
+	long countByContact_Company_Id(Long companyId);
+	long countByContact_Company_IdAndStatus(Long companyId, String status);
 }

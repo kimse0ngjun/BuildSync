@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.buildsync.dto.order.OrderRequest;
+import com.buildsync.dto.order.OrderStatusResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
 import com.buildsync.entity.Orders;
@@ -101,5 +102,19 @@ public class OrderController {
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
+	}
+	
+	// 건설업체 상단 건수 카드
+	@GetMapping("/counts/construction")
+	public ResponseEntity<OrderStatusResponse> getConstructionCounts(@RequestParam("companyId") Long companyId) {
+		OrderStatusResponse counts = orderService.getStatusCountsForConstruction(companyId);
+		return ResponseEntity.ok(counts);
+	}
+	
+	// 공급업체 상단 건수 카드
+	@GetMapping("/counts/supplier")
+	public ResponseEntity<OrderStatusResponse> getSupplierCounts(@RequestParam("companyId") Long companyId) {
+		OrderStatusResponse counts = orderService.getStatusCountsForSupplier(companyId);
+		return ResponseEntity.ok(counts);
 	}
 }
