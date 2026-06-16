@@ -1,6 +1,7 @@
 package com.buildsync.service.material;
 
 import com.buildsync.dto.material.CompanyMaterialResponse;
+import com.buildsync.dto.material.CompanyMaterialDashboardResponse;
 import com.buildsync.dto.material.MaterialRequest;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Material;
@@ -25,11 +26,17 @@ public class CompanyMaterialService {
     private final MaterialRepository materialRepository;
     private final CompanyRepository companyRepository;
 
-    // 내 회사 자재 목록 조회
-    public List<CompanyMaterialResponse> getCompanyMaterials(String loginId) {
+    // 내 회사 자재 목록 조회 + 통계 카드 + 검색/필터
+    public CompanyMaterialDashboardResponse getCompanyMaterials(
+            String loginId,
+            String keyword,
+            String category,
+            String status
+    ) {
         Company company = getCompanyByLoginId(loginId);
 
-        return supMaterialRepository.findByCompany(company)
+        List<CompanyMaterialResponse> materials = supMaterialRepository
+                .searchCompanyMaterials(company.getId(), keyword, category)
                 .stream()
                 .map(supMaterial -> {
                     SupStock stock = supStockRepository
@@ -38,7 +45,28 @@ public class CompanyMaterialService {
 
                     return CompanyMaterialResponse.from(supMaterial, stock);
                 })
+                .filter(material -> status == null || status.isBlank() || status.equals(material.getStatus()))
                 .toList();
+
+        long totalMaterialCount = materials.size();
+
+        long normalStockCount = materials.stream()
+                .filter(material -> "정상".equals(material.getStatus()))
+                .count();
+
+        long shortageStockCount = materials.stream()
+                .filter(material -> "부족".equals(material.getStatus()))
+                .count();
+
+        long incomingCount = 0;
+
+        return CompanyMaterialDashboardResponse.builder()
+                .totalMaterialCount(totalMaterialCount)
+                .normalStockCount(normalStockCount)
+                .shortageStockCount(shortageStockCount)
+                .incomingCount(incomingCount)
+                .materials(materials)
+                .build();
     }
 
     // 내 회사 자재 수정
