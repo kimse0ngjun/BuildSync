@@ -36,6 +36,10 @@ public class Orders {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long orderId;
 	
+	@ManyToOne
+	@JoinColumn(name = "site_id")
+	private Site site;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "contact_id")
 	private Contact contact;
