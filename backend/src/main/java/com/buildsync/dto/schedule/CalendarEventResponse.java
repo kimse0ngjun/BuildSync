@@ -9,12 +9,19 @@ import lombok.Getter;
 @Builder
 public class CalendarEventResponse {
 
-	private Long eventId;
-	private String title;
-	private LocalDate startDate;
-	private LocalDate endDate;
-	private String eventType;
-	private String status;
-	private String site;
-	private String supplier;
+    // 공통
+    private Long eventId; // SITES, MATERIALS 
+    private String title;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String status;
+    private String eventType; // SITES, MATERIALS
+
+    // 공사 일정(SITES) 전용
+    private Long siteId;
+    private String siteName;
+
+    // 자재 입고(MATERIALS) 전용
+    private Long supplierId;
+    private String supplierName;
 }
