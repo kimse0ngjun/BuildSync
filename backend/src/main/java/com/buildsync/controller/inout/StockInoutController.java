@@ -31,7 +31,6 @@ public class StockInoutController {
 
 	private final StockInoutService stockInoutService;
 	
-	@PreAuthorize("hasRole('공급업체')")
 	@GetMapping("/dashboard")
 	public ResponseEntity<InOutSumResponse> getInoutList(
 			@RequestParam("companyId") Long companyId,
@@ -52,14 +51,12 @@ public class StockInoutController {
 		return ResponseEntity.ok(data);
 	}
 	
-	@PreAuthorize("hasRole('공급업체')")
 	@GetMapping("/auto-fill")
 	public ResponseEntity<Map<String, Object>> getAutoFill(@RequestParam("orderId") Long orderId) {
 		Map<String, Object>	autoFillData = stockInoutService.getAutoFill(orderId);
 		return ResponseEntity.ok(autoFillData);
 	}
 	
-	@PreAuthorize("hasRole('공급업체')")
 	@PostMapping("/regist")
 	public ResponseEntity<String> registerInout(@RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
@@ -74,7 +71,6 @@ public class StockInoutController {
 		}		
 	}
 	
-	@PreAuthorize("hasRole('공급업체')")
 	@PatchMapping("/update")
 	public ResponseEntity<String> updateInout(@RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
@@ -89,10 +85,9 @@ public class StockInoutController {
 		}
 	}
 	
-	@PreAuthorize("hasRole('공급업체')")
 	@DeleteMapping("/delete")
 	public ResponseEntity<String> deleteInout(
-			@RequestParam("deleteInoutIds") List<Long> deleteInoutIds, 
+			@RequestParam("deleteInoutIds") List<Long> deleteInoutIds,
 			@RequestParam("companyId") Long companyId) {
 		try {
 			stockInoutService.deleteInoutStock(deleteInoutIds, companyId);
@@ -102,7 +97,6 @@ public class StockInoutController {
 		}
 	}
 	
-	@PreAuthorize("hasRole('공급업체')")
 	@GetMapping("/detail")
 	public ResponseEntity<?> detailInout(
 			@RequestParam(value = "orderId", required = false) Long orderId,
