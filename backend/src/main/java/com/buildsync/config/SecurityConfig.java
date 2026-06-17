@@ -39,8 +39,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         .requestMatchers("/api/company/**").permitAll()
-                        .requestMatchers("/api/schedule/**").permitAll()
-                        .requestMatchers("/api/**").permitAll() // 제거해야함
 
                         .anyRequest().authenticated()
                 )
