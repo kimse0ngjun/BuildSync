@@ -8,24 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.buildsync.entity.OrderStatus;
 import com.buildsync.entity.Orders;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Orders, Long> {
-
-	// 발주서 목록
-	@Query("SELECT DISTINCT o FROM Orders o " +
-			"JOIN FETCH o.items " +
-			"WHERE o.company.id = :companyId " +
-			"ORDER BY o.orderDate DESC")
-	List<Orders> findByConstructionOrders(@Param("companyId") Long companyId);
-
-	    
-	@Query("SELECT DISTINCT o FROM Orders o " +
-	        "JOIN FETCH o.items " +
-	        "WHERE o.contact.company.id = :companyId " +
-	        "ORDER BY o.orderDate DESC")
-	List<Orders> findByOrdersToSupplier(@Param("companyId") Long companyId);
 	
 	// 발주서 상세
 	@Query("SELECT o FROM Orders o " +
@@ -33,6 +20,42 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	        "WHERE o.orderId = :orderId")
 	Orders findByOrderDetail(@Param ("orderId") Long orderId);
 	
+	// 건설
+	long countByCompanyId(Long companyId);
+	long countByCompanyIdAndStatus(Long companyId, OrderStatus status);
+	
+	// 공급
+	long countByContact_Company_Id(Long companyId);
+	long countByContact_Company_IdAndStatus(Long companyId, OrderStatus status);
+	
+	// 건설업체 발주 목록 (검색 + 상태 필터)
+	@Query("SELECT DISTINCT o FROM Orders o " +
+			"JOIN FETCH o.items i " +
+			"JOIN FETCH i.material m " +
+			"JOIN o.contact con " +
+			"JOIN con.company supplier " +
+			"WHERE o.company.id = :companyId " +
+				"AND (:status IS NULL OR o.status = :status) " +
+				"AND (:keyword IS NULL OR (o.memo LIKE %:keyword% OR supplier.companyName LIKE %:keyword% OR m.materialName LIKE %:keyword%)) " +
+			"ORDER BY o.orderId DESC")
+	    List<Orders> searchOrdersForConstruction(
+	    		@Param("companyId") Long companyId, 
+	    		@Param("status") OrderStatus status, 
+	    		@Param("keyword") String keyword);
+
+	// 공급업체 발주 목록 (검색 + 상태 필터)
+	@Query("SELECT DISTINCT o FROM Orders o " +
+			"JOIN FETCH o.items i " +
+			"JOIN FETCH i.material m " +
+	    		"JOIN o.company construction " +
+	    		"WHERE o.contact.company.id = :companyId " +
+	    			"AND (:status IS NULL OR o.status = :status) " +
+	    			"AND (:keyword IS NULL OR (o.memo LIKE %:keyword% OR construction.companyName LIKE %:keyword% OR m.materialName LIKE %:keyword%)) " +
+	    		"ORDER BY o.orderId DESC")
+	    List<Orders> searchOrdersForSupplier(
+	    		@Param("companyId") Long companyId,
+	    		@Param("status") OrderStatus status,
+	    		@Param("keyword") String keyword);
 	
 	// 자재 조회
 	@Query("""
@@ -40,7 +63,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 		    JOIN FETCH o.company c
 		    WHERE o.company.id = :companyId
 		      AND o.expectedDeliveryDate BETWEEN :firstDay AND :lastDay
-		      AND o.status <> 'CANCELLED'
+		      AND o.status <> 'CANCELED'
 		""")
         List<Orders> findDeliveriesByCompanyAndMonth(
             @Param("companyId") Long companyId,

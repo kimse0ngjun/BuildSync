@@ -1,6 +1,6 @@
 package com.buildsync.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.sql.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,29 +21,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "order_items")
-public class OrderItems {
+@Table(name = "notifications")
+public class Notification {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long orderItemId;
+	@Column(name = "notice_id")
+	private Long id;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "order_id")
-	@JsonBackReference
-	private Orders orders;
+	@JoinColumn(name = "receiver_id")
+	private Company company;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "material_id")
-	private Material material;
+	@Column(nullable = false)
+	private String type;
 	
-	@Column(nullable = true)
-	private int unitPrice;
+	@Column(nullable = false)
+	private String title;
 	
-	@Column(nullable = true)
-	private int amount;
+	@Column(nullable = false)
+	private String content;
 	
 	@Column(nullable = true)
-	private int quantity;
+	private Long relatedId;
 	
+	@Column(nullable = true)
+	private int isRead;
+	
+	@Column(nullable = true)
+	private Date createdAt;
 }

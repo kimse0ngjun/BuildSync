@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,10 +42,11 @@ public class StockInoutController {
 			@RequestParam(value = "startDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@RequestParam(value = "endDate", required = false)
-			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+			@RequestParam(value = "keyword", required = false) String keyword) {
 		
 		InOutSumResponse data = stockInoutService.getInoutDashboardData(
-				companyId, type, materialId, siteId, orderId, startDate, endDate);
+				companyId, type, materialId, siteId, orderId, startDate, endDate, keyword);
 		
 		return ResponseEntity.ok(data);
 	}
@@ -85,7 +87,7 @@ public class StockInoutController {
 	
 	@DeleteMapping("/delete")
 	public ResponseEntity<String> deleteInout(
-			@RequestParam("deleteInoutIds") List<Long> deleteInoutIds, 
+			@RequestParam("deleteInoutIds") List<Long> deleteInoutIds,
 			@RequestParam("companyId") Long companyId) {
 		try {
 			stockInoutService.deleteInoutStock(deleteInoutIds, companyId);

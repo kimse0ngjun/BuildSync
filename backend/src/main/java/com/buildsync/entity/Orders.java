@@ -4,7 +4,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -59,12 +59,15 @@ public class Orders {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
+	@Builder.Default
 	private OrderStatus status = OrderStatus.PENDING;
-	
+
 	@Column(columnDefinition = "TEXT")
 	private String memo;
 	
 	@OneToMany(mappedBy = "orders", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JsonManagedReference
+	@Builder.Default
     private List<OrderItems> items = new ArrayList<>();
 	
 	public void modifyOrderDetails(String memo, List<OrderItems> newItems) {
@@ -85,5 +88,12 @@ public class Orders {
 	
 	public void changeStatus(OrderStatus status) {
 		this.status = status;
+	}
+	
+	public Long getConstructionCompanyId() {
+		if (this.company != null) {
+			return this.company.getId();
+		}
+		return null;
 	}
 }

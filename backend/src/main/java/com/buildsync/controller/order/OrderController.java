@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.buildsync.dto.order.OrderRequest;
+import com.buildsync.dto.order.OrderStatusResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
+import com.buildsync.entity.OrderStatus;
 import com.buildsync.entity.Orders;
 import com.buildsync.entity.SupMaterial;
 import com.buildsync.service.order.OrderService;
@@ -65,17 +67,24 @@ public class OrderController {
 		return ResponseEntity.ok(material);
 	}
 	
-	// 건설&공급업체 발주서 목록 화면
-	@GetMapping("/list")
-	public ResponseEntity<List<Orders>> getOrderList(
+	// 건설업체 발주 목록 (검색 + 상태 필터)
+	@GetMapping("/construction")
+	public ResponseEntity<List<Orders>> getOrderListForConstruction(
 			@RequestParam("companyId") Long companyId,
-			@RequestParam("companyType") String companyType) {
-		if ("건설업체".equals(companyType)) {
-			return ResponseEntity.ok(orderService.getOrderListForConstruction(companyId));
-		} else if ("공급업체".equals(companyType)) {
-			return ResponseEntity.ok(orderService.getOrderListForSupplier(companyId));
-		}
-		return ResponseEntity.badRequest().body(java.util.Collections.emptyList());
+			@RequestParam(value = "status", required = false) OrderStatus status,
+			@RequestParam(value = "keyword", required = false) String keyword) {
+		List<Orders> list = orderService.getOrderListForConstruction(companyId, status, keyword);
+			return ResponseEntity.ok(list);
+	}
+
+	// 공급업체 발주 목록 (검색 + 상태 필터)
+	@GetMapping("/supplier")
+	public ResponseEntity<List<Orders>> getOrderListForSupplier(
+			@RequestParam("companyId") Long companyId,
+			@RequestParam(value = "status", required = false) OrderStatus status,
+			@RequestParam(value = "keyword", required = false) String keyword) {
+		List<Orders> list = orderService.getOrderListForSupplier(companyId, status, keyword);
+		return ResponseEntity.ok(list);
 	}
 	
 	// 발주서 상세 화면
@@ -101,5 +110,19 @@ public class OrderController {
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
+	}
+	
+	// 건설업체 상단 건수 카드
+	@GetMapping("/counts/construction")
+	public ResponseEntity<OrderStatusResponse> getConstructionCounts(@RequestParam("companyId") Long companyId) {
+		OrderStatusResponse counts = orderService.getStatusCountsForConstruction(companyId);
+		return ResponseEntity.ok(counts);
+	}
+	
+	// 공급업체 상단 건수 카드
+	@GetMapping("/counts/supplier")
+	public ResponseEntity<OrderStatusResponse> getSupplierCounts(@RequestParam("companyId") Long companyId) {
+		OrderStatusResponse counts = orderService.getStatusCountsForSupplier(companyId);
+		return ResponseEntity.ok(counts);
 	}
 }

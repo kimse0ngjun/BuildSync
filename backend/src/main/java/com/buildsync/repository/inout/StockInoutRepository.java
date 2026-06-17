@@ -12,19 +12,19 @@ import com.buildsync.entity.StockInout;
 @Repository
 public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 
-	// 특정 회사 전체 입출고 건수
+	// 공급업체 전체 입출고 건수
 	@Query("SELECT COUNT(s) FROM StockInout s JOIN SupMaterial sm ON s.material.id = sm.material.id " +
-			"WHERE sm.company.id = :companyId")
+			"WHERE sm.company.id = :companyId AND sm.company.companyType = '공급업체'")
 	long totalCountInout(@Param("companyId") Long companyId);
 	
-	// 각 입고, 출고 건수
+	// 공급업체 각 입고, 출고 건수
 	@Query("SELECT COUNT(s) FROM StockInout s JOIN SupMaterial sm ON s.material.id = sm.material.id " +
-			"WHERE sm.company.id = :companyId AND s.type = :type")
+			"WHERE sm.company.id = :companyId AND s.type = :type AND sm.company.companyType = '공급업체'")
 	long countInout(@Param("companyId") Long companyId, @Param("type") String type);
 	
 	// 금일 처리 건수
 	@Query("SELECT COUNT(s) FROM StockInout s JOIN SupMaterial sm ON s.material.id = sm.material.id " +
-			"WHERE sm.company.id = :companyId AND s.processedDate = CURRENT_DATE")
+			"WHERE sm.company.id = :companyId AND s.processedDate = CURRENT_DATE AND sm.company.companyType = '공급업체'")
 	long countInoutToday(@Param("companyId") Long companyId);
 	
 	
@@ -34,13 +34,14 @@ public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 			"JOIN SupMaterial sm ON m.id = sm.material.id " +
 			"LEFT JOIN FETCH s.site si " +
 			"WHERE sm.company.id = :companyId " +
-				"AND (:type IS NULL OR :type = '' OR s.type = :type)" +
+				"AND sm.company.companyType = '공급업체' " +
+				"AND (:type IS NULL OR :type = '' OR s.type = :type) " +
 				"AND (:materialId IS NULL OR m.id = :materialId) " +
 				"AND (:siteId IS NULL OR si.id = :siteId) " +
-				"AND (:orderId IS NULL OR s.orders.id = :orderId) " +
+				"AND (:orderId IS NULL OR s.orders.orderId = :orderId) " +
 				"AND (:startDate IS NULL OR s.processedDate >= :startDate) " +
 				"AND (:endDate IS NULL OR s.processedDate <= :endDate) " +
-			"ORDER BY s.id DESC")
+				"AND (:keyword IS NULL OR m.materialName LIKE %:keyword% OR s.memo LIKE %:keyword%)")
 	List<StockInout> inoutListByFilters(
 			@Param("companyId") Long companyId,
 			@Param("type") String type,
@@ -48,25 +49,29 @@ public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 			@Param("siteId") Long siteId,
 			@Param("orderId") Long orderId,
 			@Param("startDate") LocalDate startDate,
-			@Param("endDate") LocalDate endDate);
+			@Param("endDate") LocalDate endDate,
+			@Param("keyword") String keyword);
 	
 	// 하단 입출고 요약
 	@Query("SELECT COALESCE(SUM(s.quantity), 0) FROM StockInout s " +
 			"JOIN SupMaterial sm ON s.material.id = sm.material.id " +
 			"WHERE sm.company.id = :companyId " +
+				"AND sm.company.companyType = '공급업체' " +
 				"AND (:type IS NULL OR :type = '' OR s.type = :type) " +
 				"AND (:materialId IS NULL OR s.material.id = :materialId) " +
 				"AND (:siteId IS NULL OR s.site.id = :siteId) " +
-				"AND (:orderId IS NULL OR s.orders.id = :orderId) " +
+				"AND (:orderId IS NULL OR s.orders.orderId = :orderId) " +
 				"AND (:startDate IS NULL OR s.processedDate >= :startDate) " +
-				"AND (:endDate IS NULL OR s.processedDate <= :endDate)")
+				"AND (:endDate IS NULL OR s.processedDate <= :endDate) " +
+				"AND (:keyword IS NULL OR s.material.materialName LIKE %:keyword% OR s.memo LIKE %:keyword%)")
 	long calculQtyByFilters(@Param("companyId") Long companyId,
 			@Param("type") String type,
 			@Param("materialId") Long materialId,
 			@Param("siteId") Long siteId,
 			@Param("orderId") Long orderId,
 			@Param("startDate") LocalDate startDate,
-			@Param("endDate") LocalDate endDate);
+			@Param("endDate") LocalDate endDate,
+			@Param("keyword") String keyword);
 	
 	// 입고 상세
 	@Query("SELECT si FROM StockInout si WHERE si.orders.orderId = :orderId")
