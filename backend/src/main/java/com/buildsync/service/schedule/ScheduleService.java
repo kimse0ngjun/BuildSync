@@ -126,16 +126,42 @@ public class ScheduleService {
 
     // 삭제
     @Transactional
-    public void deleteSchedule(Long companyId, Long scheduleId) {
+    public void deleteSchedule(
+            Long companyId,
+            Long scheduleId,
+            String type
+    ) {
 
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정입니다."));
+        switch (type.toUpperCase()) {
 
-        if (!schedule.getCompanyId().equals(companyId)) {
-            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+            case "SITES" -> {
+
+                Schedule schedule = scheduleRepository.findById(scheduleId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException("일정을 찾을 수 없습니다."));
+
+                if (!schedule.getCompanyId().equals(companyId)) {
+                    throw new IllegalArgumentException("삭제 권한이 없습니다.");
+                }
+
+                scheduleRepository.delete(schedule);
+            }
+
+            case "MATERIALS" -> {
+
+                Orders order = orderRepository.findById(scheduleId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException("발주 정보를 찾을 수 없습니다."));
+
+                if (!order.getCompany().getId().equals(companyId)) {
+                    throw new IllegalArgumentException("삭제 권한이 없습니다.");
+                }
+
+                orderRepository.delete(order);
+            }
+
+            default -> throw new IllegalArgumentException("지원하지 않는 일정 타입입니다.");
         }
-
-        scheduleRepository.delete(schedule);
     }
 
     // 공사 일정 상태
