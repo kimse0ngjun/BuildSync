@@ -8,7 +8,6 @@ import lombok.Getter;
 public class MonthlyMaterialCostResponse {
 
 	private String month; // 월
-	private Integer inboundQuantity; // 입고 처리된 자재 수량
 	private Integer totalOrderAmount; // 발주 총 금액
 	private Integer totalMaterialCost; // 총 자재 구매 비용
 }

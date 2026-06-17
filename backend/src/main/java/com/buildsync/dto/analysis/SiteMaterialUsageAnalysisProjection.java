@@ -17,4 +17,6 @@ public interface SiteMaterialUsageAnalysisProjection {
     Integer getCurrentStock();
 
     Integer getUnitPrice();
+    
+    String getUnit();
 }

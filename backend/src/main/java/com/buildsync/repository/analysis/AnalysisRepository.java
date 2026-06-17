@@ -84,7 +84,8 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long>{
             s.site_name AS siteName,
 
             m.material_name AS materialName,
-
+            
+            m.unit AS unit,
 
             COALESCE(SUM(
                 CASE
@@ -148,6 +149,7 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long>{
             s.site_id,
             s.site_name,
             m.material_name,
+            m.unit,
             oi.unit_price
 
 

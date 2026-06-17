@@ -4,8 +4,6 @@ public interface MonthlyMaterialCostProjection {
 
 	String getMonth();
 	
-	Integer getInboundQuantity();
-	
 	Integer getTotalOrderAmount();
 	
 	Integer getTotalMaterialCost();

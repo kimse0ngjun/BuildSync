@@ -18,6 +18,7 @@ public class AnalysisService {
 
     private final AnalysisRepository repository;
 
+    // 월별 자재 구매 비용 분석
     public List<MonthlyMaterialCostResponse>
     getMonthlyMaterialCost(Long companyId) {
 
@@ -30,10 +31,6 @@ public class AnalysisService {
                     MonthlyMaterialCostResponse.builder()
 
                     .month(item.getMonth())
-
-                    .inboundQuantity(
-                        item.getInboundQuantity()
-                    )
 
                     .totalOrderAmount(
                         item.getTotalOrderAmount()
@@ -49,8 +46,7 @@ public class AnalysisService {
                 .toList();
     }
 
-
-
+    // 현장별 자재 사용 비용 분석
     public List<SiteMaterialUsageAnalysisResponse>
     getSiteMaterialUsage(Long companyId) {
 
@@ -89,6 +85,10 @@ public class AnalysisService {
                     .unitPrice(
                         item.getUnitPrice()
                     )
+                    
+                    .unit(
+                    	    item.getUnit()
+                    	)
 
                     .build()
 
