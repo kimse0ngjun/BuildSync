@@ -60,16 +60,24 @@ public class ScheduleController {
     }
 
     // 일정 삭제
-    @DeleteMapping("/{scheduleId}")
+    @DeleteMapping("/{eventId}")
     public ResponseEntity<Map<String, String>> deleteSchedule(
             @RequestParam("companyId") Long companyId,
-            @PathVariable("scheduleId") Long scheduleId
+            @RequestParam("type") String type,
+            @PathVariable("eventId") Long eventId
     ) {
 
-        scheduleService.deleteSchedule(companyId, scheduleId);
+        scheduleService.deleteSchedule(
+                companyId,
+                eventId,
+                type
+        );
 
         return ResponseEntity.ok(
-                Map.of("message", "일정이 삭제되었습니다.")
+                Map.of(
+                        "type", type,
+                        "eventId", String.valueOf(eventId),
+                        "message", "일정이 삭제되었습니다.")
         );
     }
 }

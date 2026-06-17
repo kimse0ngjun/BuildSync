@@ -1,5 +1,7 @@
 package com.buildsync.entity;
 
+import java.sql.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,25 +18,40 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "sup_material")
+@Table(name = "stock_inout")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SupMaterial {
-
-    @Id
+public class StockInout {
+	
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sup_material_id")
+    @Column(name = "stock_inout_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
+    @JoinColumn(name = "site_id")
+    private Site site;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "material_id")
     private Material material;
- 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Orders orders;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contact_id")
+    private Contact contact;
+    
+    private String type;
+    
+    private int quantity;
+    
+    private Date processedDate;
+    
+    private String memo;
 }

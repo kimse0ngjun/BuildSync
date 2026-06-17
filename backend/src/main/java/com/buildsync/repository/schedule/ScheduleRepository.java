@@ -2,7 +2,6 @@ package com.buildsync.repository.schedule;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +11,7 @@ import com.buildsync.entity.Schedule;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long>{
 
+	// 공사 조회
 	@Query("""
 		    SELECT s FROM Schedule s
 		    WHERE s.companyId = :companyId

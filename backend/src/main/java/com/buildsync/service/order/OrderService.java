@@ -12,6 +12,7 @@ import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
 import com.buildsync.entity.Material;
 import com.buildsync.entity.OrderItems;
+import com.buildsync.entity.OrderStatus;
 import com.buildsync.entity.Orders;
 import com.buildsync.entity.SupMaterial;
 import com.buildsync.repository.company.CompanyRepository;
@@ -52,7 +53,7 @@ public class OrderService {
 				.orderDate(orderDto.getOrderDate())
 				.expectedDeliveryDate(orderDto.getExpectedDeliveryDate())
 				.totalAmount(orderDto.getTotalAmount())
-				.status("PENDING")
+				.status(OrderStatus.PENDING)
 				.memo(orderDto.getMemo())
 				.build();
 		
@@ -148,12 +149,20 @@ public class OrderService {
 	
 	// 공급업체 발주서 수정
 	@Transactional
-    public void updateStatusBySupplier(Long orderId, String status) {
-		Orders order = orderRepository.findByOrderDetail(orderId);
-		if (order == null) {
-			throw new IllegalArgumentException("해당 발주서가 없습니다.");
-		}
+	public void updateStatusBySupplier(Long orderId, String status) {
+	    Orders order = orderRepository.findByOrderDetail(orderId);
 
-        order.changeStatus(status);
-    }
+	    if (order == null) {
+	        throw new IllegalArgumentException("해당 발주서가 없습니다.");
+	    }
+
+	    OrderStatus orderStatus;
+	    try {
+	        orderStatus = OrderStatus.valueOf(status);
+	    } catch (IllegalArgumentException e) {
+	        throw new IllegalArgumentException("잘못된 상태값입니다: " + status);
+	    }
+
+	    order.changeStatus(orderStatus);
+	}
 }

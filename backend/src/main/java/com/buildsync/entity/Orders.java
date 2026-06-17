@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -53,10 +55,11 @@ public class Orders {
 	private Date expectedDeliveryDate;
 	
 	@Column(nullable = true)
-	private int totalAmount;
+	private Integer totalAmount;
 	
-	@Column(nullable = true, length = 30)
-	private String status;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private OrderStatus status = OrderStatus.PENDING;
 	
 	@Column(columnDefinition = "TEXT")
 	private String memo;
@@ -80,7 +83,7 @@ public class Orders {
         		.sum();
     }
 	
-	public void changeStatus(String status) {
+	public void changeStatus(OrderStatus status) {
 		this.status = status;
 	}
 }
