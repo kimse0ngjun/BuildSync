@@ -24,7 +24,6 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long> {
     """)
     List<MonthlyOrderCostResponse> findMonthlyCost(@Param("companyId") Long companyId);
 
-
     // 현장별 발주 비용 - 총액
     @Query("""
         SELECT 
