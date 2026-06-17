@@ -1,6 +1,6 @@
 package com.buildsync.dto.company;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +21,5 @@ public class AccountResponse { // 거래처 등록
     private String homepageUrl;
 	private String phone;
     private String address;
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 }

@@ -51,4 +51,46 @@ public class MailService {
 
         mailSender.send(message);
     }
+    
+    public void sendApprovalMail(String to, String companyName) throws MessagingException {
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(to);
+        helper.setSubject("[BuildSync] 가입 승인이 완료되었습니다.");
+
+        String html = """
+            <div style="font-family: Arial;">
+                <h2>BuildSync 가입 승인 완료</h2>
+                <p>안녕하세요, %s님.</p>
+                <p>BuildSync 가입 요청이 승인되었습니다.</p>
+                <p>이제 로그인 후 서비스를 이용하실 수 있습니다.</p>
+            </div>
+        """.formatted(companyName);
+
+        helper.setText(html, true);
+        mailSender.send(message);
+    }
+
+    public void sendRejectMail(String to, String companyName) throws MessagingException {
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(to);
+        helper.setSubject("[BuildSync] 가입 요청이 반려되었습니다.");
+
+        String html = """
+            <div style="font-family: Arial;">
+                <h2>BuildSync 가입 요청 반려</h2>
+                <p>안녕하세요, %s님.</p>
+                <p>BuildSync 가입 요청이 반려되었습니다.</p>
+                <p>입력하신 업체 정보를 다시 확인해주세요.</p>
+            </div>
+        """.formatted(companyName);
+
+        helper.setText(html, true);
+        mailSender.send(message);
+    }
 }

@@ -1,6 +1,6 @@
 package com.buildsync.service.auth;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,8 +37,20 @@ public class AuthService {
 	        throw new RuntimeException("비밀번호가 일치하지 않습니다.");
 	    }
 	    
+	    if (company.getStatus() == CompanyStatus.PENDING) {
+	        throw new RuntimeException("관리자 승인 대기 중입니다.");
+	    }
+
+	    if (company.getStatus() == CompanyStatus.REJECTED) {
+	        throw new RuntimeException("가입 요청이 반려되었습니다.");
+	    }
+
 	    if (company.getStatus() == CompanyStatus.INACTIVE) {
 	        throw new RuntimeException("비활성 계정입니다.");
+	    }
+
+	    if (company.getStatus() != CompanyStatus.ACTIVE) {
+	        throw new RuntimeException("로그인할 수 없는 계정 상태입니다.");
 	    }
 
 	    String token = jwtUtil.generateToken(company.getLoginId());
@@ -76,9 +88,9 @@ public class AuthService {
 	        company.setHomepageUrl(req.getHomepageUrl());
 	        company.setAddress(req.getAddress());
 	        company.setEmail(req.getEmail());
-	        company.setCreatedAt(LocalDate.now());
+	        company.setCreatedAt(LocalDateTime.now());
 
-	        company.setStatus(CompanyStatus.ACTIVE);
+	        company.setStatus(CompanyStatus.PENDING);
 	        
 	        companyRepository.save(company);
 	    }
