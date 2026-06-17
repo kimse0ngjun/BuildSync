@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +18,7 @@ import com.buildsync.dto.order.OrderRequest;
 import com.buildsync.dto.order.OrderStatusResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
+import com.buildsync.entity.OrderStatus;
 import com.buildsync.entity.Orders;
 import com.buildsync.entity.SupMaterial;
 import com.buildsync.service.order.OrderService;
@@ -71,7 +71,7 @@ public class OrderController {
 	@GetMapping("/construction")
 	public ResponseEntity<List<Orders>> getOrderListForConstruction(
 			@RequestParam("companyId") Long companyId,
-			@RequestParam(value = "status", required = false) String status,
+			@RequestParam(value = "status", required = false) OrderStatus status,
 			@RequestParam(value = "keyword", required = false) String keyword) {
 		List<Orders> list = orderService.getOrderListForConstruction(companyId, status, keyword);
 			return ResponseEntity.ok(list);
@@ -81,7 +81,7 @@ public class OrderController {
 	@GetMapping("/supplier")
 	public ResponseEntity<List<Orders>> getOrderListForSupplier(
 			@RequestParam("companyId") Long companyId,
-			@RequestParam(value = "status", required = false) String status,
+			@RequestParam(value = "status", required = false) OrderStatus status,
 			@RequestParam(value = "keyword", required = false) String keyword) {
 		List<Orders> list = orderService.getOrderListForSupplier(companyId, status, keyword);
 		return ResponseEntity.ok(list);

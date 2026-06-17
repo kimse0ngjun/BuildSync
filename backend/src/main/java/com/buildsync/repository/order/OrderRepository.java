@@ -1,5 +1,6 @@
 package com.buildsync.repository.order;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.buildsync.entity.OrderStatus;
 import com.buildsync.entity.Orders;
 
 @Repository
@@ -20,11 +22,11 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	
 	// 건설
 	long countByCompanyId(Long companyId);
-	long countByCompanyIdAndStatus(Long companyId, String status);
+	long countByCompanyIdAndStatus(Long companyId, OrderStatus status);
 	
 	// 공급
 	long countByContact_Company_Id(Long companyId);
-	long countByContact_Company_IdAndStatus(Long companyId, String status);
+	long countByContact_Company_IdAndStatus(Long companyId, OrderStatus status);
 	
 	// 건설업체 발주 목록 (검색 + 상태 필터)
 	@Query("SELECT DISTINCT o FROM Orders o " +
@@ -38,7 +40,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 			"ORDER BY o.orderId DESC")
 	    List<Orders> searchOrdersForConstruction(
 	    		@Param("companyId") Long companyId, 
-	    		@Param("status") String status, 
+	    		@Param("status") OrderStatus status, 
 	    		@Param("keyword") String keyword);
 
 	// 공급업체 발주 목록 (검색 + 상태 필터)
@@ -52,6 +54,20 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	    		"ORDER BY o.orderId DESC")
 	    List<Orders> searchOrdersForSupplier(
 	    		@Param("companyId") Long companyId,
-	    		@Param("status") String status,
+	    		@Param("status") OrderStatus status,
 	    		@Param("keyword") String keyword);
+	
+	// 자재 조회
+	@Query("""
+		    SELECT o FROM Orders o
+		    JOIN FETCH o.company c
+		    WHERE o.company.id = :companyId
+		      AND o.expectedDeliveryDate BETWEEN :firstDay AND :lastDay
+		      AND o.status <> 'CANCELED'
+		""")
+        List<Orders> findDeliveriesByCompanyAndMonth(
+            @Param("companyId") Long companyId,
+            @Param("firstDay")  LocalDate firstDay,
+            @Param("lastDay")   LocalDate lastDay
+        );
 }

@@ -1,13 +1,12 @@
 package com.buildsync.controller.material;
 
+import com.buildsync.dto.material.CompanyMaterialDashboardResponse;
 import com.buildsync.dto.material.CompanyMaterialResponse;
 import com.buildsync.dto.material.MaterialRequest;
 import com.buildsync.service.material.CompanyMaterialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/company-materials")
@@ -16,13 +15,16 @@ public class CompanyMaterialController {
 
     private final CompanyMaterialService companyMaterialService;
 
-    // 내 회사 자재 목록 조회
+    // 내 회사 자재 목록 조회 + 통계 카드 + 검색/필터
     @GetMapping
-    public List<CompanyMaterialResponse> getCompanyMaterials(
-            Authentication authentication
+    public CompanyMaterialDashboardResponse getCompanyMaterials(
+            Authentication authentication,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "status", required = false) String status
     ) {
         String loginId = authentication.getName();
-        return companyMaterialService.getCompanyMaterials(loginId);
+        return companyMaterialService.getCompanyMaterials(loginId, keyword, category, status);
     }
 
     // 내 회사 자재 수정

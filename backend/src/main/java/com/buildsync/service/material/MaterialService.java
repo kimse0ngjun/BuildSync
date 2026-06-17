@@ -1,6 +1,7 @@
 package com.buildsync.service.material;
 
 import com.buildsync.dto.material.MaterialRequest;
+import com.buildsync.dto.material.MaterialDashboardResponse;
 import com.buildsync.dto.material.MaterialResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Material;
@@ -66,10 +67,10 @@ public class MaterialService {
         return MaterialResponse.from(savedMaterial, savedStock);
     }
 
-    // 전체 자재 목록 조회
-    public List<MaterialResponse> getMaterials() {
+    // 전체 자재 목록 조회 + 통계 카드 + 검색/필터
+    public MaterialDashboardResponse getMaterials(String keyword, String category, String status) {
 
-        return supStockRepository.findAll()
+        List<MaterialResponse> materials = supStockRepository.searchStocks(keyword, category)
                 .stream()
                 .map(stock ->
                         MaterialResponse.from(
@@ -77,7 +78,28 @@ public class MaterialService {
                                 stock
                         )
                 )
+                .filter(material -> status == null || status.isBlank() || status.equals(material.getStatus()))
                 .toList();
+
+        long totalMaterialCount = materials.size();
+
+        long normalStockCount = materials.stream()
+                .filter(material -> "정상".equals(material.getStatus()))
+                .count();
+
+        long shortageStockCount = materials.stream()
+                .filter(material -> "부족".equals(material.getStatus()))
+                .count();
+
+        long incomingCount = 0;
+
+        return MaterialDashboardResponse.builder()
+                .totalMaterialCount(totalMaterialCount)
+                .normalStockCount(normalStockCount)
+                .shortageStockCount(shortageStockCount)
+                .incomingCount(incomingCount)
+                .materials(materials)
+                .build();
     }
 
     // 자재 상세 조회

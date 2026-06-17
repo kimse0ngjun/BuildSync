@@ -1,13 +1,12 @@
 package com.buildsync.controller.material;
 
+import com.buildsync.dto.material.MaterialDashboardResponse;
 import com.buildsync.dto.material.MaterialRequest;
 import com.buildsync.dto.material.MaterialResponse;
 import com.buildsync.service.material.MaterialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/materials")
@@ -26,10 +25,14 @@ public class MaterialController {
         return materialService.createMaterial(loginId, request);
     }
 
-    // 전체 자재 목록 조회
+    // 전체 자재 목록 조회 + 통계 카드 + 검색/필터
     @GetMapping
-    public List<MaterialResponse> getMaterials() {
-        return materialService.getMaterials();
+    public MaterialDashboardResponse getMaterials(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "status", required = false) String status
+    ) {
+        return materialService.getMaterials(keyword, category, status);
     }
 
     // 자재 상세 조회

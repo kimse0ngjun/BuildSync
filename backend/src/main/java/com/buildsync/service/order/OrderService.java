@@ -13,6 +13,7 @@ import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
 import com.buildsync.entity.Material;
 import com.buildsync.entity.OrderItems;
+import com.buildsync.entity.OrderStatus;
 import com.buildsync.entity.Orders;
 import com.buildsync.entity.SupMaterial;
 import com.buildsync.repository.company.CompanyRepository;
@@ -56,7 +57,7 @@ public class OrderService {
 				.orderDate(orderDto.getOrderDate())
 				.expectedDeliveryDate(orderDto.getExpectedDeliveryDate())
 				.totalAmount(orderDto.getTotalAmount())
-				.status("PENDING") // enum 1 처리 🚨
+				.status(OrderStatus.PENDING)
 				.memo(orderDto.getMemo())
 				.build();
 		
@@ -113,8 +114,8 @@ public class OrderService {
 	
 	// 건설업체 화면 발주 목록 (검색 + 상태 필터)
 	@Transactional(readOnly = true)
-	public List<Orders> getOrderListForConstruction(Long companyId, String status, String keyword) {
-		String searchStatus = (status != null && !status.trim().isEmpty()) ? status : null;
+	public List<Orders> getOrderListForConstruction(Long companyId, OrderStatus status, String keyword) {
+		OrderStatus searchStatus = (status != null) ? status : null;
 		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
 		
 		return orderRepository.searchOrdersForConstruction(companyId, searchStatus, searchKeyword);
@@ -122,8 +123,8 @@ public class OrderService {
 	
 	// 공급업체 화면 발주 목록 (검색 + 상태 필터)
 	@Transactional(readOnly = true)
-	public List<Orders> getOrderListForSupplier(Long companyId, String status, String keyword) {
-		String searchStatus = (status != null && !status.trim().isEmpty()) ? status : null;
+	public List<Orders> getOrderListForSupplier(Long companyId, OrderStatus status, String keyword) {
+		OrderStatus searchStatus = (status != null) ? status : null;
 		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
 		
 		return orderRepository.searchOrdersForSupplier(companyId, searchStatus, searchKeyword);
@@ -135,24 +136,24 @@ public class OrderService {
 		return orderRepository.findByOrderDetail(orderId);
 	}
 	
-	// 건설업체 화면 상단 상태 카드 (enum 처리 4)
+	// 건설업체 화면 상단 상태 카드
 	public OrderStatusResponse getStatusCountsForConstruction(Long companyId) {
 		long total = orderRepository.countByCompanyId(companyId);
-		long pending = orderRepository.countByCompanyIdAndStatus(companyId, "PENDING");
-		long accepted = orderRepository.countByCompanyIdAndStatus(companyId, "ACCEPTED");
-		long end = orderRepository.countByCompanyIdAndStatus(companyId, "END");
-		long canceled = orderRepository.countByCompanyIdAndStatus(companyId, "CANCELED");
+		long pending = orderRepository.countByCompanyIdAndStatus(companyId, OrderStatus.PENDING);
+		long accepted = orderRepository.countByCompanyIdAndStatus(companyId, OrderStatus.ACCEPTED);
+		long end = orderRepository.countByCompanyIdAndStatus(companyId, OrderStatus.END);
+		long canceled = orderRepository.countByCompanyIdAndStatus(companyId, OrderStatus.CANCELED);
 		
 		return new OrderStatusResponse(total, pending, accepted, end, canceled);
 	}
 	
-	// 공급업체 화면 상단 상태 카드 (enum 처리 4)
+	// 공급업체 화면 상단 상태 카드
 	public OrderStatusResponse getStatusCountsForSupplier(Long companyId) {
 		long total = orderRepository.countByContact_Company_Id(companyId);
-		long pending = orderRepository.countByContact_Company_IdAndStatus(companyId, "PENDING");
-		long accepted = orderRepository.countByContact_Company_IdAndStatus(companyId, "ACCEPTED");
-		long end = orderRepository.countByContact_Company_IdAndStatus(companyId, "END");
-		long canceled = orderRepository.countByContact_Company_IdAndStatus(companyId, "CANCELED");
+		long pending = orderRepository.countByContact_Company_IdAndStatus(companyId, OrderStatus.PENDING);
+		long accepted = orderRepository.countByContact_Company_IdAndStatus(companyId, OrderStatus.ACCEPTED);
+		long end = orderRepository.countByContact_Company_IdAndStatus(companyId, OrderStatus.END);
+		long canceled = orderRepository.countByContact_Company_IdAndStatus(companyId, OrderStatus.CANCELED);
 		
 		return new OrderStatusResponse(total, pending, accepted, end, canceled);
 	}
@@ -165,14 +166,12 @@ public class OrderService {
 			throw new IllegalArgumentException("해당 발주서가 없습니다.");
 		}
 
-        // enum 처리 1 🚨
-        if (!"PENDING".equals(order.getStatus())) {
+        if (order.getStatus() != OrderStatus.PENDING) {
             throw new IllegalStateException("대기 중인 발주서만 수정할 수 있습니다.");
         }
         
-        // enum 처리 2 🚨
-        if ("CANCELED".equals(dto.getOrders().getStatus())) {
-			order.changeStatus("CANCELED");
+        if (dto.getOrders() != null && "CANCELED".equals(dto.getOrders().getStatus())) {
+			order.changeStatus(OrderStatus.CANCELED);
 			
 			// 공급업체가 받을 발주서 취소 알림
 			notificationService.sendNotification(
@@ -214,19 +213,28 @@ public class OrderService {
 	
 	// 공급업체 발주서 수정
 	@Transactional
-    public void updateStatusBySupplier(Long orderId, String status) {
-		Orders order = orderRepository.findByOrderDetail(orderId);
-		if (order == null) {
-			throw new IllegalArgumentException("해당 발주서가 없습니다.");
-		}
+	public void updateStatusBySupplier(Long orderId, String status) {
+	    Orders order = orderRepository.findByOrderDetail(orderId);
 
-        order.changeStatus(status);
+	    if (order == null) {
+	        throw new IllegalArgumentException("해당 발주서가 없습니다.");
+	    }
+	    
+	    OrderStatus orderStatus;
+	    
+	    try {
+	        orderStatus = OrderStatus.valueOf(status.toUpperCase());
+	    } catch (IllegalArgumentException e) {
+	    	throw new IllegalArgumentException("잘못된 상태값입니다: " + status);
+	    }
+	    
+        order.changeStatus(orderStatus);
         
-        // 공급업체 발주 상태 변경 enum 처리 3 🚨
+        // 공급업체 발주 상태 변경
         Long constructionCompanyId = order.getConstructionCompanyId();
         
         // 건설업체가 받을 발주 수락 알림
-        if ("ACCEPTED".equals(status)) {
+        if (orderStatus == OrderStatus.ACCEPTED) {
 			notificationService.sendNotification(
 					constructionCompanyId,
 					"ORDER_APPROVED",
@@ -235,7 +243,7 @@ public class OrderService {
 					orderId
 		);
 		// 건설업체가 받을 발주 거절 알림
-		} else if ("CANCELED".equals(status)) {
+		} else if (orderStatus == OrderStatus.CANCELED) {
 			notificationService.sendNotification(
 					constructionCompanyId,
 					"ORDER_REJECTED",
@@ -244,14 +252,14 @@ public class OrderService {
 					orderId
 		);
 		// 건설업체가 받을 발주 완료 알림
-		} else if ("END".equals(status)) {
+		} else if (orderStatus == OrderStatus.END) {
 			notificationService.sendNotification(
 					constructionCompanyId,
 					"DELIVERY_START",
 					"자재 배송 완료 (출발)",
 					"발주하신 모든 자재의 출고 및 배송 준비가 완료되었습니다. 현장으로 출발합니다.",
 					orderId
-		);
+			);
 		}
-    }
+	}
 }

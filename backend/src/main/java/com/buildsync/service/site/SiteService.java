@@ -1,6 +1,7 @@
 package com.buildsync.service.site;
 
 import com.buildsync.dto.site.SiteRequest;
+import com.buildsync.dto.site.SiteDashboardResponse;
 import com.buildsync.dto.site.SiteResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Site;
@@ -39,15 +40,42 @@ public class SiteService {
         return SiteResponse.from(savedSite);
     }
 
-    // 공사 현장 목록 조회
-    public List<SiteResponse> getSites(String loginId) {
-
+    // 공사 현장 목록 조회 + 통계 카드 + 검색/필터
+    public SiteDashboardResponse getSites(
+            String loginId,
+            String keyword,
+            String constructionType,
+            String status
+    ) {
         Company company = getCompanyByLoginId(loginId);
 
-        return siteRepository.findByCompany(company)
+        List<SiteResponse> sites = siteRepository
+                .searchSites(company, keyword, constructionType, status)
                 .stream()
                 .map(SiteResponse::from)
                 .toList();
+
+        long totalSiteCount = sites.size();
+
+        long progressCount = sites.stream()
+                .filter(site -> "진행중".equals(site.getStatus()))
+                .count();
+
+        long plannedCount = sites.stream()
+                .filter(site -> "예정".equals(site.getStatus()))
+                .count();
+
+        long completedCount = sites.stream()
+                .filter(site -> "완료".equals(site.getStatus()))
+                .count();
+
+        return SiteDashboardResponse.builder()
+                .totalSiteCount(totalSiteCount)
+                .progressCount(progressCount)
+                .plannedCount(plannedCount)
+                .completedCount(completedCount)
+                .sites(sites)
+                .build();
     }
 
     // 공사 현장 수정

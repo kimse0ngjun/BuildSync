@@ -148,7 +148,7 @@ public class StockInoutService {
 		}
 	}
 	
-	// 입출고 수정 + 자재 변동 처리 (yet)
+	// 입출고 수정 + 자재 변동 처리
 	@Transactional
 	public void updateInoutStock(InOutRegRequest req) {
 		Site site = req.getSiteId() != null ? siteRepository.findById(req.getSiteId()).orElse(null) : null;

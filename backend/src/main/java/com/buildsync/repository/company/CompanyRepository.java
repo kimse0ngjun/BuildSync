@@ -12,6 +12,7 @@ import com.buildsync.entity.Company;
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 	
+	// Auth
 	Optional<Company> findByLoginId(String loginId);
 	boolean existsByLoginId(String loginId);
 	Optional<Company> findByEmail(String email);

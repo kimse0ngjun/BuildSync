@@ -88,4 +88,25 @@ public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 			@Param("siteId") Long siteId,
 			@Param("contactId") Long contactId,
 			@Param("type") String type);
+	
+	// 현장별 자재 사용 내역 조회
+	@Query("SELECT s FROM StockInout s " +
+	        "JOIN FETCH s.site si " +
+	        "JOIN FETCH s.material m " +
+	        "LEFT JOIN FETCH s.contact c " +
+	        "WHERE si.company.loginId = :loginId " +
+	        "AND s.type = '출고' " +
+	        "AND (:siteId IS NULL OR si.id = :siteId) " +
+	        "AND (:materialId IS NULL OR m.id = :materialId) " +
+	        "AND (:keyword IS NULL OR :keyword = '' " +
+	        "OR si.siteName LIKE CONCAT('%', :keyword, '%') " +
+	        "OR m.materialName LIKE CONCAT('%', :keyword, '%') " +
+	        "OR c.contactName LIKE CONCAT('%', :keyword, '%')) " +
+	        "ORDER BY s.processedDate DESC, s.id DESC")
+	List<StockInout> findSiteMaterialUsages(
+	        @Param("loginId") String loginId,
+	        @Param("siteId") Long siteId,
+	        @Param("materialId") Long materialId,
+	        @Param("keyword") String keyword
+	);
 }
