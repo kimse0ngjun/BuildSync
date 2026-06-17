@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import com.buildsync.dto.company.CompanyProjection;
 import com.buildsync.entity.Company;
-import com.buildsync.entity.CompanyType;
 
 
 @Repository
