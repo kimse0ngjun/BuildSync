@@ -36,8 +36,9 @@ public class Company {
     @Column(nullable = false)
 	private String password;
     
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String companyType;
+    private CompanyType companyType;
 
     @Column(nullable = false)
     private String companyName;
