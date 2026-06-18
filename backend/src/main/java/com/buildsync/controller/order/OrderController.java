@@ -2,6 +2,8 @@ package com.buildsync.controller.order;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.buildsync.dto.order.OrderRequest;
 import com.buildsync.dto.order.OrderStatusResponse;
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
 import com.buildsync.entity.OrderStatus;
@@ -67,23 +70,25 @@ public class OrderController {
 		return ResponseEntity.ok(material);
 	}
 	
-	// 건설업체 발주 목록 (검색 + 상태 필터)
+	// 건설업체 발주 목록 (검색 + 상태 필터 + 페이징)
 	@GetMapping("/construction")
-	public ResponseEntity<List<Orders>> getOrderListForConstruction(
+	public ResponseEntity<PageResponse<Orders>> getOrderListForConstruction(
 			@RequestParam("companyId") Long companyId,
 			@RequestParam(value = "status", required = false) OrderStatus status,
-			@RequestParam(value = "keyword", required = false) String keyword) {
-		List<Orders> list = orderService.getOrderListForConstruction(companyId, status, keyword);
+			@RequestParam(value = "keyword", required = false) String keyword,
+			@PageableDefault(page = 0, size = 10) Pageable pageable) {
+		PageResponse<Orders> list = orderService.getOrderListForConstruction(companyId, status, keyword, pageable);
 			return ResponseEntity.ok(list);
 	}
 
-	// 공급업체 발주 목록 (검색 + 상태 필터)
+	// 공급업체 발주 목록 (검색 + 상태 필터 + 페이징)
 	@GetMapping("/supplier")
-	public ResponseEntity<List<Orders>> getOrderListForSupplier(
+	public ResponseEntity<PageResponse<Orders>> getOrderListForSupplier(
 			@RequestParam("companyId") Long companyId,
 			@RequestParam(value = "status", required = false) OrderStatus status,
-			@RequestParam(value = "keyword", required = false) String keyword) {
-		List<Orders> list = orderService.getOrderListForSupplier(companyId, status, keyword);
+			@RequestParam(value = "keyword", required = false) String keyword,
+			@PageableDefault(page = 0, size = 10) Pageable pageable) {
+		PageResponse<Orders> list = orderService.getOrderListForSupplier(companyId, status, keyword, pageable);
 		return ResponseEntity.ok(list);
 	}
 	

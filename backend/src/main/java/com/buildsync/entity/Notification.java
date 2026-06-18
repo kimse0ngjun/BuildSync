@@ -1,6 +1,7 @@
 package com.buildsync.entity;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,5 +51,10 @@ public class Notification {
 	private int isRead;
 	
 	@Column(nullable = true)
-	private Date createdAt;
+	private LocalDateTime createdAt;
+	
+	@PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

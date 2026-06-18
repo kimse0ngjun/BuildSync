@@ -2,8 +2,6 @@ package com.buildsync.dto.inout;
 
 import java.util.List;
 
-import com.buildsync.entity.OrderItems;
-
 import lombok.Data;
 
 @Data

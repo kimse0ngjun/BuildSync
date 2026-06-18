@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,12 +14,14 @@ import com.buildsync.dto.inout.InOutRegRequest;
 import com.buildsync.dto.inout.InOutResponse;
 import com.buildsync.dto.inout.InOutSumResponse;
 import com.buildsync.dto.inout.StockInfoResponse;
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.Contact;
 import com.buildsync.entity.Material;
 import com.buildsync.entity.Orders;
 import com.buildsync.entity.Site;
 import com.buildsync.entity.StockInout;
 import com.buildsync.entity.SupStock;
+import com.buildsync.paging.PagingUtil;
 import com.buildsync.repository.company.ContactRepository;
 import com.buildsync.repository.inout.StockInoutRepository;
 import com.buildsync.repository.material.MaterialRepository;
@@ -42,7 +45,7 @@ public class StockInoutService {
 	@Transactional(readOnly = true)
 	public InOutSumResponse getInoutDashboardData(
 			Long companyId, String type, Long materialId, Long siteId, Long orderId,
-			LocalDate startDate, LocalDate endDate, String keyword) {
+			LocalDate startDate, LocalDate endDate, String keyword, Pageable pageable) {
 		
 		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
 		
@@ -52,7 +55,7 @@ public class StockInoutService {
 		long countOut = stockInoutRepository.countInout(companyId, "출고"); 
 		long countToday = stockInoutRepository.countInoutToday(companyId); 
 		
-		List<StockInout> filteredList = stockInoutRepository.inoutListByFilters(
+		List<StockInout> filteredTotalList = stockInoutRepository.inoutListByFilters(
 				companyId, type, materialId, siteId, orderId, startDate, endDate, searchKeyword);
 		
 		long totalInQty = stockInoutRepository.calculQtyByFilters(
@@ -60,7 +63,10 @@ public class StockInoutService {
 		long totalOutQty = stockInoutRepository.calculQtyByFilters(
 				companyId, "출고", materialId, siteId, orderId, startDate, endDate, searchKeyword);
 		long netInOutQty = totalInQty - totalOutQty;
-		long totalProcessedCount = filteredList.size();
+		long totalProcessedCount = filteredTotalList.size();
+		
+		List<StockInout> slicedList = PagingUtil.getSlicedList(filteredTotalList, pageable);
+		PageResponse<StockInout> pagingData = new PageResponse<StockInout>(slicedList, pageable, totalProcessedCount);
 		
 		InOutSumResponse res = new InOutSumResponse();
 		res.setTotalCount(totalCount);
@@ -73,7 +79,7 @@ public class StockInoutService {
 		res.setNetInOutQty(netInOutQty);
 		res.setTotalProcessedCount(totalProcessedCount);
 		
-		res.setInOutList(filteredList);
+		res.setInOutList(pagingData);
 		
 		return res;
 	}

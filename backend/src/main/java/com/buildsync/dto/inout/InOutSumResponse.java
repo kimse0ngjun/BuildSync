@@ -1,7 +1,6 @@
 package com.buildsync.dto.inout;
 
-import java.util.List;
-
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.StockInout;
 
 import lombok.AllArgsConstructor;
@@ -23,5 +22,5 @@ public class InOutSumResponse {
 	private long netInOutQty; // 순입출고 수량
 	private long totalProcessedCount;
 	
-	private List<StockInout> inOutList;
+	private PageResponse<StockInout> inOutList;
 }
