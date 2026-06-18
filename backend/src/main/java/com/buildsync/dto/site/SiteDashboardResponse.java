@@ -15,4 +15,9 @@ public class SiteDashboardResponse {
     private long completedCount;
 
     private List<SiteResponse> sites;
+    
+    private int currentPage;
+    private int pageSize;
+    private long totalElements;
+    private int totalPages;
 }
