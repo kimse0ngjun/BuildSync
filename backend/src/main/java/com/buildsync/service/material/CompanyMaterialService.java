@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Service
 @RequiredArgsConstructor
 public class CompanyMaterialService {
@@ -26,29 +29,32 @@ public class CompanyMaterialService {
     private final MaterialRepository materialRepository;
     private final CompanyRepository companyRepository;
 
-    // 내 회사 자재 목록 조회 + 통계 카드 + 검색/필터
+    // 내 회사 자재 목록 조회 + 통계 카드 + 검색/필터 + 페이징
     public CompanyMaterialDashboardResponse getCompanyMaterials(
             String loginId,
             String keyword,
             String category,
-            String status
+            String status,
+            Pageable pageable
     ) {
         Company company = getCompanyByLoginId(loginId);
 
-        List<CompanyMaterialResponse> materials = supMaterialRepository
-                .searchCompanyMaterials(company.getId(), keyword, category)
-                .stream()
+        Page<CompanyMaterialResponse> materialPage = supMaterialRepository
+                .searchCompanyMaterials(company.getId(), keyword, category, pageable)
                 .map(supMaterial -> {
                     SupStock stock = supStockRepository
                             .findByCompanyAndMaterial(company, supMaterial.getMaterial())
                             .orElseThrow(() -> new RuntimeException("재고 정보가 존재하지 않습니다."));
 
                     return CompanyMaterialResponse.from(supMaterial, stock);
-                })
+                });
+
+        List<CompanyMaterialResponse> materials = materialPage.getContent()
+                .stream()
                 .filter(material -> status == null || status.isBlank() || status.equals(material.getStatus()))
                 .toList();
 
-        long totalMaterialCount = materials.size();
+        long totalMaterialCount = materialPage.getTotalElements();
 
         long normalStockCount = materials.stream()
                 .filter(material -> "정상".equals(material.getStatus()))
@@ -65,6 +71,10 @@ public class CompanyMaterialService {
                 .normalStockCount(normalStockCount)
                 .shortageStockCount(shortageStockCount)
                 .incomingCount(incomingCount)
+                .currentPage(materialPage.getNumber())
+                .pageSize(materialPage.getSize())
+                .totalElements(materialPage.getTotalElements())
+                .totalPages(materialPage.getTotalPages())
                 .materials(materials)
                 .build();
     }

@@ -14,5 +14,10 @@ public class CompanyMaterialDashboardResponse {
     private long shortageStockCount;
     private long incomingCount;
 
+    private int currentPage;
+    private int pageSize;
+    private long totalElements;
+    private int totalPages;
+
     private List<CompanyMaterialResponse> materials;
 }
