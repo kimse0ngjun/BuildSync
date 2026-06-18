@@ -9,6 +9,8 @@ import com.buildsync.repository.company.CompanyRepository;
 import com.buildsync.repository.site.SiteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -40,32 +42,31 @@ public class SiteService {
         return SiteResponse.from(savedSite);
     }
 
-    // 공사 현장 목록 조회 + 통계 카드 + 검색/필터
+ // 공사 현장 목록 조회 + 통계 카드 + 검색/필터 + 페이징
     public SiteDashboardResponse getSites(
             String loginId,
             String keyword,
             String constructionType,
-            String status
+            String status,
+            Pageable pageable
     ) {
         Company company = getCompanyByLoginId(loginId);
 
-        List<SiteResponse> sites = siteRepository
-                .searchSites(company, keyword, constructionType, status)
-                .stream()
-                .map(SiteResponse::from)
-                .toList();
+        Page<SiteResponse> sitePage = siteRepository
+                .searchSites(company, keyword, constructionType, status, pageable)
+                .map(SiteResponse::from);
 
-        long totalSiteCount = sites.size();
+        long totalSiteCount = sitePage.getTotalElements();
 
-        long progressCount = sites.stream()
+        long progressCount = sitePage.getContent().stream()
                 .filter(site -> "진행중".equals(site.getStatus()))
                 .count();
 
-        long plannedCount = sites.stream()
+        long plannedCount = sitePage.getContent().stream()
                 .filter(site -> "예정".equals(site.getStatus()))
                 .count();
 
-        long completedCount = sites.stream()
+        long completedCount = sitePage.getContent().stream()
                 .filter(site -> "완료".equals(site.getStatus()))
                 .count();
 
@@ -74,7 +75,11 @@ public class SiteService {
                 .progressCount(progressCount)
                 .plannedCount(plannedCount)
                 .completedCount(completedCount)
-                .sites(sites)
+                .sites(sitePage.getContent())
+                .currentPage(sitePage.getNumber())
+                .pageSize(sitePage.getSize())
+                .totalElements(sitePage.getTotalElements())
+                .totalPages(sitePage.getTotalPages())
                 .build();
     }
 

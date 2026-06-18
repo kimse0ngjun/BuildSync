@@ -7,6 +7,9 @@ import com.buildsync.service.site.SiteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 
 @RestController
 @RequestMapping("/api/sites")
@@ -26,17 +29,25 @@ public class SiteController {
         return siteService.createSite(loginId, request);
     }
 
-    // 공사현장 목록 조회 + 통계 카드 + 검색/필터
+ // 공사현장 목록 조회 + 통계 카드 + 검색/필터 + 페이징
     @GetMapping
     public SiteDashboardResponse getSites(
             Authentication authentication,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "constructionType", required = false) String constructionType,
-            @RequestParam(value = "status", required = false) String status
+            @RequestParam(value = "status", required = false) String status,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
         String loginId = authentication.getName();
 
-        return siteService.getSites(loginId, keyword, constructionType, status);
+        return siteService.getSites(
+                loginId,
+                keyword,
+                constructionType,
+                status,
+                pageable
+        );
     }
 
     // 공사현장 수정
