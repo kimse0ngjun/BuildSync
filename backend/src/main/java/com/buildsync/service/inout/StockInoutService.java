@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.buildsync.dto.inout.InOutRegRequest;
 import com.buildsync.dto.inout.InOutResponse;
 import com.buildsync.dto.inout.InOutSumResponse;
+import com.buildsync.dto.inout.StockInfoResponse;
 import com.buildsync.entity.Contact;
 import com.buildsync.entity.Material;
 import com.buildsync.entity.Orders;
@@ -77,7 +78,7 @@ public class StockInoutService {
 		return res;
 	}
 	
-	// 입고 등록 - 발주번호 선택 시 자동 완성
+	// 출고 등록 - 발주번호 선택 시 자동 완성
 	@Transactional(readOnly = true)
 	public Map<String, Object> getAutoFill(Long orderId) {
 		Orders orders = orderRepository.findById(orderId)
@@ -92,12 +93,61 @@ public class StockInoutService {
 			m.put("materialCode", i.getMaterial().getMaterialCode());
 			m.put("unit", i.getMaterial().getUnit());
 			m.put("quantity", i.getQuantity());
+			m.put("unitPrice", i.getUnitPrice());
 			
 			return m;
 		}).collect(Collectors.toList());
 		
 		data.put("items", materialList);
 		return data;
+	}
+	
+	// 등록 자재 선택 시 자재 정보
+	@Transactional(readOnly = true)
+	public StockInfoResponse getPureStockInfo(Long companyId, Long materialId) {
+	    SupStock stock = supStockRepository.findByCompanyIdAndMaterialId(companyId, materialId)
+	            .orElseThrow(() -> new IllegalArgumentException("재고 정보가 없습니다."));
+	            
+	    return StockInfoResponse.builder()
+	            .materialId(materialId)
+	            .unit(stock.getMaterial().getUnit())
+	            .currentQuantity(stock.getCurrentQuantity())
+	            .minimumQuantity(stock.getMinimumQuantity())
+	            .build();
+	}
+	
+	// 입출고 등록 시 미리보기 + 예상
+	@Transactional(readOnly = true)
+	public StockInfoResponse getStockCalculation(
+	        Long companyId, 
+	        Long materialId, 
+	        String type,
+	        Integer quantity,
+	        Integer unitPrice
+	) {
+	    SupStock stock = supStockRepository.findByCompanyIdAndMaterialId(companyId, materialId)
+	            .orElseThrow(() -> new IllegalArgumentException("재고 정보가 없습니다."));
+	            
+	    int currentAmt = stock.getCurrentQuantity();
+	    int totalAmount = (quantity != null && unitPrice != null) ? (quantity * unitPrice) : 0;
+	    int expectedQuantity = currentAmt;
+	    
+	    if (quantity != null) {
+	        if ("입고".equals(type)) {
+	            expectedQuantity = currentAmt + quantity;
+	        } else if ("출고".equals(type)) {
+	            expectedQuantity = currentAmt - quantity;
+	        }
+	    }
+	    
+	    return StockInfoResponse.builder()
+	            .materialId(materialId)
+	            .unit(stock.getMaterial().getUnit())
+	            .currentQuantity(currentAmt)
+	            .minimumQuantity(stock.getMinimumQuantity())
+	            .totalAmount(totalAmount)
+	            .expectedQuantity(expectedQuantity)
+	            .build();
 	}
 	
 	// 입출고 등록 + 자재 변동 처리
@@ -215,43 +265,6 @@ public class StockInoutService {
 			
 			stockInoutRepository.save(newStockInout);
 		}
-	}
-	
-	// 입출고 내역 삭제
-	public void deleteInoutStock(List<Long> deleteInoutIds, Long companyId) {		
-		if (deleteInoutIds == null || deleteInoutIds.isEmpty()) {
-			throw new IllegalArgumentException("삭제할 입출고 내역이 존재하지 않습니다.");
-		}
-		
-		List<StockInout> oldInoutList = stockInoutRepository.findAllById(deleteInoutIds);
-		
-		if (oldInoutList.isEmpty()) {
-			throw new IllegalArgumentException("요청된 ID에 해당하는 입출고 내역을 찾을 수 없습니다.");
-		}
-		
-		for (StockInout stockInout : oldInoutList) {
-			SupStock supStock = supStockRepository
-					.findByCompanyIdAndMaterialId(companyId, stockInout.getMaterial().getId())
-					.orElseThrow(() -> new IllegalArgumentException(
-							stockInout.getMaterial().getMaterialName() + "의 정보를 찾을 수 없습니다.")
-							);
-			int rollbackQty = supStock.getCurrentQuantity();
-			
-			if ("입고".equals(stockInout.getType())) {
-				rollbackQty -= stockInout.getQuantity();
-				
-				if (rollbackQty < 0) {
-	                throw new IllegalStateException(stockInout.getMaterial().getMaterialName() + 
-	                        " 자재는 이미 다른 현장에서 출고되어 사용 중이므로 입고 내역을 삭제할 수 없습니다.");
-	            }
-			} else if ("출고".equals(stockInout.getType())) {
-				rollbackQty += stockInout.getQuantity();
-			}
-			
-			supStock.changeCurStock(rollbackQty);
-		}
-		
-		stockInoutRepository.deleteAll(oldInoutList);
 	}
 	
 	// 입출고 상세
