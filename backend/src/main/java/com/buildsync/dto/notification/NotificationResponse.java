@@ -1,6 +1,7 @@
 package com.buildsync.dto.notification;
 
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 
 import com.buildsync.entity.Notification;
 
@@ -18,16 +19,15 @@ public class NotificationResponse {
 	private String createdAt;
 	
 	public NotificationResponse(Notification notification) {
-		this.noticeId = noticeId;
-		this.type = type;
-		this.title = title;
-		this.content = content;
-		this.relatedId = relatedId;
-		this.isRead = isRead;
+		this.noticeId = notification.getId();
+		this.type = notification.getType();
+		this.title = notification.getTitle();
+		this.content = notification.getContent();
+		this.relatedId = notification.getRelatedId();
+		this.isRead = notification.getIsRead();
 		
 		if (notification.getCreatedAt() != null) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			this.createdAt = sdf.format(notification.getCreatedAt());
+			this.createdAt = notification.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
 		}
 	}
 }
