@@ -1,13 +1,10 @@
 package com.buildsync.controller.inout;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.buildsync.dto.inout.InOutRegRequest;
 import com.buildsync.dto.inout.InOutResponse;
 import com.buildsync.dto.inout.InOutSumResponse;
-import com.buildsync.repository.inout.StockInoutRepository;
+import com.buildsync.dto.inout.StockInfoResponse;
 import com.buildsync.service.inout.StockInoutService;
 
 import lombok.RequiredArgsConstructor;
@@ -57,6 +54,7 @@ public class StockInoutController {
 		return ResponseEntity.ok(autoFillData);
 	}
 	
+	// 입출고 등록
 	@PostMapping("/regist")
 	public ResponseEntity<String> registerInout(@RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
@@ -71,6 +69,28 @@ public class StockInoutController {
 		}		
 	}
 	
+	// 등록 - 자재 선택 시 정보
+	@GetMapping("/stock-info")
+	public ResponseEntity<StockInfoResponse> getPureStockInfo(
+			@RequestParam("companyId") Long companyId,
+			@RequestParam("materialId") Long materialId) {
+		StockInfoResponse res = stockInoutService.getPureStockInfo(companyId, materialId);
+		return ResponseEntity.ok(res);
+	}
+	
+	// 등록 - 미리보기 + 예상
+	@GetMapping("/stock-calc")
+	public ResponseEntity<StockInfoResponse> getStockCalculation(
+			@RequestParam("companyId") Long companyId,
+			@RequestParam("materialId") Long materialId,
+			@RequestParam("type") String type,
+			@RequestParam(value = "quantity", required = false) Integer quantity,
+			@RequestParam(value = "unitPrice", required = false) Integer unitPrice) {
+		StockInfoResponse res = stockInoutService.getStockCalculation(
+				companyId, materialId, type, quantity, unitPrice);
+		return ResponseEntity.ok(res);
+	}
+	
 	@PatchMapping("/update")
 	public ResponseEntity<String> updateInout(@RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
@@ -80,18 +100,6 @@ public class StockInoutController {
 		try {
 			stockInoutService.updateInoutStock(req);
 			return ResponseEntity.ok("입출고 내역이 성공적으로 수정되었습니다.");
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-	}
-	
-	@DeleteMapping("/delete")
-	public ResponseEntity<String> deleteInout(
-			@RequestParam("deleteInoutIds") List<Long> deleteInoutIds,
-			@RequestParam("companyId") Long companyId) {
-		try {
-			stockInoutService.deleteInoutStock(deleteInoutIds, companyId);
-			return ResponseEntity.ok("입출고 내역이 성공적으로 삭제되었습니다.");
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
