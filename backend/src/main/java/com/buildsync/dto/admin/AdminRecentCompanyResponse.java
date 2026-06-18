@@ -1,6 +1,7 @@
 package com.buildsync.dto.admin;
 
 import com.buildsync.entity.Company;
+import com.buildsync.entity.CompanyType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,7 +13,7 @@ public class AdminRecentCompanyResponse {
 
     private Long companyId;
     private String companyName;
-    private String companyType;
+    private CompanyType companyType;
     private LocalDateTime createdAt;
 
     public static AdminRecentCompanyResponse from(Company company) {

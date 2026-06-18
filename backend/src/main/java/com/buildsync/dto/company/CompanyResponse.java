@@ -1,6 +1,6 @@
 package com.buildsync.dto.company;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.buildsync.entity.Company;
@@ -20,7 +20,7 @@ public class CompanyResponse {
     private String phone;
     private String address;
     private List<String> materials;
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
     
     public static CompanyResponse from(Company company) {
 

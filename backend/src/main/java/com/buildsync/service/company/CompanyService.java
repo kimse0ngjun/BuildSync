@@ -46,8 +46,8 @@ public class CompanyService {
                     )
 
                     .companyType(
-                        item.getCompanyType()
-                    )
+                    	    CompanyType.valueOf(item.getCompanyType())
+                    	)
 
                     .companyName(
                         item.getCompanyName()

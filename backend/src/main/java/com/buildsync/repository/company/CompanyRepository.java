@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 
 import com.buildsync.dto.company.CompanyProjection;
 import com.buildsync.entity.Company;
+import com.buildsync.entity.CompanyStatus;
+
+import java.time.LocalDateTime;
 
 
 @Repository
@@ -23,6 +26,11 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	boolean existsByEmail(String email);
 	
 	List<Company> findByCompanyType(String companyType);
+	List<Company> findByStatus(CompanyStatus status);
+	
+	long countByStatus(CompanyStatus status);
+	long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+	List<Company> findTop5ByOrderByCreatedAtDesc();
 	
 	// Company
 	@Query(value = """

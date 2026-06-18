@@ -1,17 +1,15 @@
 package com.buildsync.dto.company;
 
-import java.time.LocalDate;
-
-import com.buildsync.entity.CompanyType;
+import java.time.LocalDateTime;
 
 public interface CompanyProjection {
 
-	Long getCompanyId();
-	CompanyType getCompanyType();
-	String getCompanyName();
-	String getCeoName();
-	String getPhone();
-	String getAddress();
-    LocalDate getCreatedAt();
+    Long getCompanyId();
+    String getCompanyType();
+    String getCompanyName();
+    String getCeoName();
+    String getPhone();
+    String getAddress();
+    LocalDateTime getCreatedAt();
     String getMaterials();
 }

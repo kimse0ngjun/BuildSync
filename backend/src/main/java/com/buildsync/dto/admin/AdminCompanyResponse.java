@@ -2,6 +2,7 @@ package com.buildsync.dto.admin;
 
 import com.buildsync.entity.Company;
 import com.buildsync.entity.CompanyStatus;
+import com.buildsync.entity.CompanyType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,7 +14,7 @@ public class AdminCompanyResponse {
 
     private Long companyId;
     private String loginId;
-    private String companyType;
+    private CompanyType companyType;
     private String companyName;
     private String ceoName;
     private String businessNumber;
