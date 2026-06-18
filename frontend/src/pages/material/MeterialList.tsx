@@ -75,6 +75,8 @@ function MaterialList() {
   const filteredMaterials = materials;
   const size = 10;
 
+  const myCompanyName = "테스트건설";
+
   const getToken = () => {
     const token = localStorage.getItem("token");
 
@@ -86,6 +88,10 @@ function MaterialList() {
     }
 
     return token;
+  };
+
+  const getSelectedMaterialId = () => {
+    return selected?.materialId ?? selected?.id;
   };
 
   const fetchMaterials = async () => {
@@ -193,6 +199,52 @@ function MaterialList() {
   const handleNextPage = () => {
     if (page < totalPages - 1) {
       setPage(page + 1);
+    }
+  };
+
+  const canManageSelected =
+    selected !== null && selected.supplierName === myCompanyName;
+
+  const handleDeleteMaterial = async () => {
+    if (!selected) return;
+
+    const materialId = getSelectedMaterialId();
+
+    if (!materialId) {
+      alert("자재 ID가 없습니다.");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `${selected.materialName} 자재를 삭제하시겠습니까?`,
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch(
+        `http://localhost:8080/api/company-materials/${materialId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("자재 삭제 실패");
+      }
+
+      alert("자재가 삭제되었습니다.");
+      setSelected(null);
+      fetchMaterials();
+    } catch (error) {
+      console.error(error);
+      alert("자재 삭제에 실패했습니다.");
     }
   };
 
@@ -428,9 +480,18 @@ function MaterialList() {
               <Info label="공급업체" value={selected.supplierName} />
             </div>
 
-            <div className="panel-actions">
-              <button>수정</button>
-            </div>
+            {canManageSelected && (
+              <div className="panel-actions">
+                <button
+                  onClick={() =>
+                    navigate(`/material/edit/${getSelectedMaterialId()}`)
+                  }
+                >
+                  수정
+                </button>
+                <button onClick={handleDeleteMaterial}>삭제</button>
+              </div>
+            )}
           </aside>
         )}
       </div>
