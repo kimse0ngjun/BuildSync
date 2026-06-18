@@ -195,7 +195,7 @@ public class OrderService {
         		order.getCompany().getId(),
         		"ORDER_CANCELED",
         		"발주서 수정 알림",
-        		"건설사 요청에 의해 발주서 #" + orderId + "건의 취소되었습니다.",
+        		"건설사 요청에 의해 발주서 #" + orderId + "의 취소되었습니다.",
         		orderId
         	);
 		} else {
@@ -222,7 +222,7 @@ public class OrderService {
 					order.getCompany().getId(),
 					"ORDER_MODIFIED",
 					"발주서 수정 알림",
-					"대기 중인 발주서 #" + orderId + "건의 상세 내용이 수정되었습니다.",
+					"대기 중인 발주서 #" + orderId + "의 상세 내용이 수정되었습니다.",
 					orderId
 			);
 		}
