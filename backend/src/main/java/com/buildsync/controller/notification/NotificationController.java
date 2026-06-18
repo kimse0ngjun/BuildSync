@@ -1,7 +1,7 @@
 package com.buildsync.controller.notification;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.buildsync.dto.notification.NotificationResponse;
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.service.notification.NotificationService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,15 +25,20 @@ public class NotificationController {
 
 	// 모든 알림 최신순 조회
 	@GetMapping("/list")
-	public ResponseEntity<List<NotificationResponse>> getAllNotification(@RequestParam("companyId") Long companyId) {
-		List<NotificationResponse> list = notificationService.getAllNotification(companyId);
+	public ResponseEntity<PageResponse<NotificationResponse>> getAllNotification(
+			@RequestParam("companyId") Long companyId,
+			@PageableDefault(page = 0, size = 10) Pageable pageable) {
+		
+		PageResponse<NotificationResponse> list = notificationService.getAllNotification(companyId, pageable);
 		return ResponseEntity.ok(list);
 	}
 	
 	// 안 읽은 알림 최신순 조회
 	@GetMapping("/not-read-list")
-	public ResponseEntity<List<NotificationResponse>> getNotReadNotificationList(@RequestParam("companyId") Long companyId) {
-		List<NotificationResponse> list = notificationService.getUnreadNotification(companyId);
+	public ResponseEntity<PageResponse<NotificationResponse>> getNotReadNotificationList(
+			@RequestParam("companyId") Long companyId,
+			@PageableDefault(page = 0, size = 10) Pageable pageable) {
+		PageResponse<NotificationResponse> list = notificationService.getUnreadNotification(companyId, pageable);
 		return ResponseEntity.ok(list);
 	}
 	

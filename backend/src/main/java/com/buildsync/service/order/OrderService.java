@@ -87,7 +87,7 @@ public class OrderService {
 		    }
 		}
 		
-		// 발주서 알림 테이블 저장
+		// 공급업체가 받을 발주서 등록 알림
 		notificationService.sendNotification(
 				orderDto.getCompanyId(),
 				"NEW_ORDER",
