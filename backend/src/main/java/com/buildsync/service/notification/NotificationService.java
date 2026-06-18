@@ -3,13 +3,16 @@ package com.buildsync.service.notification;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.buildsync.dto.notification.NotificationResponse;
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Notification;
 import com.buildsync.entity.SupStock;
+import com.buildsync.paging.PagingUtil;
 import com.buildsync.repository.company.CompanyRepository;
 import com.buildsync.repository.material.SupStockRepository;
 import com.buildsync.repository.notification.NotificationRepository;
@@ -41,21 +44,31 @@ public class NotificationService {
 		notificationRepository.save(notification);
 	}
 	
+	// 모든 알림 조회
 	@Transactional(readOnly = true)
-	public List<NotificationResponse> getAllNotification(Long companyId) {
-		return notificationRepository.findByCompany_IdOrderByIdDesc(companyId)
+	public PageResponse<NotificationResponse> getAllNotification(Long companyId, Pageable pageable) {
+		List<NotificationResponse> list = notificationRepository.findByCompany_IdOrderByIdDesc(companyId)
 				.stream()
 				.map(NotificationResponse::new)
 				.collect(Collectors.toList());
+		
+		long totalElements = list.size();
+		List<NotificationResponse> slicedList = PagingUtil.getSlicedList(list, pageable);
+		return new PageResponse<>(slicedList, pageable, totalElements);
 	}
 	
 	// 안 읽은 목록 최신순 조회
 	@Transactional(readOnly = true)
-	public List<NotificationResponse> getUnreadNotification(Long companyId) {
-		return notificationRepository.findByCompany_IdAndIsReadOrderByIdDesc(companyId, 0)
+	public PageResponse<NotificationResponse> getUnreadNotification(Long companyId, Pageable pageable) {
+		List<NotificationResponse> list = notificationRepository.findByCompany_IdAndIsReadOrderByIdDesc(companyId, 0)
 				.stream()
 				.map(NotificationResponse::new)
 				.collect(Collectors.toList());
+		
+		long totalElements = list.size();
+		List<NotificationResponse> slicedList = PagingUtil.getSlicedList(list, pageable);
+		
+		return new PageResponse<>(slicedList, pageable, totalElements);
 	}
 	
 	// 알림 읽음 처리
