@@ -14,5 +14,10 @@ public class SiteMaterialUsageDashboardResponse {
     private long usedSiteCount;
     private long contactCount;
 
+    private int currentPage;
+    private int pageSize;
+    private long totalElements;
+    private int totalPages;
+
     private List<SiteMaterialUsageResponse> usages;
 }

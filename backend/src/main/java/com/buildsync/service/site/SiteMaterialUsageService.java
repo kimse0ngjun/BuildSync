@@ -5,9 +5,9 @@ import com.buildsync.dto.site.SiteMaterialUsageResponse;
 import com.buildsync.entity.StockInout;
 import com.buildsync.repository.inout.StockInoutRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,41 +19,46 @@ public class SiteMaterialUsageService {
             String loginId,
             Long siteId,
             Long materialId,
-            String keyword
+            String keyword,
+            Pageable pageable
     ) {
-        List<StockInout> usageList = stockInoutRepository.findSiteMaterialUsages(
+        Page<StockInout> usagePage = stockInoutRepository.findSiteMaterialUsages(
                 loginId,
                 siteId,
                 materialId,
-                keyword
+                keyword,
+                pageable
         );
 
-        List<SiteMaterialUsageResponse> usages = usageList.stream()
-                .map(SiteMaterialUsageResponse::from)
-                .toList();
-
-        long usedMaterialCount = usageList.stream()
-                .map(usage -> usage.getMaterial().getId())
-                .distinct()
-                .count();
-
-        long usedSiteCount = usageList.stream()
-                .map(usage -> usage.getSite().getId())
-                .distinct()
-                .count();
-
-        long contactCount = usageList.stream()
-                .filter(usage -> usage.getContact() != null)
-                .map(usage -> usage.getContact().getContactId())
-                .distinct()
-                .count();
+        Page<SiteMaterialUsageResponse> usages =
+                usagePage.map(SiteMaterialUsageResponse::from);
 
         return SiteMaterialUsageDashboardResponse.builder()
-                .totalUsageCount(usageList.size())
-                .usedMaterialCount(usedMaterialCount)
-                .usedSiteCount(usedSiteCount)
-                .contactCount(contactCount)
-                .usages(usages)
+                .totalUsageCount(usagePage.getTotalElements())
+                .usedMaterialCount(
+                        usagePage.getContent().stream()
+                                .map(usage -> usage.getMaterial().getId())
+                                .distinct()
+                                .count()
+                )
+                .usedSiteCount(
+                        usagePage.getContent().stream()
+                                .map(usage -> usage.getSite().getId())
+                                .distinct()
+                                .count()
+                )
+                .contactCount(
+                        usagePage.getContent().stream()
+                                .filter(usage -> usage.getContact() != null)
+                                .map(usage -> usage.getContact().getContactId())
+                                .distinct()
+                                .count()
+                )
+                .currentPage(usagePage.getNumber())
+                .pageSize(usagePage.getSize())
+                .totalElements(usagePage.getTotalElements())
+                .totalPages(usagePage.getTotalPages())
+                .usages(usages.getContent())
                 .build();
     }
 }
