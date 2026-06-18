@@ -3,6 +3,8 @@ package com.buildsync.repository.company;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -86,8 +88,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	            c.created_at
 
 	        """, nativeQuery = true)
-		List<CompanyProjection> findCompanies(
+		Page<CompanyProjection> findCompanies(
 		    @Param("type") String type,
-		    @Param("keyword") String keyword
+		    @Param("keyword") String keyword,
+		    Pageable pageable
 		);
 }

@@ -2,6 +2,9 @@ package com.buildsync.controller.company;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +18,7 @@ import com.buildsync.dto.company.CompanyDeleteResponse;
 import com.buildsync.dto.company.CompanyResponse;
 import com.buildsync.dto.company.CompanyUpdateRequest;
 import com.buildsync.dto.company.CompanyUpdateResponse;
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.CompanyType;
 import com.buildsync.service.company.CompanyService;
 
@@ -29,7 +33,7 @@ public class CompanyController {
 	
 	// 업체 목록 조회 + 검색 + 유형 필터
 	@GetMapping
-	public List<CompanyResponse> getCompanies(
+	public PageResponse<CompanyResponse> getCompanies(
 
 	        @RequestParam(
 	            name = "type",
@@ -39,13 +43,21 @@ public class CompanyController {
 	        @RequestParam(
 	            name = "keyword",
 	            required = false
-	        ) String keyword
-
+	        ) String keyword,
+	        
+	        @PageableDefault(
+	        	page = 0,
+	        	size = 10,
+	        	sort = "createdAt",
+	        	direction = Sort.Direction.DESC
+	        )
+	        Pageable pageable
 	){
 
 	    return companyService.getCompanies(
 	            type,
-	            keyword
+	            keyword,
+	            pageable
 	    );
 	}
 	
