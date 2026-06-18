@@ -1,7 +1,8 @@
 package com.buildsync.entity;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,6 +52,7 @@ public class Notification {
 	private int isRead;
 	
 	@Column(nullable = true)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
 	private LocalDateTime createdAt;
 	
 	@PrePersist

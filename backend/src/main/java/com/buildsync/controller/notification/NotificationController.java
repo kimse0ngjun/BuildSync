@@ -31,7 +31,7 @@ public class NotificationController {
 	
 	// 안 읽은 알림 최신순 조회
 	@GetMapping("/not-read-list")
-	public ResponseEntity<List<NotificationResponse>> name(@RequestParam("companyId") Long companyId) {
+	public ResponseEntity<List<NotificationResponse>> getNotReadNotificationList(@RequestParam("companyId") Long companyId) {
 		List<NotificationResponse> list = notificationService.getUnreadNotification(companyId);
 		return ResponseEntity.ok(list);
 	}

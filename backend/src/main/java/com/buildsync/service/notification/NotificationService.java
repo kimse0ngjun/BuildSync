@@ -43,7 +43,7 @@ public class NotificationService {
 	
 	@Transactional(readOnly = true)
 	public List<NotificationResponse> getAllNotification(Long companyId) {
-		return notificationRepository.findByCompanyIdOrderByIdDesc(companyId)
+		return notificationRepository.findByCompany_IdOrderByIdDesc(companyId)
 				.stream()
 				.map(NotificationResponse::new)
 				.collect(Collectors.toList());
@@ -52,7 +52,7 @@ public class NotificationService {
 	// 안 읽은 목록 최신순 조회
 	@Transactional(readOnly = true)
 	public List<NotificationResponse> getUnreadNotification(Long companyId) {
-		return notificationRepository.findByCompanyIdAndIsReadOrderByIdDesc(companyId, 0)
+		return notificationRepository.findByCompany_IdAndIsReadOrderByIdDesc(companyId, 0)
 				.stream()
 				.map(NotificationResponse::new)
 				.collect(Collectors.toList());

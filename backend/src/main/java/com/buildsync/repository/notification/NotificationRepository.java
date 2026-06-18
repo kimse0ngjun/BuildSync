@@ -14,10 +14,10 @@ import com.buildsync.entity.Notification;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
 	// 모든 알림 조회 (최신순)
-	List<Notification> findByCompanyIdOrderByIdDesc(Long companyId);
+	List<Notification> findByCompany_IdOrderByIdDesc(Long companyId);
 	
 	// 읽지 않음만 조회
-	List<Notification> findByCompanyIdAndIsReadOrderByIdDesc(Long companyId, int isRead);
+	List<Notification> findByCompany_IdAndIsReadOrderByIdDesc(Long companyId, int isRead);
 	
 	// 읽음 처리
 	@Modifying
