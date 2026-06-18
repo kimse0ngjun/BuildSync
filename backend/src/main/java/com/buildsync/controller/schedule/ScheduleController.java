@@ -1,10 +1,16 @@
 package com.buildsync.controller.schedule;
 
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.dto.schedule.CalendarEventResponse;
 import com.buildsync.dto.schedule.ScheduleRequest;
 import com.buildsync.dto.schedule.ScheduleResponse;
 import com.buildsync.service.schedule.ScheduleService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +37,39 @@ public class ScheduleController {
             scheduleService.getCalendarEvents(companyId, year, month, type, status)
         );
     }
+    
+    // 일정 계시판 조회
+    @GetMapping("/list")
+    public ResponseEntity<PageResponse<ScheduleResponse>> getScheduleList(
+            @RequestParam("companyId") Long companyId,
+            @PageableDefault(
+            		size = 10,
+            		sort = "startDate",
+            		direction = Sort.Direction.DESC
+            )
+            Pageable pageable
+    ) {
 
+        return ResponseEntity.ok(
+                scheduleService.getScheduleList(
+                        companyId,
+                        pageable
+                )
+        );
+    }
+    
+    // 상세 조회
+    @GetMapping("/{scheduleId}")
+    public ResponseEntity<ScheduleResponse> getSchedule(
+            @RequestParam("companyId") Long companyId,
+            @PathVariable("scheduleId") Long scheduleId
+    ) {
+
+        return ResponseEntity.ok(
+            scheduleService.getSchedule(companyId, scheduleId)
+        );
+    }
+    		
     // 일정 등록
     @PostMapping
     public ResponseEntity<ScheduleResponse> createSchedule(

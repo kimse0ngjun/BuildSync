@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.dto.schedule.CalendarEventResponse;
 import com.buildsync.dto.schedule.ScheduleRequest;
 import com.buildsync.dto.schedule.ScheduleResponse;
@@ -65,6 +68,64 @@ public class ScheduleService {
         events.sort(Comparator.comparing(CalendarEventResponse::getStartDate));
         return events;
     }
+    
+    // 일정 계시판 조회
+    @Transactional(readOnly = true)
+    public PageResponse<ScheduleResponse> getScheduleList(
+            Long companyId,
+            Pageable pageable
+    ) {
+
+        Page<ScheduleResponse> page =
+                scheduleRepository
+                        .findByCompanyId(companyId, pageable)
+                        .map(schedule -> ScheduleResponse.builder()
+                                .scheduleId(schedule.getId())
+                                .title(schedule.getTitle())
+                                .content(schedule.getContent())
+                                .startDate(schedule.getStartDate())
+                                .endDate(schedule.getEndDate())
+                                .siteId(schedule.getSiteName().getId())
+                                .siteName(schedule.getSiteName().getSiteName())
+                                .build()
+                        );
+
+
+        return new PageResponse<>(
+                page.getContent(),
+                pageable,
+                page.getTotalElements()
+        );
+    }
+    
+    // 상세 정보
+    @Transactional(readOnly = true)
+    public ScheduleResponse getSchedule(
+            Long companyId,
+            Long scheduleId
+    ) {
+
+        Schedule schedule =
+            scheduleRepository.findByIdAndCompanyId(
+                scheduleId,
+                companyId
+            )
+            .orElseThrow(
+                () -> new RuntimeException("존재하지 않는 일정입니다.")
+            );
+
+        return ScheduleResponse.builder()
+                .scheduleId(schedule.getId())
+                .title(schedule.getTitle())
+                .content(schedule.getContent())
+                .startDate(schedule.getStartDate())
+                .endDate(schedule.getEndDate())
+                .siteId(schedule.getSiteName().getId())
+                .siteName(
+                    schedule.getSiteName().getSiteName()
+                )
+                .build();
+    }
 
     // 일정 생성
     @Transactional
@@ -99,8 +160,13 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponse updateSchedule(Long companyId, Long scheduleId, ScheduleRequest request) {
 
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 일정입니다."));
+    	Schedule schedule = scheduleRepository.findByIdAndCompanyId(
+    	        scheduleId,
+    	        companyId
+    	)
+    	.orElseThrow(() -> 
+    	        new IllegalArgumentException("존재하지 않는 일정입니다.")
+    	);
 
         Site site = siteRepository.findById(request.getSiteId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 현장입니다."));
