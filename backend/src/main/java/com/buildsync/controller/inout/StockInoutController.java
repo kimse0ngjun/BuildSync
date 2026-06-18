@@ -3,6 +3,8 @@ package com.buildsync.controller.inout;
 import java.time.LocalDate;
 import java.util.Map;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,10 +42,11 @@ public class StockInoutController {
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@RequestParam(value = "endDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-			@RequestParam(value = "keyword", required = false) String keyword) {
+			@RequestParam(value = "keyword", required = false) String keyword,
+			@PageableDefault(page = 0, size = 10) Pageable pageable) {
 		
 		InOutSumResponse data = stockInoutService.getInoutDashboardData(
-				companyId, type, materialId, siteId, orderId, startDate, endDate, keyword);
+				companyId, type, materialId, siteId, orderId, startDate, endDate, keyword, pageable);
 		
 		return ResponseEntity.ok(data);
 	}

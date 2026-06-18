@@ -3,12 +3,15 @@ package com.buildsync.service.notification;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.buildsync.dto.notification.MaterialShortageResponse;
 import com.buildsync.dto.notification.StockShortageResponse;
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.SupStock;
+import com.buildsync.paging.PagingUtil;
 import com.buildsync.repository.material.SupStockRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +22,7 @@ public class StockShortageService {
 	
 	private final SupStockRepository supStockRepository;
 
-	// 재고 부족 페이지 - 상단 카드
+		// 재고 부족 페이지 - 상단 카드
 		@Transactional(readOnly = true)
 		public StockShortageResponse getStockShortageBoard(Long companyId) {
 			List<SupStock> list = supStockRepository.findShortageStocks(companyId);
@@ -36,10 +39,10 @@ public class StockShortageService {
 		
 		// 재고 부족 목록 조회
 		@Transactional(readOnly = true)
-		public List<MaterialShortageResponse> getShortageMaterial(Long companyId) {
+		public PageResponse<MaterialShortageResponse> getShortageMaterial(Long companyId, Pageable pageable) {
 			List<SupStock> list = supStockRepository.findShortageStocks(companyId);
 			
-			return list.stream().map(s -> {
+			List<MaterialShortageResponse> dtoList = list.stream().map(s -> {
 				int deficit = s.getMinimumQuantity() - s.getCurrentQuantity();
 				
 				String statusMessage = (s.getCurrentQuantity() <= (s.getMinimumQuantity() * 0.3)) ? "위험" : "주의";
@@ -53,5 +56,11 @@ public class StockShortageService {
 						s.getUnitPrice(),
 						statusMessage);
 			}).collect(Collectors.toList());
+			
+			long totalElements = dtoList.size();
+			
+			List<MaterialShortageResponse> slicedList = PagingUtil.getSlicedList(dtoList, pageable);
+			
+			return new PageResponse<MaterialShortageResponse>(slicedList, pageable, totalElements);
 		}
 }

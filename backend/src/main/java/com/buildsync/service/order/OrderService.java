@@ -2,6 +2,7 @@ package com.buildsync.service.order;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +10,7 @@ import com.buildsync.dto.order.OrderItemsDTO;
 import com.buildsync.dto.order.OrderRequest;
 import com.buildsync.dto.order.OrderStatusResponse;
 import com.buildsync.dto.order.OrdersDTO;
+import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Contact;
 import com.buildsync.entity.Material;
@@ -16,6 +18,7 @@ import com.buildsync.entity.OrderItems;
 import com.buildsync.entity.OrderStatus;
 import com.buildsync.entity.Orders;
 import com.buildsync.entity.SupMaterial;
+import com.buildsync.paging.PagingUtil;
 import com.buildsync.repository.company.CompanyRepository;
 import com.buildsync.repository.company.ContactRepository;
 import com.buildsync.repository.material.SupMaterialRepository;
@@ -114,20 +117,34 @@ public class OrderService {
 	
 	// 건설업체 화면 발주 목록 (검색 + 상태 필터)
 	@Transactional(readOnly = true)
-	public List<Orders> getOrderListForConstruction(Long companyId, OrderStatus status, String keyword) {
+	public PageResponse<Orders> getOrderListForConstruction(
+			Long companyId, OrderStatus status, String keyword, Pageable pageable) {
+		
 		OrderStatus searchStatus = (status != null) ? status : null;
 		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
 		
-		return orderRepository.searchOrdersForConstruction(companyId, searchStatus, searchKeyword);
+		List<Orders> totalList = orderRepository.searchOrdersForConstruction(companyId, searchStatus, searchKeyword);
+		long totalElements = totalList.size();
+		
+		List<Orders> slicedList = PagingUtil.getSlicedList(totalList, pageable);
+		
+		return new PageResponse<>(slicedList, pageable, totalElements);
 	}
 	
 	// 공급업체 화면 발주 목록 (검색 + 상태 필터)
 	@Transactional(readOnly = true)
-	public List<Orders> getOrderListForSupplier(Long companyId, OrderStatus status, String keyword) {
+	public PageResponse<Orders> getOrderListForSupplier(
+			Long companyId, OrderStatus status, String keyword, Pageable pageable) {
+		
 		OrderStatus searchStatus = (status != null) ? status : null;
 		String searchKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword : null;
 		
-		return orderRepository.searchOrdersForSupplier(companyId, searchStatus, searchKeyword);
+		List<Orders> totalList = orderRepository.searchOrdersForSupplier(companyId, searchStatus, searchKeyword);
+		long totalElements = totalList.size();
+		
+		List<Orders> slicedList = PagingUtil.getSlicedList(totalList, pageable);
+		
+		return new PageResponse<>(slicedList, pageable, totalElements);
 	}
 	
 	// 발주서 상세 보기
