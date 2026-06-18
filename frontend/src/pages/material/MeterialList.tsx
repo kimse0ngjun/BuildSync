@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiPlus,
@@ -13,113 +13,188 @@ import {
 } from "react-icons/fi";
 import "../../styles/MaterialList.css";
 
-const materials = [
-  {
-    code: "MAT-001",
-    name: "철근 D13",
-    category: "철강",
-    stock: 120,
-    min: 50,
-    unit: "EA",
-    price: "30,000",
-    status: "정상",
-    supplier: "대한자재",
-    isMyCompany: true,
-  },
-  {
-    code: "MAT-002",
-    name: "시멘트 40kg",
-    category: "시멘트",
-    stock: 20,
-    min: 50,
-    unit: "포",
-    price: "12,000",
-    status: "부족",
-    supplier: "쌍용양회",
-    isMyCompany: false,
-  },
-  {
-    code: "MAT-003",
-    name: "유리 5T",
-    category: "유리",
-    stock: 80,
-    min: 30,
-    unit: "EA",
-    price: "25,000",
-    status: "정상",
-    supplier: "대한자재",
-    isMyCompany: true,
-  },
-  {
-    code: "MAT-004",
-    name: "벽돌",
-    category: "건축자재",
-    stock: 15,
-    min: 30,
-    unit: "EA",
-    price: "5,000",
-    status: "부족",
-    supplier: "벽돌마트",
-    isMyCompany: false,
-  },
-  {
-    code: "MAT-005",
-    name: "목재 2x4",
-    category: "목재",
-    stock: 60,
-    min: 40,
-    unit: "EA",
-    price: "8,500",
-    status: "정상",
-    supplier: "대한자재",
-    isMyCompany: true,
-  },
-  {
-    code: "MAT-006",
-    name: "페인트 18L",
-    category: "도장재",
-    stock: 35,
-    min: 20,
-    unit: "통",
-    price: "45,000",
-    status: "정상",
-    supplier: "삼화페인트",
-    isMyCompany: false,
-  },
-  {
-    code: "MAT-007",
-    name: "전선 2.5sq",
-    category: "전기자재",
-    stock: 100,
-    min: 50,
-    unit: "롤",
-    price: "70,000",
-    status: "정상",
-    supplier: "대한전선",
-    isMyCompany: false,
-  },
-  {
-    code: "MAT-008",
-    name: "배관 PVC 50A",
-    category: "배관자재",
-    stock: 25,
-    min: 30,
-    unit: "EA",
-    price: "3,500",
-    status: "부족",
-    supplier: "대한자재",
-    isMyCompany: true,
-  },
-];
+type MaterialItem = {
+  id?: number;
+  materialId?: number;
+  supMaterialId?: number;
+  materialCode: string;
+  materialName: string;
+  materialCategory: string;
+  currentQuantity: number;
+  minimumQuantity: number;
+  unit: string;
+  unitPrice: number;
+  status: string;
+  supplierName: string;
+  specification: string;
+  createdAt: string;
+};
+
+type MaterialListResponse = {
+  totalMaterialCount: number;
+  normalStockCount: number;
+  shortageStockCount: number;
+  incomingCount: number;
+  currentPage?: number;
+  pageSize?: number;
+  totalElements?: number;
+  totalPages?: number;
+  materials: MaterialItem[];
+};
+
+type CategoryItem = {
+  categoryId: number;
+  categoryName: string;
+  createdAt: string;
+};
 
 function MaterialList() {
   const navigate = useNavigate();
+
   const [tab, setTab] = useState<"all" | "my">("all");
+  const [materials, setMaterials] = useState<MaterialItem[]>([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [selected, setSelected] = useState<MaterialItem | null>(null);
 
-  const filteredMaterials =
-    tab === "all" ? materials : materials.filter((item) => item.isMyCompany);
+  const [keyword, setKeyword] = useState("");
+  const [category, setCategory] = useState("");
+  const [status, setStatus] = useState("");
 
-  const selected = filteredMaterials[0] ?? materials[0];
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [summary, setSummary] = useState({
+    totalMaterialCount: 0,
+    normalStockCount: 0,
+    shortageStockCount: 0,
+    incomingCount: 0,
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const filteredMaterials = materials;
+  const size = 10;
+
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert(
+        "토큰이 없습니다. Postman에서 받은 토큰을 localStorage에 저장해주세요.",
+      );
+      return null;
+    }
+
+    return token;
+  };
+
+  const fetchMaterials = async () => {
+    try {
+      setLoading(true);
+
+      const token = getToken();
+      if (!token) return;
+
+      const baseUrl =
+        tab === "all"
+          ? "http://localhost:8080/api/materials"
+          : "http://localhost:8080/api/company-materials";
+
+      const params = new URLSearchParams({
+        keyword,
+        category,
+        status,
+        page: String(page),
+        size: String(size),
+      });
+
+      const response = await fetch(`${baseUrl}?${params.toString()}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("자재 목록 조회 실패");
+      }
+
+      const data: MaterialListResponse = await response.json();
+
+      setMaterials(data.materials);
+      setSummary({
+        totalMaterialCount: data.totalMaterialCount,
+        normalStockCount: data.normalStockCount,
+        shortageStockCount: data.shortageStockCount,
+        incomingCount: data.incomingCount,
+      });
+      setTotalPages(data.totalPages ?? 1);
+    } catch (error) {
+      console.error(error);
+      alert("자재 목록을 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch(
+        "http://localhost:8080/api/material-categories",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("카테고리 목록 조회 실패");
+      }
+
+      const data: CategoryItem[] = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    setSelected(null);
+    fetchMaterials();
+  }, [tab, page, category, status]);
+
+  const handleSearch = () => {
+    setSelected(null);
+    setPage(0);
+    fetchMaterials();
+  };
+
+  const handleTabChange = (nextTab: "all" | "my") => {
+    setTab(nextTab);
+    setPage(0);
+    setSelected(null);
+  };
+
+  const handlePrevPage = () => {
+    if (page > 0) {
+      setPage(page - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages - 1) {
+      setPage(page + 1);
+    }
+  };
 
   return (
     <div className="material-page">
@@ -142,21 +217,31 @@ function MaterialList() {
       </div>
 
       <div className="material-stat-grid">
-        <StatCard icon={<FiBox />} title="전체 자재" value="152" unit="개" />
+        <StatCard
+          icon={<FiBox />}
+          title="전체 자재"
+          value={summary.totalMaterialCount}
+          unit="개"
+        />
         <StatCard
           icon={<FiCheckCircle />}
           title="정상 재고"
-          value="128"
+          value={summary.normalStockCount}
           unit="개"
         />
         <StatCard
           icon={<FiAlertTriangle />}
           title="부족 재고"
-          value="12"
+          value={summary.shortageStockCount}
           unit="개"
           warning
         />
-        <StatCard icon={<FiTruck />} title="입고 예정" value="8" unit="건" />
+        <StatCard
+          icon={<FiTruck />}
+          title="입고 예정"
+          value={summary.incomingCount}
+          unit="건"
+        />
       </div>
 
       <div className="material-layout">
@@ -164,13 +249,13 @@ function MaterialList() {
           <div className="material-tabs">
             <button
               className={tab === "all" ? "active" : ""}
-              onClick={() => setTab("all")}
+              onClick={() => handleTabChange("all")}
             >
               전체 자재
             </button>
             <button
               className={tab === "my" ? "active" : ""}
-              onClick={() => setTab("my")}
+              onClick={() => handleTabChange("my")}
             >
               내 회사 자재
             </button>
@@ -178,21 +263,42 @@ function MaterialList() {
 
           <div className="material-toolbar">
             <div className="material-search">
-              <input placeholder="자재명, 코드, 규격 검색..." />
-              <FiSearch />
+              <input
+                placeholder="자재명, 코드, 규격 검색..."
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
+              />
+              <FiSearch onClick={handleSearch} />
             </div>
 
-            <select>
-              <option>전체 분류</option>
-              <option>철강</option>
-              <option>시멘트</option>
-              <option>유리</option>
+            <select
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">전체 분류</option>
+              {categories.map((item) => (
+                <option key={item.categoryId} value={item.categoryName}>
+                  {item.categoryName}
+                </option>
+              ))}
             </select>
 
-            <select>
-              <option>전체 상태</option>
-              <option>정상</option>
-              <option>부족</option>
+            <select
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">전체 상태</option>
+              <option value="정상">정상</option>
+              <option value="부족">부족</option>
             </select>
           </div>
 
@@ -212,102 +318,121 @@ function MaterialList() {
             </thead>
 
             <tbody>
-              {filteredMaterials.map((item) => (
-                <tr key={item.code}>
-                  <td>{item.code}</td>
-                  <td className="material-name">{item.name}</td>
-                  <td>{item.category}</td>
-                  <td>{item.stock}</td>
-                  <td>{item.min}</td>
-                  <td>{item.unit}</td>
-                  <td>{item.price}</td>
-                  <td>
-                    <span
-                      className={
-                        item.status === "정상" ? "status normal" : "status low"
-                      }
-                    >
-                      {item.status}
-                    </span>
-                  </td>
-                  <td>{item.supplier}</td>
+              {loading ? (
+                <tr>
+                  <td colSpan={9}>자재 목록을 불러오는 중입니다.</td>
                 </tr>
-              ))}
+              ) : filteredMaterials.length === 0 ? (
+                <tr>
+                  <td colSpan={9}>등록된 자재가 없습니다.</td>
+                </tr>
+              ) : (
+                filteredMaterials.map((item, index) => (
+                  <tr
+                    key={`${item.materialCode}-${index}`}
+                    onClick={() => setSelected(item)}
+                    className={
+                      selected?.materialId === item.materialId &&
+                      selected?.materialCode === item.materialCode
+                        ? "selected-row"
+                        : ""
+                    }
+                  >
+                    <td>{item.materialCode}</td>
+                    <td className="material-name">{item.materialName}</td>
+                    <td>{item.materialCategory}</td>
+                    <td>{item.currentQuantity}</td>
+                    <td>{item.minimumQuantity}</td>
+                    <td>{item.unit}</td>
+                    <td>{item.unitPrice.toLocaleString()}</td>
+                    <td>
+                      <span
+                        className={
+                          item.status === "정상"
+                            ? "status normal"
+                            : "status low"
+                        }
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                    <td>{item.supplierName}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
 
           <div className="pagination">
-            <button>
+            <button onClick={handlePrevPage} disabled={page === 0}>
               <FiChevronLeft />
             </button>
-            <button className="active">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>4</button>
-            <button>5</button>
-            <button>
+
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                className={page === index ? "active" : ""}
+                onClick={() => setPage(index)}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button onClick={handleNextPage} disabled={page >= totalPages - 1}>
               <FiChevronRight />
             </button>
           </div>
         </section>
 
-        <aside className="material-detail-panel">
-          <div className="panel-header">
-            <h3>자재 상세 정보</h3>
-            <button>
-              <FiX />
-            </button>
-          </div>
-
-          <div className="selected-material">
-            <div className="material-thumb">▥</div>
-            <div>
-              <h2>{selected.name}</h2>
-              <span
-                className={
-                  selected.status === "정상" ? "status normal" : "status low"
-                }
-              >
-                {selected.status}
-              </span>
-              <p>
-                {selected.code} · {selected.category}
-              </p>
-            </div>
-          </div>
-
-          <div className="detail-list">
-            <Info
-              label="현재 재고"
-              value={`${selected.stock} ${selected.unit}`}
-            />
-            <Info
-              label="최소 재고"
-              value={`${selected.min} ${selected.unit}`}
-            />
-            <Info label="단가" value={`${selected.price} 원`} />
-            <Info label="단위" value={selected.unit} />
-            <Info label="분류" value={selected.category} />
-            <Info label="공급업체" value={selected.supplier} />
-          </div>
-
-          <div className="stock-history">
-            <div className="history-title">
-              <h4>최근 입출고 내역</h4>
-              <button>더보기</button>
+        {selected && (
+          <aside className="material-detail-panel">
+            <div className="panel-header">
+              <h3>자재 상세 정보</h3>
+              <button onClick={() => setSelected(null)}>
+                <FiX />
+              </button>
             </div>
 
-            <History date="2024-06-10" type="입고" amount="+50 EA" positive />
-            <History date="2024-06-08" type="출고" amount="-30 EA" />
-            <History date="2024-06-05" type="입고" amount="+100 EA" positive />
-          </div>
+            <div className="selected-material">
+              <div className="material-thumb">▥</div>
+              <div>
+                <h2>{selected.materialName}</h2>
+                <span
+                  className={
+                    selected.status === "정상" ? "status normal" : "status low"
+                  }
+                >
+                  {selected.status}
+                </span>
+                <p>
+                  {selected.materialCode} · {selected.materialCategory}
+                </p>
+              </div>
+            </div>
 
-          <div className="panel-actions">
-            <button className="primary">입고 처리</button>
-            <button>출고 처리</button>
-            <button>수정</button>
-          </div>
-        </aside>
+            <div className="detail-list">
+              <Info
+                label="현재 재고"
+                value={`${selected.currentQuantity} ${selected.unit}`}
+              />
+              <Info
+                label="최소 재고"
+                value={`${selected.minimumQuantity} ${selected.unit}`}
+              />
+              <Info
+                label="단가"
+                value={`${selected.unitPrice.toLocaleString()} 원`}
+              />
+              <Info label="단위" value={selected.unit} />
+              <Info label="분류" value={selected.materialCategory} />
+              <Info label="공급업체" value={selected.supplierName} />
+            </div>
+
+            <div className="panel-actions">
+              <button>수정</button>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );
@@ -331,16 +456,6 @@ function Info({ label, value }: { label: string; value: string }) {
     <div className="detail-info-row">
       <span>{label}</span>
       <strong>{value}</strong>
-    </div>
-  );
-}
-
-function History({ date, type, amount, positive }: any) {
-  return (
-    <div className="history-row">
-      <span>{date}</span>
-      <span>{type}</span>
-      <strong className={positive ? "positive" : "negative"}>{amount}</strong>
     </div>
   );
 }
