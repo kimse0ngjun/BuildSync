@@ -9,6 +9,10 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.buildsync.dto.paging.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 @Service
@@ -19,11 +23,22 @@ public class AdminCompanyService {
     private final MailService mailService;
 
     // 승인 대기 업체 목록 조회
-    public List<AdminCompanyResponse> getPendingCompanies() {
-        return companyRepository.findByStatus(CompanyStatus.PENDING)
-                .stream()
-                .map(AdminCompanyResponse::from)
-                .toList();
+    public PageResponse<AdminCompanyResponse> getPendingCompanies(Pageable pageable) {
+
+        Page<Company> companyPage =
+                companyRepository.findByStatus(CompanyStatus.PENDING, pageable);
+
+        List<AdminCompanyResponse> list =
+                companyPage.getContent()
+                        .stream()
+                        .map(AdminCompanyResponse::from)
+                        .toList();
+
+        return new PageResponse<>(
+                list,
+                pageable,
+                companyPage.getTotalElements()
+        );
     }
 
     // 업체 승인

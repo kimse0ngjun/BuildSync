@@ -5,6 +5,11 @@ import com.buildsync.service.admin.AdminCompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import com.buildsync.dto.paging.PageResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
+
 import java.util.List;
 
 @RestController
@@ -16,8 +21,15 @@ public class AdminCompanyController {
 
     //승인 대기 업체 목록 조회
     @GetMapping("/pending")
-    public List<AdminCompanyResponse> getPendingCompanies() {
-        return adminCompanyService.getPendingCompanies();
+    public PageResponse<AdminCompanyResponse> getPendingCompanies(
+            @PageableDefault(
+                    size = 10,
+                    sort = "createdAt",
+                    direction = Sort.Direction.ASC
+            )
+            Pageable pageable
+    ) {
+        return adminCompanyService.getPendingCompanies(pageable);
     }
 
     //업체 승인

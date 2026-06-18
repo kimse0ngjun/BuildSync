@@ -34,6 +34,8 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 	List<Company> findTop5ByOrderByCreatedAtDesc();
 	
+	Page<Company> findByStatus(CompanyStatus status, Pageable pageable);
+	
 	// Company
 	@Query(value = """
 	        SELECT
