@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Service
 @RequiredArgsConstructor
 public class MaterialService {
@@ -67,21 +70,28 @@ public class MaterialService {
         return MaterialResponse.from(savedMaterial, savedStock);
     }
 
-    // 전체 자재 목록 조회 + 통계 카드 + 검색/필터
-    public MaterialDashboardResponse getMaterials(String keyword, String category, String status) {
-
-        List<MaterialResponse> materials = supStockRepository.searchStocks(keyword, category)
-                .stream()
+    // 전체 자재 목록 조회 + 통계 카드 + 검색/필터 + 페이징
+    public MaterialDashboardResponse getMaterials(
+            String keyword,
+            String category,
+            String status,
+            Pageable pageable
+    ) {
+        Page<MaterialResponse> materialPage = supStockRepository
+                .searchStocks(keyword, category, pageable)
                 .map(stock ->
                         MaterialResponse.from(
                                 stock.getMaterial(),
                                 stock
                         )
-                )
+                );
+
+        List<MaterialResponse> materials = materialPage.getContent()
+                .stream()
                 .filter(material -> status == null || status.isBlank() || status.equals(material.getStatus()))
                 .toList();
 
-        long totalMaterialCount = materials.size();
+        long totalMaterialCount = materialPage.getTotalElements();
 
         long normalStockCount = materials.stream()
                 .filter(material -> "정상".equals(material.getStatus()))
@@ -98,6 +108,10 @@ public class MaterialService {
                 .normalStockCount(normalStockCount)
                 .shortageStockCount(shortageStockCount)
                 .incomingCount(incomingCount)
+                .currentPage(materialPage.getNumber())
+                .pageSize(materialPage.getSize())
+                .totalElements(materialPage.getTotalElements())
+                .totalPages(materialPage.getTotalPages())
                 .materials(materials)
                 .build();
     }

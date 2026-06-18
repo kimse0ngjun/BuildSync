@@ -12,6 +12,9 @@ import com.buildsync.entity.Company;
 import com.buildsync.entity.Material;
 import com.buildsync.entity.SupStock;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Repository
 public interface SupStockRepository extends JpaRepository<SupStock, Long> {
 
@@ -40,19 +43,32 @@ public interface SupStockRepository extends JpaRepository<SupStock, Long> {
     			+ "com.buildsync.entity.OrderStatus.ACCEPTED)")
     long countOnOrderMaterials(@Param("companyId") Long companyId);
 
-    // 전체 자재 검색 + 분류 필터
-    @Query("SELECT ss FROM SupStock ss " +
-            "JOIN FETCH ss.material m " +
-            "JOIN FETCH ss.company c " +
-            "WHERE (:keyword IS NULL OR :keyword = '' " +
-            "OR m.materialCode LIKE CONCAT('%', :keyword, '%') " +
-            "OR m.materialName LIKE CONCAT('%', :keyword, '%') " +
-            "OR m.materialCategory LIKE CONCAT('%', :keyword, '%') " +
-            "OR m.specification LIKE CONCAT('%', :keyword, '%') " +
-            "OR c.companyName LIKE CONCAT('%', :keyword, '%')) " +
-            "AND (:category IS NULL OR :category = '' OR m.materialCategory = :category)")
-    List<SupStock> searchStocks(
+    // 전체 자재 검색 + 분류 필터 + 페이징
+    @Query(
+            value = "SELECT ss FROM SupStock ss " +
+                    "JOIN FETCH ss.material m " +
+                    "JOIN FETCH ss.company c " +
+                    "WHERE (:keyword IS NULL OR :keyword = '' " +
+                    "OR m.materialCode LIKE CONCAT('%', :keyword, '%') " +
+                    "OR m.materialName LIKE CONCAT('%', :keyword, '%') " +
+                    "OR m.materialCategory LIKE CONCAT('%', :keyword, '%') " +
+                    "OR m.specification LIKE CONCAT('%', :keyword, '%') " +
+                    "OR c.companyName LIKE CONCAT('%', :keyword, '%')) " +
+                    "AND (:category IS NULL OR :category = '' OR m.materialCategory = :category)",
+            countQuery = "SELECT COUNT(ss) FROM SupStock ss " +
+                    "JOIN ss.material m " +
+                    "JOIN ss.company c " +
+                    "WHERE (:keyword IS NULL OR :keyword = '' " +
+                    "OR m.materialCode LIKE CONCAT('%', :keyword, '%') " +
+                    "OR m.materialName LIKE CONCAT('%', :keyword, '%') " +
+                    "OR m.materialCategory LIKE CONCAT('%', :keyword, '%') " +
+                    "OR m.specification LIKE CONCAT('%', :keyword, '%') " +
+                    "OR c.companyName LIKE CONCAT('%', :keyword, '%')) " +
+                    "AND (:category IS NULL OR :category = '' OR m.materialCategory = :category)"
+    )
+    Page<SupStock> searchStocks(
             @Param("keyword") String keyword,
-            @Param("category") String category
+            @Param("category") String category,
+            Pageable pageable
     );
 }
