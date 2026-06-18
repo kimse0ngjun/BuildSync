@@ -1,5 +1,7 @@
 package com.buildsync.dto.auth;
 
+import com.buildsync.entity.CompanyType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +14,7 @@ public class SignupRequest {
     private String password;
 
     // 업체 정보
-    private String companyType;
+    private CompanyType companyType;
     private String companyName;
     private String ceoName;
 

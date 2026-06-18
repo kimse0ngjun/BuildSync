@@ -1,6 +1,6 @@
 package com.buildsync.entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,8 +36,9 @@ public class Company {
     @Column(nullable = false)
 	private String password;
     
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String companyType;
+    private CompanyType companyType;
 
     @Column(nullable = false)
     private String companyName;
@@ -59,8 +60,8 @@ public class Company {
 	@Column(unique = true)
 	private String email;
 	
-	@Column(nullable = false, updatable = false)
-	private LocalDate createdAt;
+	@Column(name = "created_at", updatable = false)
+	private LocalDateTime createdAt;
 	
 	@Enumerated(EnumType.STRING)
 	private CompanyStatus status;
