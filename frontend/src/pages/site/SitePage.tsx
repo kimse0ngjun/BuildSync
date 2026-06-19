@@ -13,6 +13,7 @@ import {
   FiChevronRight,
   FiX,
 } from "react-icons/fi";
+import { siteApi } from "../../api/siteApi";
 import "../../styles/SitePage.css";
 
 type Site = {
@@ -56,17 +57,6 @@ function SitePage() {
 
   const navigate = useNavigate();
 
-  const getToken = () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      return null;
-    }
-
-    return token;
-  };
-
   const getProgress = (site: Site) => {
     if (site.status === "완료") return 100;
 
@@ -107,32 +97,13 @@ function SitePage() {
 
   const fetchSites = async () => {
     try {
-      const token = getToken();
-      if (!token) return;
-
-      const params = new URLSearchParams({
+      const data: SiteResponse = await siteApi.getSites({
         keyword,
         constructionType,
         status,
-        page: String(page),
-        size: "10",
+        page,
+        size: 10,
       });
-
-      const response = await fetch(
-        `http://localhost:8080/api/sites?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("공사 현장 목록 조회 실패");
-      }
-
-      const data: SiteResponse = await response.json();
 
       setSites(data.sites ?? []);
       setSummary({
@@ -163,22 +134,7 @@ function SitePage() {
     if (!window.confirm("공사 현장을 삭제하시겠습니까?")) return;
 
     try {
-      const token = getToken();
-      if (!token) return;
-
-      const response = await fetch(
-        `http://localhost:8080/api/sites/${siteId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("공사 현장 삭제 실패");
-      }
+      await siteApi.deleteSite(siteId);
 
       alert("공사 현장이 삭제되었습니다.");
       setSelected(null);

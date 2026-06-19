@@ -11,6 +11,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
 } from "react-icons/fi";
+import { materialApi } from "../../api/materialApi";
 import "../../styles/MaterialList.css";
 
 type MaterialItem = {
@@ -77,17 +78,6 @@ function MaterialList() {
 
   const myCompanyName = "테스트건설";
 
-  const getToken = () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      return null;
-    }
-
-    return token;
-  };
-
   const getSelectedMaterialId = () => {
     return selected?.materialId ?? selected?.id;
   };
@@ -96,36 +86,20 @@ function MaterialList() {
     try {
       setLoading(true);
 
-      const token = getToken();
-      if (!token) return;
-
-      const baseUrl =
-        tab === "all"
-          ? "http://localhost:8080/api/materials"
-          : "http://localhost:8080/api/company-materials";
-
-      const params = new URLSearchParams({
+      const params = {
         keyword,
         category,
         status,
-        page: String(page),
-        size: String(size),
-      });
+        page,
+        size,
+      };
 
-      const response = await fetch(`${baseUrl}?${params.toString()}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const data: MaterialListResponse =
+        tab === "all"
+          ? await materialApi.getAllMaterials(params)
+          : await materialApi.getMaterials(params);
 
-      if (!response.ok) {
-        throw new Error("자재 목록 조회 실패");
-      }
-
-      const data: MaterialListResponse = await response.json();
-
-      setMaterials(data.materials);
+      setMaterials(data.materials ?? []);
       setSummary({
         totalMaterialCount: data.totalMaterialCount,
         normalStockCount: data.normalStockCount,
@@ -143,24 +117,7 @@ function MaterialList() {
 
   const fetchCategories = async () => {
     try {
-      const token = getToken();
-      if (!token) return;
-
-      const response = await fetch(
-        "http://localhost:8080/api/material-categories",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("카테고리 목록 조회 실패");
-      }
-
-      const data: CategoryItem[] = await response.json();
+      const data: CategoryItem[] = await materialApi.getCategories();
       setCategories(data);
     } catch (error) {
       console.error(error);
@@ -220,22 +177,7 @@ function MaterialList() {
     if (!confirmDelete) return;
 
     try {
-      const token = getToken();
-      if (!token) return;
-
-      const response = await fetch(
-        `http://localhost:8080/api/company-materials/${materialId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("자재 삭제 실패");
-      }
+      await materialApi.deleteCompanyMaterial(materialId);
 
       alert("자재가 삭제되었습니다.");
       setSelected(null);

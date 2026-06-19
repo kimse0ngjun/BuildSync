@@ -10,6 +10,7 @@ import {
   FiChevronRight,
   FiX,
 } from "react-icons/fi";
+import { materialUsageApi } from "../../api/materialUsageApi";
 import "../../styles/MaterialUsagePage.css";
 
 type Usage = {
@@ -62,37 +63,13 @@ function MaterialUsagePage() {
 
   const size = 10;
 
-  const getToken = () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      return null;
-    }
-
-    return token;
-  };
-
   const fetchAllOptions = async () => {
     try {
-      const token = getToken();
-      if (!token) return;
+      const data: UsageResponse = await materialUsageApi.getUsages({
+        page: 0,
+        size: 1000,
+      });
 
-      const response = await fetch(
-        "http://localhost:8080/api/site-material-usages?page=0&size=1000",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("전체 옵션 조회 실패");
-      }
-
-      const data: UsageResponse = await response.json();
       setAllUsages(data.usages ?? []);
     } catch (error) {
       console.error(error);
@@ -103,38 +80,13 @@ function MaterialUsagePage() {
     try {
       setLoading(true);
 
-      const token = getToken();
-      if (!token) return;
-
-      const params = new URLSearchParams({
+      const data: UsageResponse = await materialUsageApi.getUsages({
         keyword: search,
-        page: String(page),
-        size: String(size),
+        siteId: siteId || undefined,
+        materialId: materialId || undefined,
+        page,
+        size,
       });
-
-      if (siteId) {
-        params.append("siteId", siteId);
-      }
-
-      if (materialId) {
-        params.append("materialId", materialId);
-      }
-
-      const response = await fetch(
-        `http://localhost:8080/api/site-material-usages?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("자재 사용내역 조회 실패");
-      }
-
-      const data: UsageResponse = await response.json();
 
       setUsages(data.usages ?? []);
       setSummary({
@@ -300,7 +252,12 @@ function MaterialUsagePage() {
 
           <div className="usage-pagination">
             <button
-              onClick={() => page > 0 && setPage(page - 1)}
+              onClick={() => {
+                if (page > 0) {
+                  setPage(page - 1);
+                  setSelected(null);
+                }
+              }}
               disabled={page === 0}
             >
               <FiChevronLeft />
@@ -320,7 +277,12 @@ function MaterialUsagePage() {
             ))}
 
             <button
-              onClick={() => page < totalPages - 1 && setPage(page + 1)}
+              onClick={() => {
+                if (page < totalPages - 1) {
+                  setPage(page + 1);
+                  setSelected(null);
+                }
+              }}
               disabled={page >= totalPages - 1}
             >
               <FiChevronRight />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiArrowLeft, FiBox, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
+import { materialApi } from "../../api/materialApi";
 import "../../styles/MaterialWrite.css";
 
 type CategoryItem = {
@@ -47,37 +48,9 @@ function MaterialEdit() {
   const isEnough =
     Number(form.currentStock || 0) >= Number(form.minimumStock || 0);
 
-  const getToken = () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      return null;
-    }
-
-    return token;
-  };
-
   const fetchCategories = async () => {
     try {
-      const token = getToken();
-      if (!token) return;
-
-      const response = await fetch(
-        "http://localhost:8080/api/material-categories",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("카테고리 목록 조회 실패");
-      }
-
-      const data: CategoryItem[] = await response.json();
+      const data: CategoryItem[] = await materialApi.getCategories();
       setCategories(data);
     } catch (error) {
       console.error(error);
@@ -86,30 +59,13 @@ function MaterialEdit() {
 
   const fetchMaterial = async () => {
     try {
-      const token = getToken();
-      if (!token) return;
-
       if (!materialId) {
         alert("자재 ID가 없습니다.");
         navigate("/material");
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:8080/api/materials/${materialId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("자재 상세 조회 실패");
-      }
-
-      const data: MaterialResponse = await response.json();
+      const data: MaterialResponse = await materialApi.getMaterial(materialId);
 
       setForm({
         materialCode: data.materialCode,
@@ -145,6 +101,11 @@ function MaterialEdit() {
   };
 
   const handleSubmit = async () => {
+    if (!materialId) {
+      alert("자재 ID가 없습니다.");
+      return;
+    }
+
     if (
       !form.materialCode ||
       !form.materialName ||
@@ -170,33 +131,18 @@ function MaterialEdit() {
     try {
       setLoading(true);
 
-      const token = getToken();
-      if (!token) return;
+      const requestBody = {
+        materialCode: form.materialCode,
+        materialName: form.materialName,
+        materialCategory: form.materialCategory,
+        unit: form.unit,
+        specification: form.specification,
+        currentQuantity: Number(form.currentStock),
+        minimumQuantity: Number(form.minimumStock),
+        unitPrice: Number(form.price),
+      };
 
-      const response = await fetch(
-        `http://localhost:8080/api/company-materials/${materialId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            materialCode: form.materialCode,
-            materialName: form.materialName,
-            materialCategory: form.materialCategory,
-            unit: form.unit,
-            specification: form.specification,
-            currentQuantity: Number(form.currentStock),
-            minimumQuantity: Number(form.minimumStock),
-            unitPrice: Number(form.price),
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("자재 수정 실패");
-      }
+      await materialApi.updateCompanyMaterial(materialId, requestBody);
 
       alert("자재가 수정되었습니다.");
       navigate("/material");
