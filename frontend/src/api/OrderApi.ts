@@ -1,41 +1,65 @@
 import axios from "axios";
-import type { Company, Contact, Material } from "../types/OrderDTO";
+import type {
+  CompanyResponse,
+  Contact,
+  MaterialResponse,
+  PageResponse,
+} from "../types/OrderDTO";
 
 const api = axios.create({
-  baseURL: "/order",
+  baseURL: "http://localhost:8080/api/order",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+// 발주서 작성 api
 export const writeOrderApi = {
-  getSupplierList: () => api<Company[]>("/company").then((res) => res.data),
+  getSupplierList: () => {
+    return api.get<CompanyResponse[]>("/company").then((res) => res.data);
+  },
 
-  getContactList: (companyId: number) =>
-    api<Contact[]>(`/contact?companyId=${companyId}`).then((res) => res.data),
+  getContactList: (companyId: number) => {
+    return api
+      .get<Contact[]>(`/contact?companyId=${companyId}`)
+      .then((res) => res.data);
+  },
 
-  getOurCompanyMaterial: (companyId: number) =>
-    api<Material[]>(`/material?companyId=${companyId}`).then((res) => res.data),
+  getOurCompanyMaterial: (companyId: number) => {
+    return api
+      .get<MaterialResponse[]>(`/material?companyId=${companyId}`)
+      .then((res) => res.data);
+  },
 
-  writeOrder: (data: any) => api.post("/write", data).then((res) => res.data),
+  writeOrder: (data: any) => {
+    return api.post("/write", data).then((res) => res.data);
+  },
 };
 
+// 발주 목록 api
 export const orderListApi = {
-  getOrderList: (filters: {
+  getOrderListConstruction: (filters: {
+    companyId: number;
     status?: string;
-    search?: string;
-    currentPage: number;
+    keyword?: string;
+    page: number;
     size: number;
   }) => {
-    return api.get<any[]>("/list", { params: filters }).then((res) => res.data);
+    const params = {
+      companyId: filters.companyId,
+      status: filters.status || undefined,
+      keyword: filters.keyword || undefined,
+      page: filters.page,
+      size: filters.size,
+    };
+
+    return api
+      .get<PageResponse<any>>("/construction", { params })
+      .then((res) => res.data);
   },
 
   getOrderDetail: (orderId: number) => {
     return api.get<any>(`/detail/${orderId}`).then((res) => res.data);
-  },
-
-  updateStockIn: (orderId: number) => {
-    api.patch<string>(`/stock-in/${orderId}`);
   },
 
   changeOrderCancel: (orderId: number, status: string) => {

@@ -13,22 +13,25 @@ import {
   FiFileText,
   FiSave,
 } from "react-icons/fi";
-import { writeOrderApi } from "../../api/OrderApi";
+import { writeOrderApi } from "../../api/orderApi";
 import type {
-  Company,
+  CompanyResponse,
   Contact,
-  Material,
+  MaterialResponse,
   SelectedMaterialItem,
 } from "../../types/OrderDTO";
+
 import "../../styles/WriteOrder.css";
 
 export const WriteOrder = () => {
   const navigate = useNavigate();
   const orderDate = new Date().toISOString().split("T")[0];
 
-  const [supplierList, setSupplierList] = useState<Company[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<Material[]>([]);
+  const [supplierList, setSupplierList] = useState<CompanyResponse[]>([]);
+  const [selectedId, setSelectedId] = useState<string>("");
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialResponse[]>(
+    [],
+  );
   const [inputMaterialId, setInputMaterialId] = useState<number>(0);
   const [inputQuantity, setInputQuantity] = useState<number>(0);
   const [basketList, setBasketList] = useState<SelectedMaterialItem[]>([]);
@@ -38,7 +41,10 @@ export const WriteOrder = () => {
   useEffect(() => {
     writeOrderApi
       .getSupplierList()
-      .then((data) => setSupplierList(Array.isArray(data) ? data : []))
+      .then((data) => {
+        console.log(data);
+        setSupplierList(Array.isArray(data) ? data : []);
+      })
       .catch(console.error);
   }, []);
 
@@ -49,8 +55,12 @@ export const WriteOrder = () => {
     }
 
     writeOrderApi
-      .getOurCompanyMaterial(selectedId)
-      .then((data) => setSelectedMaterial(Array.isArray(data) ? data : []))
+      .getOurCompanyMaterial(Number(selectedId))
+      .then((data) => {
+        console.log("자재 응답", data);
+        setSelectedMaterial(Array.isArray(data) ? data : []);
+      })
+
       .catch(console.error);
   }, [selectedId]);
 
@@ -63,27 +73,31 @@ export const WriteOrder = () => {
     0,
   );
 
-  const handleCompanyChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const companyId = Number(e.target.value);
+  const handleCompanyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const companyIdStr = e.target.value;
 
-    setSelectedId(companyId);
+    setSelectedId(companyIdStr);
     setInputMaterialId(0);
     setBasketList([]);
 
-    if (!companyId) {
+    if (!companyIdStr) {
       setContact(null);
       return;
     }
 
-    try {
-      const data = await writeOrderApi.getContactList(companyId);
-      setContact(data && data.length > 0 ? data[0] : null);
-    } catch (error) {
-      console.error("담당자 로드 실패:", error);
-      setContact(null);
-    }
+    writeOrderApi
+      .getContactList(Number(companyIdStr))
+      .then((data) => {
+        if (data && data.length > 0) {
+          setContact(data[0]);
+        } else {
+          setContact(null);
+        }
+      })
+      .catch((error) => {
+        console.error("담당자 로드 실패:", error);
+        setContact(null);
+      });
   };
 
   const handleAddMaterial = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -100,7 +114,7 @@ export const WriteOrder = () => {
     }
 
     const isExist = basketList.some(
-      (item) => item.materialId === currentSelectedMaterialInfo.materialId,
+      (item) => item.id === currentSelectedMaterialInfo.materialId,
     );
 
     if (isExist) {
@@ -113,7 +127,7 @@ export const WriteOrder = () => {
       currentStock: currentSelectedMaterialInfo.currentStock,
       minimumStock: currentSelectedMaterialInfo.minimumStock,
       orderQuantity: inputQuantity,
-      totalAmount: currentSelectedMaterialInfo.price * inputQuantity,
+      totalAmount: currentSelectedMaterialInfo.unitPrice * inputQuantity,
     };
 
     setBasketList([...basketList, newItem]);
@@ -122,7 +136,7 @@ export const WriteOrder = () => {
   };
 
   const handleRemoveItem = (id: number) => {
-    setBasketList(basketList.filter((item) => item.materialId !== id));
+    setBasketList(basketList.filter((item) => item.id !== id));
   };
 
   const handleUploadOrder = async (e: React.FormEvent) => {
@@ -141,20 +155,19 @@ export const WriteOrder = () => {
     try {
       const orderPayload = {
         orders: {
-          order_id: null,
-          contact_id: contact?.contactId || null,
-          company_id: selectedId,
-          order_date: orderDate,
-          expected_delivery_date: orderDate,
-          total_amount: totalAmountSum,
+          orderId: null,
+          contactId: contact?.contactId || null,
+          companyId: selectedId,
+          orderDate: orderDate,
+          totalAmount: totalAmountSum,
           status: "PENDING",
-          memo,
+          memo: memo || null,
         },
         orderItems: basketList.map((item) => ({
-          order_item_id: null,
-          order_id: null,
-          material_id: item.materialId,
-          unit_price: item.price,
+          orderItemId: null,
+          orderId: null,
+          materialId: item.id,
+          unitPrice: item.material.unitPrice,
           amount: item.totalAmount,
           quantity: item.orderQuantity,
         })),
@@ -162,7 +175,7 @@ export const WriteOrder = () => {
 
       await writeOrderApi.writeOrder(orderPayload);
       alert("발주서 전송이 완료되었습니다.");
-      navigate("/orders");
+      navigate("/order/list");
     } catch (error) {
       console.error("발주서 전송 실패:", error);
       alert("서버 오류로 발주서 전송에 실패했습니다.");
@@ -173,7 +186,7 @@ export const WriteOrder = () => {
     <div className="order-write-page">
       <div className="order-write-header">
         <button className="order-back-btn" onClick={() => navigate(-1)}>
-          <FiArrowLeft />
+          <FiArrowLeft className="go-back-icon" />
         </button>
 
         <div>
@@ -217,33 +230,33 @@ export const WriteOrder = () => {
 
           <div className="order-form-grid">
             <FormField label="거래처 선택" required icon={<FiBriefcase />}>
-              <select onChange={handleCompanyChange} defaultValue="">
-                <option disabled value="">
-                  거래처를 선택하세요
-                </option>
+              <select onChange={handleCompanyChange} value={selectedId || ""}>
+                <option value="">거래처를 선택하세요</option>
 
                 {supplierList.length > 0 ? (
-                  supplierList.map((item) => (
-                    <option key={item.companyId} value={item.companyId}>
+                  supplierList.map((item, index) => (
+                    <option key={`${item.id}-${index}`} value={String(item.id)}>
                       {item.companyName}
                     </option>
                   ))
                 ) : (
-                  <option disabled>등록된 공급업체가 없습니다</option>
+                  <option key="no-supplier" disabled value="">
+                    등록된 공급업체가 없습니다
+                  </option>
                 )}
               </select>
             </FormField>
 
             <FormField label="담당자명" icon={<FiUser />}>
-              <input value={contact?.contactName || ""} readOnly />
+              <input value={contact?.contactName ?? ""} readOnly />
             </FormField>
 
             <FormField label="연락처" icon={<FiPhone />}>
-              <input value={contact?.phone || ""} readOnly />
+              <input value={contact?.phone ?? ""} readOnly />
             </FormField>
 
             <FormField label="이메일" icon={<FiMail />}>
-              <input value={contact?.email || ""} readOnly />
+              <input value={contact?.email ?? ""} readOnly />
             </FormField>
           </div>
         </section>
@@ -262,12 +275,20 @@ export const WriteOrder = () => {
               value={inputMaterialId}
               onChange={(e) => setInputMaterialId(Number(e.target.value))}
             >
-              <option value={0}>자재 선택</option>
-              {selectedMaterial.map((item) => (
-                <option key={item.materialId} value={item.materialId}>
-                  {item.materialName}
+              <option value={0} key="default-material">
+                자재 선택
+              </option>
+              {selectedMaterial.length > 0 ? (
+                selectedMaterial.map((item) => (
+                  <option key={item.materialId} value={item.materialId}>
+                    {item.materialName}
+                  </option>
+                ))
+              ) : (
+                <option key="no-material" disabled>
+                  등록된 자재가 없습니다
                 </option>
-              ))}
+              )}
             </select>
 
             <input
@@ -299,8 +320,6 @@ export const WriteOrder = () => {
               <thead>
                 <tr>
                   <th>자재명</th>
-                  <th>현재 재고</th>
-                  <th>최소 재고</th>
                   <th>발주 수량</th>
                   <th>규격</th>
                   <th>단가</th>
@@ -312,23 +331,22 @@ export const WriteOrder = () => {
               <tbody>
                 {basketList.length > 0 ? (
                   basketList.map((item) => (
-                    <tr key={item.materialId}>
+                    <tr key={item.id}>
                       <td className="order-material-name">
-                        {item.materialName}
+                        {item.material.materialName}
                       </td>
-                      <td>{item.currentStock}</td>
-                      <td>{item.minimumStock}</td>
+
                       <td>
-                        {item.orderQuantity} {item.unit}
+                        {item.orderQuantity} {item.material.unit}
                       </td>
-                      <td>{item.specification}</td>
-                      <td>{item.price.toLocaleString()}</td>
+                      <td>{item.material.specification}</td>
+                      <td>{item.material.unitPrice.toLocaleString()}</td>
                       <td>{item.totalAmount.toLocaleString()}</td>
                       <td>
                         <button
                           type="button"
                           className="delete-item-btn"
-                          onClick={() => handleRemoveItem(item.materialId)}
+                          onClick={() => handleRemoveItem(item.material.id)}
                         >
                           <FiTrash2 />
                         </button>

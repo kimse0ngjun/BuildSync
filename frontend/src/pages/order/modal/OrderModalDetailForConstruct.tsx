@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Material, OrderDetailProps } from "../../../types/OrderDTO";
-import { orderListApi, writeOrderApi } from "../../../api/OrderApi";
+import { orderListApi, writeOrderApi } from "../../../api/orderApi";
 
 // 건설업체 발주 상세 화면
 export const OrderModalDetailForConstruct = ({

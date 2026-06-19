@@ -1,5 +1,5 @@
-export interface Company {
-  companyId: number;
+export interface CompanyResponse {
+  id: number;
   companyType: string;
   companyName: string;
   ceoName: string;
@@ -21,23 +21,35 @@ export interface Contact {
   email: string;
 }
 
-export interface Material {
-  materialId: number;
-  materialCode: string;
-  materialName: string;
-  materialCategory: string;
-  currentStock: number;
-  minimumStock: number;
-  unit: string;
-  specification: string;
-  unitPrice: number;
+export interface MaterialResponse {
+  id: number;
+
+  company: {
+    id: number;
+    companyName: string;
+  };
+
+  material: {
+    id: number;
+    materialCode: string;
+    materialName: string;
+    materialCategory: string;
+    unit: string;
+    unitPrice: number;
+    specification: string;
+  };
+
+  SupStock: {
+    id: number;
+    unitPrice: number;
+  };
 }
 
 export interface WriteOrderInfo {
   orderItems: any[];
 }
 
-export interface SelectedMaterialItem extends Material {
+export interface SelectedMaterialItem extends MaterialResponse {
   orderQuantity: number;
   totalAmount: number;
 }
@@ -74,4 +86,12 @@ export interface OrderList extends OrderDetail {
 export interface OrderDetailProps {
   selectedOrder: any | null;
   onClose: () => void;
+}
+
+export interface PageResponse<T> {
+  list: T[];
+  pageNum: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
 }

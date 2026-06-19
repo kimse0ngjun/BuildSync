@@ -12,76 +12,12 @@ import {
 } from "react-icons/fi";
 import "../../styles/OrderList.css";
 
-const sampleOrders = [
-  {
-    orderId: "PO-2026-001",
-    companyName: "대한자재",
-    contactName: "김철수",
-    status: "END",
-    orderDate: "2026-06-09",
-    orderItems: [{ materialName: "철근 D13" }, { materialName: "시멘트 40kg" }],
-  },
-  {
-    orderId: "PO-2026-002",
-    companyName: "쌍용양회",
-    contactName: "이영희",
-    status: "PENDING",
-    orderDate: "2026-06-08",
-    orderItems: [{ materialName: "시멘트 40kg" }],
-  },
-  {
-    orderId: "PO-2026-003",
-    companyName: "우드코리아",
-    contactName: "박민수",
-    status: "ACCEPTED",
-    orderDate: "2026-06-07",
-    orderItems: [
-      { materialName: "목재 2x4" },
-      { materialName: "합판 12T" },
-      { materialName: "각재" },
-    ],
-  },
-  {
-    orderId: "PO-2026-004",
-    companyName: "대한전선",
-    contactName: "최현우",
-    status: "END",
-    orderDate: "2026-06-06",
-    orderItems: [{ materialName: "전선 2.5sq" }],
-  },
-  {
-    orderId: "PO-2026-005",
-    companyName: "삼화페인트",
-    contactName: "강민수",
-    status: "CANCELED",
-    orderDate: "2026-06-05",
-    orderItems: [{ materialName: "페인트 18L" }],
-  },
-  {
-    orderId: "PO-2026-006",
-    companyName: "금강PVC",
-    contactName: "정하늘",
-    status: "PENDING",
-    orderDate: "2026-06-04",
-    orderItems: [
-      { materialName: "배관 PVC 50A" },
-      { materialName: "PVC 엘보" },
-    ],
-  },
-  {
-    orderId: "PO-2026-007",
-    companyName: "벽돌마트",
-    contactName: "홍길동",
-    status: "ACCEPTED",
-    orderDate: "2026-06-03",
-    orderItems: [{ materialName: "벽돌" }],
-  },
-];
-
 import { FaRegCircleCheck } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetail } from "./modal/OrderModalDetail";
+import { orderListApi } from "../../api/orderApi";
+import { STATUS_MAP } from "../../constants/status";
 
 export const OrderList = () => {
   const navigate = useNavigate();
@@ -89,45 +25,84 @@ export const OrderList = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [keyword, setKeyword] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    accepted: 0,
+    end: 0,
+    canceled: 0,
+  });
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
-  const pageSize = 7;
+  const pageSize = 10;
 
-  const myCompanyType = localStorage.getItem("companyType") as
-    | "CONSTRUCTION"
-    | "SUPPLIER";
+  // const myCompanyType = localStorage.getItem("companyType") as
+  //   | "CONSTRUCTION"
+  //   | "SUPPLIER";
+  // const myCompanyId = Number(localStorage.getItem("companyId") || 1);
+  const myCompanyId = 1;
+  const myCompanyType = "CONSTRUCTION";
 
-  useEffect(() => {
-    let filtered = sampleOrders;
+  const fetchOrderList = () => {
+    const filters = {
+      companyId: myCompanyId,
+      status: selectedStatus || undefined,
+      keyword: keyword.trim() || undefined,
+      page: page - 1,
+      size: pageSize,
+    };
 
-    if (selectedStatus) {
-      filtered = filtered.filter((order) => order.status === selectedStatus);
-    }
+    orderListApi
+      .getOrderListConstruction(filters)
+      .then((data) => {
+        if (data && (data.content || data.list)) {
+          const contentList = data.content || data.list || [];
+          setOrders(contentList);
 
-    if (keyword.trim()) {
-      filtered = filtered.filter((order) => {
-        const itemNames = order.orderItems
-          .map((item: any) => item.materialName)
-          .join(" ");
+          const totalElements =
+            data.totalElements || data.totalCount || contentList.length;
+          setTotalCount(totalElements);
 
-        return (
-          order.orderId.includes(keyword) ||
-          order.companyName.includes(keyword) ||
-          order.contactName.includes(keyword) ||
-          itemNames.includes(keyword)
-        );
+          const calculatedTotalPages =
+            data.totalPages || Math.ceil(totalElements / pageSize) || 1;
+          setTotalPages(calculatedTotalPages);
+
+          setStats({
+            total: totalElements,
+            pending:
+              data.pendingCount ||
+              contentList.filter((o: any) => o.status === "PENDING").length,
+            accepted:
+              data.acceptedCount ||
+              contentList.filter((o: any) => o.status === "ACCEPTED").length,
+            end:
+              data.endCount ||
+              contentList.filter((o: any) => o.status === "END").length,
+            canceled:
+              data.canceledCount ||
+              contentList.filter((o: any) => o.status === "CANCELED").length,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("발주 목록 로드 실패:", err);
+        setOrders([]);
       });
-    }
+  };
 
-    setOrders(filtered);
-    setTotalCount(filtered.length);
+  // 필터 및 페이지 번호 체인 시 재조회
+  useEffect(() => {
+    fetchOrderList();
   }, [selectedStatus, keyword, page]);
 
-  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  // 페이지네이션 번호 가방 계산
   const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -137,7 +112,13 @@ export const OrderList = () => {
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setKeyword(searchInput);
     setPage(1);
+  };
+
+  const handleRowClick = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
   };
 
   const icon = <FaRegCircleCheck />;
@@ -167,29 +148,25 @@ export const OrderList = () => {
         <StatCard
           icon={<FiFileText />}
           title="전체 발주"
-          value={sampleOrders.length}
+          value={stats.total}
           unit="건"
         />
         <StatCard
           icon={<FiClock />}
           title="접수 대기"
-          value={
-            sampleOrders.filter((order) => order.status === "PENDING").length
-          }
+          value={stats.pending}
           unit="건"
         />
         <StatCard
           icon={<FiCheckCircle />}
           title="발주 완료"
-          value={sampleOrders.filter((order) => order.status === "END").length}
+          value={stats.end}
           unit="건"
         />
         <StatCard
           icon={<FiXCircle />}
           title="취소"
-          value={
-            sampleOrders.filter((order) => order.status === "CANCELED").length
-          }
+          value={stats.canceled}
           unit="건"
           danger
         />
@@ -199,8 +176,8 @@ export const OrderList = () => {
         <form className="order-search" onSubmit={handleSearchSubmit}>
           <input
             placeholder="발주번호, 거래처, 담당자, 자재 검색..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
           <button type="submit">
             <FiSearch />
@@ -231,30 +208,28 @@ export const OrderList = () => {
 
           <tbody>
             {orders.length > 0 ? (
-              orders.map((order) => {
+              orders.map((order, index) => {
                 const items = order.orderItems || [];
                 const representativeItem =
                   items.length > 0 ? items[0].materialName : "품목 없음";
                 const itemCount = items.length;
 
                 return (
-                  <tr key={order.orderId}>
+                  <tr
+                    key={`${order.orderId ?? "order"}-${index}`}
+                    onClick={() => handleRowClick(order)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <td className="order-number">{order.orderId}</td>
                     <td className="order-company">{order.companyName}</td>
-                    <td>{order.contactName}</td>
+                    <td>{order.contactName || "-"}</td>
                     <td className="order-material">
                       {representativeItem}
                       {itemCount > 1 && <span> 외 {itemCount - 1}건</span>}
                     </td>
                     <td>
                       <span className={`order-status ${order.status}`}>
-                        {order.status === "PENDING"
-                          ? "접수 대기"
-                          : order.status === "ACCEPTED"
-                            ? "접수 완료"
-                            : order.status === "END"
-                              ? "발주 완료"
-                              : "취소"}
+                        {STATUS_MAP[order.status] ?? order.status}
                       </span>
                     </td>
 
