@@ -177,6 +177,14 @@
   border-bottom: 1px solid #eef2f7;
 }
 
+.site-table tbody tr {
+  cursor: pointer;
+}
+
+.site-table tbody tr:hover {
+  background: #f4f8ff;
+}
+
 .site-name {
   color: #10284a !important;
   font-weight: 700 !important;
@@ -279,6 +287,29 @@
 
 .site-detail-list {
   border-top: 1px solid #eef2f7;
+}
+
+.site-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.site-detail-header button {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.site-table tbody tr {
+  cursor: pointer;
+}
+
+.site-table tbody tr:hover {
+  background: #f4f8ff;
 }
 
 .site-info-row {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FiArrowLeft, FiBox, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
 import "../../styles/MaterialWrite.css";
 
@@ -9,10 +9,29 @@ type CategoryItem = {
   createdAt: string;
 };
 
-function MaterialWrite() {
+type MaterialResponse = {
+  id?: number;
+  materialId?: number;
+  supMaterialId?: number;
+  materialCode: string;
+  materialName: string;
+  materialCategory: string;
+  currentQuantity: number;
+  minimumQuantity: number;
+  unit: string;
+  unitPrice: number;
+  status: string;
+  supplierName: string;
+  specification: string;
+  createdAt: string;
+};
+
+function MaterialEdit() {
   const navigate = useNavigate();
+  const { materialId } = useParams();
 
   const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     materialCode: "",
@@ -65,30 +84,64 @@ function MaterialWrite() {
     }
   };
 
+  const fetchMaterial = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      if (!materialId) {
+        alert("자재 ID가 없습니다.");
+        navigate("/material");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:8080/api/materials/${materialId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("자재 상세 조회 실패");
+      }
+
+      const data: MaterialResponse = await response.json();
+
+      setForm({
+        materialCode: data.materialCode,
+        materialName: data.materialName,
+        materialCategory: data.materialCategory,
+        unit: data.unit,
+        currentStock: String(data.currentQuantity),
+        minimumStock: String(data.minimumQuantity),
+        price: String(data.unitPrice),
+        specification: data.specification || "",
+      });
+    } catch (error) {
+      console.error(error);
+      alert("자재 정보를 불러오지 못했습니다.");
+      navigate("/material");
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
+    fetchMaterial();
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleReset = () => {
-    setForm({
-      materialCode: "",
-      materialName: "",
-      materialCategory: "",
-      unit: "",
-      currentStock: "",
-      minimumStock: "",
-      price: "",
-      specification: "",
-    });
+    fetchMaterial();
   };
 
   const handleSubmit = async () => {
@@ -115,38 +168,43 @@ function MaterialWrite() {
     }
 
     try {
+      setLoading(true);
+
       const token = getToken();
       if (!token) return;
 
-      const requestBody = {
-        materialCode: form.materialCode,
-        materialName: form.materialName,
-        materialCategory: form.materialCategory,
-        unit: form.unit,
-        specification: form.specification,
-        currentQuantity: Number(form.currentStock),
-        minimumQuantity: Number(form.minimumStock),
-        unitPrice: Number(form.price),
-      };
-
-      const response = await fetch("http://localhost:8080/api/materials", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:8080/api/company-materials/${materialId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            materialCode: form.materialCode,
+            materialName: form.materialName,
+            materialCategory: form.materialCategory,
+            unit: form.unit,
+            specification: form.specification,
+            currentQuantity: Number(form.currentStock),
+            minimumQuantity: Number(form.minimumStock),
+            unitPrice: Number(form.price),
+          }),
         },
-        body: JSON.stringify(requestBody),
-      });
+      );
 
       if (!response.ok) {
-        throw new Error("자재 등록 실패");
+        throw new Error("자재 수정 실패");
       }
 
-      alert("자재가 등록되었습니다.");
+      alert("자재가 수정되었습니다.");
       navigate("/material");
     } catch (error) {
       console.error(error);
-      alert("자재 등록에 실패했습니다.");
+      alert("자재 수정에 실패했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,8 +217,8 @@ function MaterialWrite() {
 
         <div>
           <p className="page-label">자재 관리</p>
-          <h1>자재 등록</h1>
-          <p className="page-desc">새로운 자재 정보를 등록하세요.</p>
+          <h1>자재 수정</h1>
+          <p className="page-desc">등록된 자재 정보를 수정하세요.</p>
         </div>
       </div>
 
@@ -283,8 +341,12 @@ function MaterialWrite() {
             >
               취소
             </button>
-            <button className="submit-btn" onClick={handleSubmit}>
-              등록하기
+            <button
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "수정 중..." : "수정하기"}
             </button>
           </div>
         </section>
@@ -394,4 +456,4 @@ function PreviewInfo({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default MaterialWrite;
+export default MaterialEdit;

@@ -42,7 +42,7 @@ public class SiteService {
         return SiteResponse.from(savedSite);
     }
 
- // 공사 현장 목록 조회 + 통계 카드 + 검색/필터 + 페이징
+    // 공사 현장 목록 조회 + 통계 카드 + 검색/필터 + 페이징
     public SiteDashboardResponse getSites(
             String loginId,
             String keyword,
@@ -56,17 +56,19 @@ public class SiteService {
                 .searchSites(company, keyword, constructionType, status, pageable)
                 .map(SiteResponse::from);
 
-        long totalSiteCount = sitePage.getTotalElements();
+        List<Site> allSitesForSummary = siteRepository.findAllByCompany(company);
 
-        long progressCount = sitePage.getContent().stream()
+        long totalSiteCount = allSitesForSummary.size();
+
+        long progressCount = allSitesForSummary.stream()
                 .filter(site -> "진행중".equals(site.getStatus()))
                 .count();
 
-        long plannedCount = sitePage.getContent().stream()
+        long plannedCount = allSitesForSummary.stream()
                 .filter(site -> "예정".equals(site.getStatus()))
                 .count();
 
-        long completedCount = sitePage.getContent().stream()
+        long completedCount = allSitesForSummary.stream()
                 .filter(site -> "완료".equals(site.getStatus()))
                 .count();
 

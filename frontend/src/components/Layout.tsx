@@ -108,7 +108,7 @@ function Layout() {
             isOpen={openMenu === "site"}
             onClick={() => toggleMenu("site")}
           >
-            <NavLink to="/site">
+            <NavLink to="/site" end>
               <FiMapPin />
               현장 목록
             </NavLink>
