@@ -43,7 +43,6 @@ import SitePage from "./pages/site/SitePage";
 import SiteCreatePage from "./pages/site/SiteCreatePage";
 import SiteEditPage from "./pages/site/SiteEditPage";
 import MaterialUsagePage from "./pages/site/MaterialUsagePage";
-import MaterialUsageEditPage from "./pages/site/MaterialUsageEditPage";
 import SchedulePage from "./pages/schedule/SchedulePage";
 
 function App() {
@@ -115,10 +114,6 @@ function App() {
             <Route path="/site/create" element={<SiteCreatePage />} />
             <Route path="/site/edit/:id" element={<SiteEditPage />} />
             <Route path="/site/material" element={<MaterialUsagePage />} />
-            <Route
-              path="/site/material/edit/:id"
-              element={<MaterialUsageEditPage />}
-            />
 
             <Route path="/schedule" element={<SchedulePage />} />
           </Route>

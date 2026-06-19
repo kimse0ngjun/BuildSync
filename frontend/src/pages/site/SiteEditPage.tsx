@@ -62,7 +62,7 @@ function SiteEditPage() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("토큰이 없습니다. localStorage에 token을 저장해주세요.");
+      alert("로그인이 필요한 서비스입니다.");
       return null;
     }
 

@@ -51,9 +51,7 @@ function MaterialEdit() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert(
-        "토큰이 없습니다. Postman에서 받은 토큰을 localStorage에 저장해주세요.",
-      );
+      alert("로그인이 필요한 서비스입니다.");
       return null;
     }
 
