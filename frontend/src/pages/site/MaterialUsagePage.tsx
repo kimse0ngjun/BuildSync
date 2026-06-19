@@ -1,93 +1,179 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   FiSearch,
   FiBox,
   FiMapPin,
   FiUser,
-  FiEdit3,
-  FiTrash2,
   FiCalendar,
   FiPackage,
   FiChevronLeft,
   FiChevronRight,
+  FiX,
 } from "react-icons/fi";
 import "../../styles/MaterialUsagePage.css";
 
 type Usage = {
-  id: number;
-  date: string;
+  stockInoutId: number;
+  siteId: number;
   siteName: string;
+  materialId: number;
+  materialCode: string;
   materialName: string;
-  quantity: number;
+  materialCategory: string;
   unit: string;
-  manager: string;
+  quantity: number;
+  contactId: number;
+  contactName: string;
+  processedDate: string;
   memo: string;
 };
 
-const initialUsages: Usage[] = [
-  {
-    id: 1,
-    date: "2026-06-01",
-    siteName: "강남 오피스 신축",
-    materialName: "시멘트",
-    quantity: 120,
-    unit: "포대",
-    manager: "홍길동",
-    memo: "1차 타설용",
-  },
-  {
-    id: 2,
-    date: "2026-06-02",
-    siteName: "송도 아파트 건설",
-    materialName: "철근",
-    quantity: 50,
-    unit: "톤",
-    manager: "김철수",
-    memo: "기초 골조 작업",
-  },
-  {
-    id: 3,
-    date: "2026-06-04",
-    siteName: "부산 상가 리모델링",
-    materialName: "벽돌",
-    quantity: 300,
-    unit: "EA",
-    manager: "이민호",
-    memo: "외벽 보수",
-  },
-  {
-    id: 4,
-    date: "2026-06-05",
-    siteName: "판교 오피스 건설",
-    materialName: "페인트 18L",
-    quantity: 12,
-    unit: "통",
-    manager: "박지훈",
-    memo: "내부 도장",
-  },
-];
+type UsageResponse = {
+  totalUsageCount: number;
+  usedMaterialCount: number;
+  usedSiteCount: number;
+  contactCount: number;
+  currentPage?: number;
+  pageSize?: number;
+  totalElements?: number;
+  totalPages?: number;
+  usages: Usage[];
+};
 
 function MaterialUsagePage() {
-  const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [usages, setUsages] = useState<Usage[]>(initialUsages);
+  const [siteId, setSiteId] = useState("");
+  const [materialId, setMaterialId] = useState("");
 
-  const filtered = usages.filter(
-    (item) =>
-      item.siteName.includes(search) ||
-      item.materialName.includes(search) ||
-      item.manager.includes(search),
+  const [usages, setUsages] = useState<Usage[]>([]);
+  const [allUsages, setAllUsages] = useState<Usage[]>([]);
+  const [selected, setSelected] = useState<Usage | null>(null);
+
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const [summary, setSummary] = useState({
+    totalUsageCount: 0,
+    usedMaterialCount: 0,
+    usedSiteCount: 0,
+    contactCount: 0,
+  });
+
+  const size = 10;
+
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("토큰이 없습니다. localStorage에 token을 저장해주세요.");
+      return null;
+    }
+
+    return token;
+  };
+
+  const fetchAllOptions = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch(
+        "http://localhost:8080/api/site-material-usages?page=0&size=1000",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("전체 옵션 조회 실패");
+      }
+
+      const data: UsageResponse = await response.json();
+      setAllUsages(data.usages ?? []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchUsages = async () => {
+    try {
+      setLoading(true);
+
+      const token = getToken();
+      if (!token) return;
+
+      const params = new URLSearchParams({
+        keyword: search,
+        page: String(page),
+        size: String(size),
+      });
+
+      if (siteId) {
+        params.append("siteId", siteId);
+      }
+
+      if (materialId) {
+        params.append("materialId", materialId);
+      }
+
+      const response = await fetch(
+        `http://localhost:8080/api/site-material-usages?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("자재 사용내역 조회 실패");
+      }
+
+      const data: UsageResponse = await response.json();
+
+      setUsages(data.usages ?? []);
+      setSummary({
+        totalUsageCount: data.totalUsageCount,
+        usedMaterialCount: data.usedMaterialCount,
+        usedSiteCount: data.usedSiteCount,
+        contactCount: data.contactCount,
+      });
+      setTotalPages(data.totalPages ?? 1);
+      setSelected(null);
+    } catch (error) {
+      console.error(error);
+      alert("자재 사용내역을 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllOptions();
+  }, []);
+
+  useEffect(() => {
+    fetchUsages();
+  }, [page, siteId, materialId]);
+
+  const handleSearch = () => {
+    setPage(0);
+    setSelected(null);
+    fetchUsages();
+  };
+
+  const siteOptions = Array.from(
+    new Map(allUsages.map((item) => [item.siteId, item.siteName])),
   );
 
-  const selected = filtered[0] || usages[0];
-
-  const handleDelete = (id: number) => {
-    const ok = window.confirm("삭제하시겠습니까?");
-    if (!ok) return;
-
-    setUsages((prev) => prev.filter((item) => item.id !== id));
-  };
+  const materialOptions = Array.from(
+    new Map(allUsages.map((item) => [item.materialId, item.materialName])),
+  );
 
   return (
     <div className="material-usage-page">
@@ -105,12 +191,27 @@ function MaterialUsagePage() {
         <StatCard
           icon={<FiBox />}
           title="전체 사용 내역"
-          value="48"
+          value={String(summary.totalUsageCount)}
           unit="건"
         />
-        <StatCard icon={<FiPackage />} title="사용 자재" value="18" unit="종" />
-        <StatCard icon={<FiMapPin />} title="사용 현장" value="7" unit="개" />
-        <StatCard icon={<FiUser />} title="담당자" value="6" unit="명" />
+        <StatCard
+          icon={<FiPackage />}
+          title="사용 자재"
+          value={String(summary.usedMaterialCount)}
+          unit="종"
+        />
+        <StatCard
+          icon={<FiMapPin />}
+          title="사용 현장"
+          value={String(summary.usedSiteCount)}
+          unit="개"
+        />
+        <StatCard
+          icon={<FiUser />}
+          title="담당자"
+          value={String(summary.contactCount)}
+          unit="명"
+        />
       </div>
 
       <div className="usage-layout">
@@ -121,22 +222,43 @@ function MaterialUsagePage() {
                 placeholder="현장명, 자재명, 담당자 검색..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
               />
-              <FiSearch />
+              <FiSearch onClick={handleSearch} />
             </div>
 
-            <select>
-              <option>전체 현장</option>
-              <option>강남 오피스 신축</option>
-              <option>송도 아파트 건설</option>
-              <option>부산 상가 리모델링</option>
+            <select
+              value={siteId}
+              onChange={(e) => {
+                setSiteId(e.target.value);
+                setPage(0);
+                setSelected(null);
+              }}
+            >
+              <option value="">전체 현장</option>
+              {siteOptions.map(([id, name]) => (
+                <option key={id} value={String(id)}>
+                  {name}
+                </option>
+              ))}
             </select>
 
-            <select>
-              <option>전체 자재</option>
-              <option>시멘트</option>
-              <option>철근</option>
-              <option>벽돌</option>
+            <select
+              value={materialId}
+              onChange={(e) => {
+                setMaterialId(e.target.value);
+                setPage(0);
+                setSelected(null);
+              }}
+            >
+              <option value="">전체 자재</option>
+              {materialOptions.map(([id, name]) => (
+                <option key={id} value={String(id)}>
+                  {name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -149,87 +271,105 @@ function MaterialUsagePage() {
                 <th>수량</th>
                 <th>단위</th>
                 <th>담당자</th>
-                <th>관리</th>
               </tr>
             </thead>
 
             <tbody>
-              {filtered.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.date}</td>
-                  <td className="usage-site-name">{item.siteName}</td>
-                  <td className="usage-material-name">{item.materialName}</td>
-                  <td>{item.quantity}</td>
-                  <td>{item.unit}</td>
-                  <td>{item.manager}</td>
-                  <td>
-                    <div className="usage-actions">
-                      <button
-                        className="edit"
-                        onClick={() =>
-                          navigate(`/site/material/edit/${item.id}`)
-                        }
-                      >
-                        <FiEdit3 />
-                      </button>
-                      <button
-                        className="delete"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={6}>자재 사용내역을 불러오는 중입니다.</td>
                 </tr>
-              ))}
+              ) : usages.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>등록된 사용내역이 없습니다.</td>
+                </tr>
+              ) : (
+                usages.map((item) => (
+                  <tr key={item.stockInoutId} onClick={() => setSelected(item)}>
+                    <td>{item.processedDate}</td>
+                    <td className="usage-site-name">{item.siteName}</td>
+                    <td className="usage-material-name">{item.materialName}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.unit}</td>
+                    <td>{item.contactName}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
 
           <div className="usage-pagination">
-            <button>
+            <button
+              onClick={() => page > 0 && setPage(page - 1)}
+              disabled={page === 0}
+            >
               <FiChevronLeft />
             </button>
-            <button className="active">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>
+
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                className={page === index ? "active" : ""}
+                onClick={() => {
+                  setPage(index);
+                  setSelected(null);
+                }}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => page < totalPages - 1 && setPage(page + 1)}
+              disabled={page >= totalPages - 1}
+            >
               <FiChevronRight />
             </button>
           </div>
         </section>
 
-        <aside className="usage-detail-panel">
-          <h3>사용 상세 정보</h3>
-
-          <div className="usage-detail-top">
-            <div className="usage-detail-icon">
-              <FiBox />
+        {selected && (
+          <aside className="usage-detail-panel">
+            <div className="usage-detail-header">
+              <h3>사용 상세 정보</h3>
+              <button type="button" onClick={() => setSelected(null)}>
+                <FiX />
+              </button>
             </div>
-            <div>
-              <h2>{selected.materialName}</h2>
-              <p>{selected.siteName}</p>
-            </div>
-          </div>
 
-          <div className="usage-detail-list">
-            <Info label="사용일" value={selected.date} />
-            <Info label="사용 현장" value={selected.siteName} />
-            <Info
-              label="사용 수량"
-              value={`${selected.quantity} ${selected.unit}`}
-            />
-            <Info label="담당자" value={selected.manager} />
-            <Info label="메모" value={selected.memo} />
-          </div>
-
-          <div className="usage-mini-card">
-            <div>
-              <FiCalendar />
-              <span>최근 사용일</span>
+            <div className="usage-detail-top">
+              <div className="usage-detail-icon">
+                <FiBox />
+              </div>
+              <div>
+                <h2>{selected.materialName}</h2>
+                <p>{selected.siteName}</p>
+              </div>
             </div>
-            <strong>{selected.date}</strong>
-          </div>
-        </aside>
+
+            <div className="usage-detail-list">
+              <Info label="사용일" value={selected.processedDate} />
+              <Info label="사용 현장" value={selected.siteName} />
+              <Info label="자재 코드" value={selected.materialCode} />
+              <Info label="자재명" value={selected.materialName} />
+              <Info label="분류" value={selected.materialCategory} />
+              <Info
+                label="사용 수량"
+                value={`${selected.quantity} ${selected.unit}`}
+              />
+              <Info label="담당자" value={selected.contactName} />
+              <Info label="메모" value={selected.memo || "-"} />
+            </div>
+
+            <div className="usage-mini-card">
+              <div>
+                <FiCalendar />
+                <span>최근 사용일</span>
+              </div>
+              <strong>{selected.processedDate}</strong>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

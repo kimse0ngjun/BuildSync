@@ -11,6 +11,7 @@ import {
   FiTrash2,
   FiChevronLeft,
   FiChevronRight,
+  FiX,
 } from "react-icons/fi";
 import "../../styles/SitePage.css";
 
@@ -141,7 +142,7 @@ function SitePage() {
         completedCount: data.completedCount,
       });
       setTotalPages(data.totalPages ?? 1);
-      setSelected(data.sites?.[0] ?? null);
+      setSelected(null);
     } catch (error) {
       console.error(error);
       alert("공사 현장 목록을 불러오지 못했습니다.");
@@ -154,6 +155,7 @@ function SitePage() {
 
   const handleSearch = () => {
     setPage(0);
+    setSelected(null);
     fetchSites();
   };
 
@@ -254,6 +256,7 @@ function SitePage() {
               onChange={(e) => {
                 setConstructionType(e.target.value);
                 setPage(0);
+                setSelected(null);
               }}
             >
               <option value="">전체 유형</option>
@@ -268,6 +271,7 @@ function SitePage() {
               onChange={(e) => {
                 setStatus(e.target.value);
                 setPage(0);
+                setSelected(null);
               }}
             >
               <option value="">전체 상태</option>
@@ -336,7 +340,12 @@ function SitePage() {
 
           <div className="site-pagination">
             <button
-              onClick={() => page > 0 && setPage(page - 1)}
+              onClick={() => {
+                if (page > 0) {
+                  setPage(page - 1);
+                  setSelected(null);
+                }
+              }}
               disabled={page === 0}
             >
               <FiChevronLeft />
@@ -346,14 +355,22 @@ function SitePage() {
               <button
                 key={index}
                 className={page === index ? "active" : ""}
-                onClick={() => setPage(index)}
+                onClick={() => {
+                  setPage(index);
+                  setSelected(null);
+                }}
               >
                 {index + 1}
               </button>
             ))}
 
             <button
-              onClick={() => page < totalPages - 1 && setPage(page + 1)}
+              onClick={() => {
+                if (page < totalPages - 1) {
+                  setPage(page + 1);
+                  setSelected(null);
+                }
+              }}
               disabled={page >= totalPages - 1}
             >
               <FiChevronRight />
@@ -363,7 +380,12 @@ function SitePage() {
 
         {selected && (
           <aside className="site-detail-panel">
-            <h3>현장 상세 정보</h3>
+            <div className="site-detail-header">
+              <h3>현장 상세 정보</h3>
+              <button type="button" onClick={() => setSelected(null)}>
+                <FiX />
+              </button>
+            </div>
 
             <div className="site-detail-top">
               <div className="site-detail-icon">
