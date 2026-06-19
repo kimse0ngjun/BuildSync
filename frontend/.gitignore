@@ -7,18 +7,90 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Frontend
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
 
-# Editor directories and files
+# Vite
+vite.config.ts.timestamp-*
+
+# Local Env
+.env
+.env.*
+!.env.example
+
+# Backend (Spring Boot)
+target/
+build/
+.gradle/
+
+# Spring
+*.class
+*.jar
+*.war
+*.ear
+
+# Application Config
+application-local.yml
+application-local.yaml
+application-dev.yml
+application-dev.yaml
+
+# IDE
+
+# VSCode
 .vscode/*
 !.vscode/extensions.json
-.idea
+
+# Eclipse
+.project
+.classpath
+.settings/
+.factorypath
+
+# IntelliJ
+.idea/
+*.iml
+
+# STS
+.apt_generated/
+.springBeans
+
+# OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+Desktop.ini
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+docker-data/
+mysql-data/
+postgres-data/
+
+# Upload Files
+uploads/
+upload/
+files/
+
+# Test Reports
+surefire-reports/
+failsafe-reports/
+
+# Misc
+*.pid
+*.seed
+*.pid.lock

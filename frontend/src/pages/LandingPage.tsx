@@ -21,7 +21,13 @@ function LandingPage() {
           <a href="#intro">서비스 소개</a>
           <a href="#features">핵심 기능</a>
           <a href="#process">프로세스</a>
-          <button className="login-btn">로그인</button>
+          <button
+            type="button"
+            className="login-btn"
+            onClick={() => navigate("/login")}
+          >
+            로그인
+          </button>
         </nav>
       </header>
 

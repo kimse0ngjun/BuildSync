@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authApi from "../../api/authApi";
+import "../../styles/FindIdPage.css";
+
 export default function FindIdPage() {
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
@@ -35,24 +37,24 @@ export default function FindIdPage() {
 
   if (result) {
     return (
-      <div className="auth-page">
-        <div className="auth-card">
-          <div className="auth-inner">
-            <h2 className="auth-title">아이디 찾기 성공</h2>
-            <p className="auth-desc">회원님의 아이디는</p>
+      <div className="findid-page">
+        <div className="findid-card">
+          <div className="findid-inner">
+            <h2 className="findid-title">아이디 찾기 성공</h2>
+            <p className="findid-desc">회원님의 아이디는</p>
 
-            <div className="auth-result-box">{result}</div>
+            <div className="findid-result-box">{result}</div>
 
-            <div className="auth-btn-row">
+            <div className="findid-btn-row">
               <button
-                className="auth-btn auth-btn--ghost"
+                className="findid-action-btn findid-action-btn--ghost"
                 onClick={() => navigate("/find-password")}
               >
                 비밀번호 찾기
               </button>
 
               <button
-                className="auth-btn auth-btn--primary"
+                className="findid-action-btn findid-action-btn--primary"
                 onClick={() => navigate("/login")}
               >
                 로그인
@@ -65,23 +67,34 @@ export default function FindIdPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="auth-inner">
-          <button className="back-btn" onClick={() => navigate("/login")}>
+    <div className="findid-page">
+      <div className="findid-card">
+        <div className="login-logo">
+          <div className="login-logo-box">B</div>
+          <span>
+            <b>Build</b>
+            <strong>Sync</strong>
+          </span>
+        </div>
+        <div className="findid-inner">
+          <button
+            className="findid-back-btn"
+            onClick={() => navigate("/login")}
+          >
             ←
           </button>
-          <h2 className="auth-title">아이디 찾기</h2>
 
-          <p className="auth-desc">
+          <h2 className="findid-title">아이디 찾기</h2>
+
+          <p className="findid-desc">
             가입 시 등록한 휴대전화 번호를 입력하면 아이디를 확인할 수 있습니다.
           </p>
 
-          <div className="login-field">
-            <label className="login-label">휴대전화 번호</label>
+          <div className="findid-field">
+            <label className="findid-label">휴대전화 번호</label>
 
             <input
-              className={`login-input${error ? " error" : ""}`}
+              className={`findid-input${error ? " error" : ""}`}
               type="text"
               value={phone}
               onChange={handlePhoneChange}
@@ -89,12 +102,12 @@ export default function FindIdPage() {
               maxLength={13}
             />
 
-            {error && <p className="login-error show">{error}</p>}
+            {error && <p className="findid-error">{error}</p>}
           </div>
 
-          <div className="auth-btn-single">
+          <div className="findid-btn-single">
             <button
-              className={`login-btn${!phone ? " disabled" : ""}`}
+              className={`findid-btn${!phone ? " disabled" : ""}`}
               disabled={!phone}
               onClick={handleFind}
             >

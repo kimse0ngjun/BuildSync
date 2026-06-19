@@ -1,17 +1,5 @@
 import { createContext, useContext, useState } from "react";
-
-type AuthContextType = {
-  isLogin: boolean;
-  ceoName: string;
-  companyName: string;
-  login: (data: {
-    token: string;
-    ceoName: string;
-    companyName: string;
-  }) => void;
-  logout: () => void;
-};
-
+import type { AuthContextType } from "../types/Auth.ts";
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -27,8 +15,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => localStorage.getItem("companyName") || "",
   );
 
-  // 로그인 처리
-  const login = (data) => {
+  // 로그인
+  const login = (data: {
+    token: string;
+    ceoName: string;
+    companyName: string;
+  }) => {
     localStorage.setItem("token", data.token);
     localStorage.setItem("ceoName", data.ceoName);
     localStorage.setItem("companyName", data.companyName);
@@ -38,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCompanyName(data.companyName);
   };
 
-  // 로그아웃 처리
+  // 로그아웃
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("ceoName");
@@ -64,9 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// 사용 훅
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("AuthProvider 없음");
+
+  if (!context) {
+    throw new Error("AuthProvider 없음");
+  }
+
   return context;
 };

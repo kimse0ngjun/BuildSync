@@ -1,0 +1,224 @@
+.findid-page {
+  width: 100%;
+  min-height: 100%;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.findid-card {
+  width: 420px;
+  background: transparent;
+}
+
+.findid-inner {
+  position: relative;
+}
+
+.findid-back-btn {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.findid-back-btn:hover {
+  color: #2563eb;
+}
+
+.findid-title {
+  margin: 0;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #10284a;
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.findid-desc {
+  margin: 20px 0 28px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.findid-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.findid-label {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.findid-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 14px;
+  color: #10284a;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+}
+
+.findid-input:focus {
+  border-color: #2563eb;
+}
+
+.findid-input.error {
+  border-color: #ef4444;
+}
+
+.findid-error {
+  margin: 6px 0 0;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.findid-btn-single {
+  margin-top: 24px;
+}
+
+.findid-btn {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.findid-btn:hover {
+  background: #1d4ed8;
+}
+
+.findid-btn.disabled,
+.findid-btn:disabled {
+  cursor: not-allowed;
+}
+
+.findid-result-box {
+  margin: 24px 0;
+  padding: 18px;
+  border-radius: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.findid-btn-row {
+  display: flex;
+  gap: 12px;
+}
+
+.findid-action-btn {
+  flex: 1;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.findid-action-btn--primary {
+  border: none;
+  background: #2563eb;
+  color: #fff;
+}
+
+.findid-action-btn--primary:hover {
+  background: #1d4ed8;
+}
+
+.findid-action-btn--ghost {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.findid-action-btn--ghost:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+/* dark mode */
+body.dark-mode .findid-page {
+  background: #0f172a;
+}
+
+body.dark-mode .findid-title {
+  color: #f8fafc;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .findid-desc,
+body.dark-mode .findid-label,
+body.dark-mode .findid-back-btn {
+  color: #94a3b8;
+}
+
+body.dark-mode .findid-back-btn:hover {
+  color: #60a5fa;
+}
+
+body.dark-mode .findid-input {
+  background: #111827;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .findid-input::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .findid-input:focus {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .findid-result-box {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #93c5fd;
+}
+
+body.dark-mode .findid-action-btn--ghost {
+  background: #111827;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .findid-action-btn--ghost:hover {
+  border-color: #60a5fa;
+  color: #93c5fd;
+}
+
+@media (max-width: 520px) {
+  .findid-card {
+    width: 100%;
+    padding: 0 28px;
+  }
+
+  .findid-btn-row {
+    flex-direction: column;
+  }
+}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   FiHome,
   FiUsers,
@@ -29,6 +30,8 @@ import "../styles/Layout.css";
 function Layout() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openBottom, setOpenBottom] = useState<string | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { isLogin, ceoName, companyName, logout } = useAuth();
 
   const toggleMenu = (menu: string) => {
     setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -177,18 +180,54 @@ function Layout() {
             </NavLink>
           </BottomGroup>
 
-          <NavLink to="/login">
-            <div className="login-profile">
-              <div className="login-avatar">
-                <FiLogIn />
+          {isLogin ? (
+            <div className="profile-wrapper">
+              <div
+                className="login-profile"
+                onClick={() => setIsProfileOpen((prev) => !prev)}
+              >
+                <div className="login-avatar">
+                  <FiUser />
+                </div>
+                <div className="login-info">
+                  <strong>{ceoName}</strong>
+                  <small>{companyName}</small>
+                </div>
               </div>
 
-              <div className="login-info">
-                <strong>로그인</strong>
-                <small>서비스 이용하기</small>
-              </div>
+              {isProfileOpen && (
+                <div className="profile-dropdown">
+                  <div className="profile-header">
+                    <div className="profile-avatar">
+                      <FiUser />
+                    </div>
+                    <div className="profile-user-info">
+                      <strong>{ceoName}</strong>
+                      <small>{companyName}</small>
+                    </div>
+                  </div>
+                  <div className="profile-divider" />
+                  <button type="button" className="logout-btn" onClick={logout}>
+                    <FiLogIn />
+                    로그아웃
+                  </button>
+                </div>
+              )}
             </div>
-          </NavLink>
+          ) : (
+            <NavLink to="/login">
+              <div className="login-profile">
+                <div className="login-avatar">
+                  <FiLogIn />
+                </div>
+
+                <div className="login-info">
+                  <strong>로그인</strong>
+                  <small>서비스 이용하기</small>
+                </div>
+              </div>
+            </NavLink>
+          )}
         </div>
       </aside>
 
