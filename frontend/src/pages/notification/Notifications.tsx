@@ -1,121 +1,226 @@
-import { useState } from "react";
-import {
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaTimesCircle,
-} from "react-icons/fa";
-import { FaRegBell } from "react-icons/fa6";
-import { IoCheckmarkDoneSharp } from "react-icons/io5";
-import type { Notification } from "../../types/NotificationDTO";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import type { NotificationResponse } from "../../types/NotificationDTO";
+import { notificationListApi } from "../../api/notificationApi";
+import { MdDeleteOutline } from "react-icons/md";
 
-export const Notifications = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      // 공급업체가 받는
-      noticeId: 1,
-      type: "NEW_ORDER",
-      title: "신규 발주서 접수 대기",
-      content:
-        "[용산 주상복합 현장]에서 레미콘 자재 발주서(#3025)를 등록했습니다. 접수 상태를 확인하세요.",
-      relatedId: 3025,
-      isRead: false,
-      createdAt: "방금 전",
-    },
-    {
-      // 건설업체가 받는
-      noticeId: 2,
-      type: "ORDER_ACCEPTED",
-      title: "발주 승인 완료",
-      content:
-        "[OO상사]에서 요청하신 철근/철강자재 발주서(#3021)를 정상 승인(접수)했습니다.",
-      relatedId: 3021,
-      isRead: false,
-      createdAt: "10분 전",
-    },
-    {
-      // 건설업체가 받는
-      noticeId: 3,
-      type: "BUDGET_WARNING",
-      title: "⚠️ 현장 지출 예산 초과 경고",
-      content: "당월 자재 누적 지출액이 지난달보다 50%를 초과했습니다.",
-      relatedId: 0,
-      isRead: true,
-      createdAt: "2시간 전",
-    },
-    {
-      // 건설업체가 받는
-      noticeId: 4,
-      type: "ORDER_REJECTED",
-      title: "발주 반려/거절 안내",
-      content:
-        "[XX네트워크]에서 재고 부족 사유로 발주서(#3018)를 반려 처리했습니다.",
-      relatedId: 3018,
-      isRead: true,
-      createdAt: "2026-06-09",
-    },
-  ]);
+export default function NotificationPage() {
+  const [notifications, setNotifications] = useState<NotificationResponse[]>(
+    [],
+  );
+  const [currentTab, setCurrentTab] = useState<"ALL" | "UNREAD">("ALL");
+  const companyId = Number(localStorage.getItem("companyId"));
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // 알림 타입별 아이콘 설정
-  const getNoticeIcon = (type: string) => {
-    switch (type) {
-      case "NEW_ORDER":
-        return <FaRegBell style={{ color: "#413ea0" }} />;
-      case "ORDER_ACCEPTED":
-        return <FaCheckCircle style={{ color: "#00C49F" }} />;
-      case "ORDER_REJECTED":
-        return <FaTimesCircle style={{ color: "#f44336" }} />;
-      case "BUDGET_WARNING":
-        return <FaExclamationTriangle style={{ color: "#FFBB28" }} />;
-      default:
-        return <FaRegBell style={{ color: "#888" }} />;
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  // 모든 알림 조회 핸들러
+  const handleGetAllNotifications = (page: number = 0) => {
+    setLoading(true);
+
+    return notificationListApi
+      .getAllNotification(companyId, page)
+      .then((data) => {
+        setNotifications(data.list || []);
+        setTotalPages(data.totalPages || 1);
+        setCurrentPage(page);
+        setCurrentTab("ALL");
+
+        return data;
+      })
+      .catch((err) => {
+        console.error("전체 알림 조회 실패", err);
+        throw err;
+      })
+      .finally(() => setLoading(false));
+  };
+
+  // 안 읽은 알림 조회 핸들러
+  const handleGetUnreadNotifications = (page: number = 0) => {
+    setLoading(true);
+
+    return notificationListApi
+      .getNotReadNotification(companyId, page)
+      .then((data) => {
+        setNotifications(data.list || []);
+        setTotalPages(data.totalPages || 1);
+        setCurrentPage(page);
+        setCurrentTab("UNREAD");
+
+        return data;
+      })
+      .catch((err) => {
+        console.error("안 읽은 알림 조회 실패", err);
+        throw err;
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (currentTab === "ALL") {
+      handleGetAllNotifications(newPage);
+    } else {
+      handleGetUnreadNotifications(newPage);
     }
   };
 
-  const nav = useNavigate();
+  // 단건 알림 읽음 처리 핸들러
+  const handleReadNotification = (id: number) => {
+    notificationListApi
+      .setReadNotification(id)
+      .then(() => {
+        setNotifications((prev) =>
+          prev.map((notice) =>
+            notice.noticeId === id ? { ...notice, isRead: 1 } : notice,
+          ),
+        );
+
+        if (currentTab === "UNREAD") {
+          setNotifications((prev) =>
+            prev.filter((notice) => notice.noticeId !== id),
+          );
+        }
+      })
+      .catch((err) => console.error("단건 읽음 실패", err));
+  };
+
+  // 모든 알림 읽음 처리 핸들러
+  const handleReadAllNotifications = () => {
+    notificationListApi
+      .setAllReadNotification(1)
+      .then(() => {
+        setNotifications((prev) =>
+          prev.map((notice) => ({ ...notice, isRead: 1 })),
+        );
+        if (currentTab === "UNREAD") {
+          setNotifications([]);
+        }
+      })
+      .catch((err) => console.error("전체 읽음 실패", err));
+  };
+
+  // 읽음 처리 후 목록 뷰에서만 영구 삭제
+  const handleDeleteFromView = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setNotifications((prev) => prev.filter((notice) => notice.noticeId !== id));
+  };
+
+  useEffect(() => {
+    handleGetAllNotifications();
+  }, []);
+
+  const deleteIcon = <MdDeleteOutline />;
 
   return (
-    <div className="notification-center-container">
-      <div className="notice-header">
-        <div className="header">
-          <h2 className="title">알림 센터</h2>
-          <p className="explain">
-            현장 및 발주서 상태 변경 알림을 실시간으로 확인하세요.
-          </p>
-        </div>
+    <div className="container">
+      <h2 className="page-title">알림 페이지</h2>
+      <hr className="line" />
 
-        <button className="btn-all-read">
-          <IoCheckmarkDoneSharp className="all-read-icon" />
-          모두 읽음
+      <div className="tab-area">
+        <button
+          className="all-notification-list"
+          onClick={() => handleGetAllNotifications(0)}
+        >
+          전체 알림
+        </button>
+        <button
+          className="not-read-list"
+          onClick={() => handleGetUnreadNotifications(0)}
+        >
+          안 읽은 알림
         </button>
       </div>
 
-      <div className="notice-list-wrapper">
-        {notifications.length > 0 ? (
-          notifications.map((notice) => (
-            <div
-              key={notice.noticeId}
-              className={`notice-item-card ${notice.isRead ? "read" : "unread"}`}
-            >
-              <div className="notice-icon-area">
-                {getNoticeIcon(notice.type)}
-              </div>
+      <div className="set-all-read-area">
+        <button
+          className="set-all-read-btn"
+          onClick={handleReadAllNotifications}
+        >
+          모두 읽음 처리
+        </button>
+      </div>
 
-              <div className="notice-content-area">
-                <div className="notice-header">
-                  <h4 className="notice-title">{notice.title}</h4>
-                  {!notice.isRead && <span>N</span>}
-                </div>
-                <p className="notice-content">{notice.content}</p>
-              </div>
+      {loading ? (
+        <p className="loading-message">알림을 로딩 중입니다 형님...</p>
+      ) : (
+        <table className="list-table">
+          <thead>
+            <tr>
+              <th className="th-type">구분</th>
+              <th className="th-title">제목</th>
+              <th className="th-content">내용</th>
+              <th className="th-createdAt">받은 날짜</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {notifications.length === 0 ? (
+              <tr className="if-no-data">
+                <td className="if-no-data-message" colSpan={5}>
+                  조건에 맞는 알림이 존재하지 않습니다.
+                </td>
+              </tr>
+            ) : (
+              notifications.map((notice) => (
+                <tr key={notice.noticeId}>
+                  <td className="type-data">{notice.type}</td>
 
-              <div className="notice-time-area">{notice.createdAt}</div>
-            </div>
-          ))
-        ) : (
-          <div className="no-notification">새로운 알림이 없습니다.</div>
-        )}
+                  <td
+                    className="title-data"
+                    onClick={() => handleReadNotification(notice.noticeId)}
+                  >
+                    {notice.title}
+                    {notice.isRead === 0 && <span> ●</span>}{" "}
+                    {/* 안 읽은 알림 ● 표시 (클릭 시 읽음 처리) */}
+                  </td>
+
+                  <td className="content-data">{notice.content}</td>
+
+                  <td className="createdAt-data">{notice.createdAt}</td>
+
+                  <td className="delete-data">
+                    <button
+                      className="data-delete-btn"
+                      onClick={(e) => handleDeleteFromView(e, notice.noticeId)}
+                    >
+                      {deleteIcon}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
+
+      <div className="pagination-area">
+        <button
+          className="prev-btn"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 0}
+        >
+          이전
+        </button>
+
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            className="current-page-btn"
+            key={index}
+            onClick={() => handlePageChange(index)}
+            disabled={currentPage === index}
+          >
+            {index + 1}
+          </button>
+        ))}
+
+        <button
+          className="next-btn"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages - 1 || totalPages === 0}
+        >
+          다음
+        </button>
       </div>
     </div>
   );
-};
+}

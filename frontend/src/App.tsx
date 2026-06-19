@@ -31,7 +31,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 import CostAnalysisPage from "./pages/analysis/CostAnalysisPage";
 
-import { Notifications } from "./pages/notification/Notifications";
+import Notifications from "./pages/notification/Notifications";
 import { NotificationStock } from "./pages/notification/NotificationStock";
 
 import AccountSetting from "./pages/settings/AccountSetting";

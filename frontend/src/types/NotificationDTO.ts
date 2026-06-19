@@ -1,9 +1,35 @@
-export interface Notification {
+export interface PageResponse<T> {
+  list: T[];
+  pageNum: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface NotificationResponse {
   noticeId: number;
-  type: "NEW_ORDER" | "ORDER_ACCEPTED" | "ORDER_REJECTED" | "BUDGET_WARNING";
+  type: string;
   title: string;
   content: string;
   relatedId: number;
-  isRead: boolean;
+  isRead: number;
   createdAt: string;
+  receiverId: number;
+}
+
+export interface MaterialShortageResponse {
+  materialId: number;
+  materialName: string;
+  currentStock: number;
+  safetyStock: number;
+  deficitQuantity: number;
+  unitPrice: number;
+  statusMessage: string;
+}
+
+export interface StockShortageResponse {
+  criticalCount: number;
+  warningCount: number;
+  onOrderCount: number;
+  estimatedRequiredCost: number;
 }

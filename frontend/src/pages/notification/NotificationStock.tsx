@@ -1,177 +1,219 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaBoxes, FaCartPlus, FaExclamationCircle } from "react-icons/fa";
 import { MdOutlineRemoveShoppingCart } from "react-icons/md";
-import type { Material } from "../../types/OrderDTO";
 import { useNavigate } from "react-router-dom";
+import type {
+  MaterialShortageResponse,
+  StockShortageResponse,
+} from "../../types/NotificationDTO";
+import { stockShortageApi } from "../../api/stockStortageApi";
 
 export const NotificationStock = () => {
-  const [materials] = useState<Material[]>([
-    {
-      materialId: 1,
-      materialCode: "MAT-2026-001",
-      materialName: "포틀랜드 시멘트",
-      materialCategory: "시멘트/레미콘",
-      currentStock: 15,
-      minimumStock: 100,
-      unit: "포대",
-      specification: "40kg",
-      unitPrice: 7500,
-    },
-    {
-      materialId: 2,
-      materialCode: "MAT-2026-002",
-      materialName: "고장력 철근",
-      materialCategory: "철강/철근",
-      currentStock: 45,
-      minimumStock: 50,
-      unit: "톤(t)",
-      specification: "D13 / 8m",
-      unitPrice: 980000,
-    },
-    {
-      materialId: 3,
-      materialCode: "MAT-2026-003",
-      materialName: "세골재 (모래)",
-      materialCategory: "골재/토사",
-      currentStock: 0,
-      minimumStock: 40,
-      unit: "루베(m³)",
-      specification: "세척사",
-      unitPrice: 28000,
-    },
-    {
-      materialId: 4,
-      materialCode: "MAT-2026-004",
-      materialName: "일반 레미콘",
-      materialCategory: "시멘트/레미콘",
-      currentStock: 150,
-      minimumStock: 120,
-      unit: "루베(m³)",
-      specification: "25-24-150",
-      unitPrice: 92000,
-    },
-  ]);
-
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-
-  const shortageMaterials = materials.filter(
-    (m) => m.currentStock < m.minimumStock,
-  );
-
-  const filteredMaterials = selectedCategory
-    ? shortageMaterials.filter((m) => m.materialCategory === selectedCategory)
-    : shortageMaterials;
-
-  const totalShortageCount = shortageMaterials.length;
-  const outOfStockCount = shortageMaterials.filter(
-    (m) => m.currentStock === 0,
-  ).length;
-
   const nav = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
+  const companyId = Number(localStorage.getItem("companyId"));
+
+  // 데이터
+  const [boardData, setBoardData] = useState<StockShortageResponse | null>(
+    null,
+  );
+  const [materials, setMaterials] = useState<MaterialShortageResponse[]>([]);
+
+  // 페이징
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalElements, setTotalElements] = useState<number>(0);
+
+  const handleFetchStockData = (page: number = 0) => {
+    setLoading(true);
+    return Promise.all([
+      stockShortageApi.getShortageCard(1), // 회사 ID
+      stockShortageApi.getShortageList(1, page),
+    ])
+      .then(([boardRes, listRes]) => {
+        setBoardData(boardRes);
+
+        setMaterials(listRes.list || []);
+        setTotalPages(listRes.totalPages || 1);
+        setTotalElements(listRes.totalElements || 0);
+        setCurrentPage(page);
+
+        return { boardRes, listRes };
+      })
+      .catch((err) => console.error("재고 부족 데이터 로딩 실패", err))
+      .finally(() => setLoading(false));
+  };
+
+  const handlePageChange = (newPage: number) => {
+    handleFetchStockData(newPage);
+  };
+
+  useEffect(() => {
+    handleFetchStockData(0);
+  }, []);
 
   return (
-    <div className="stock-warning-container">
-      <div className="page-header">
-        <h2>
-          <FaBoxes /> 자재 재고 부족 알림 현황
+    <div className="container">
+      <div className="header">
+        <h2 className="title">
+          <FaBoxes className="title-icon" /> 자재 재고 부족 알림 현황
         </h2>
-        <p>
+        <p className="explain">
           현재고가 설정된 최소 기준 재고량보다 미달된 자재 품목들을 실시간으로
           추출합니다.
         </p>
       </div>
 
-      <div className="summary-cards">
-        <div>
-          <MdOutlineRemoveShoppingCart />
-          <div>
-            <h4>당장 투입 불가 (재고 없음 / 품절)</h4>
-            <p>{outOfStockCount} 품목</p>
+      <div className="critical-area">
+        <div className="critical-card">
+          <MdOutlineRemoveShoppingCart className="critical-icon" />
+          <div className="critical-material-area">
+            <h4 className="critical-title">심각 유의 자재 (위험 등급)</h4>
+            <p className="critical-data">
+              {boardData ? boardData.criticalCount : 0} 품목
+            </p>
           </div>
         </div>
 
-        <div>
-          <FaExclamationCircle />
-          <div>
-            <h4>안전기준 미달 (재고 부족)</h4>
-            <p>{totalShortageCount} 품목</p>
+        <div className="warning-area">
+          <FaExclamationCircle className="warning-icon" />
+          <div className="warning-material-area">
+            <h4 className="warning-title">안전기준 미달 자재 (전체 주의건)</h4>
+            <p className="warning-data">
+              {boardData ? boardData.warningCount : 0} 품목
+            </p>
+          </div>
+        </div>
+
+        <div className="ordering-area">
+          <FaBoxes className="ordering-icon" />
+          <div className="ordering-material-area">
+            <h4 className="ordering-title">현재 발주 진행 중인 자재</h4>
+            <p className="ordering-data">
+              {boardData ? boardData.onOrderCount : 0} 품목
+            </p>
+          </div>
+        </div>
+
+        <div className="deficit-area">
+          <div className="deficit-material-area">
+            <h4 className="deficit-title">예상 부족 재고 확보 비용</h4>
+            <p className="deficit-data">
+              {boardData ? boardData.estimatedRequiredCost.toLocaleString() : 0}{" "}
+              원
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="filter-bar">
-        <span>
-          기준 미달 자재: 총 <span>{filteredMaterials.length}</span>건
+      <hr className="line" />
+
+      <div className="shortage-material-area">
+        <span className="shortage-material-data">
+          기준 미달 자재: 총 <strong>{totalElements}</strong> 건
         </span>
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <option value="">전체 카테고리</option>
-          <option value="시멘트/레미콘">시멘트/레미콘</option>
-          <option value="철강/철근">철강/철근</option>
-          <option value="골재/토사">골재/토사</option>
-        </select>
       </div>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>구분</th>
-              <th>자재 코드</th>
-              <th>자재명 / 규격</th>
-              <th>현재 재고</th>
-              <th>설정 최소 재고</th>
-              <th>예상 단가</th>
-              <th>조치</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredMaterials.length > 0 ? (
-              filteredMaterials.map((material) => {
-                const isOutOfStock = material.currentStock === 0;
-
-                return (
+      {loading ? (
+        <p>재고 현황 데이터를 분석 중입니다.</p>
+      ) : (
+        <div className="shortage-list-area">
+          <table className="shortage-table">
+            <thead>
+              <tr>
+                <th className="th-status">상태</th>
+                <th className="th-materialId">자재 코드</th>
+                <th className="th-materialName">자재명</th>
+                <th className="th-currentStock">현재 재고</th>
+                <th className="th-safeStock">설정 최소 재고</th>
+                <th className="th-deficitQuantity">부족 수량</th>
+                <th className="th-unitPrice">예상 단가</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {materials.length > 0 ? (
+                materials.map((material) => (
                   <tr key={material.materialId}>
-                    <td>
-                      <span>{isOutOfStock ? "품절" : "재고부족"}</span>
+                    <td className="status-data">
+                      <span>{material.statusMessage}</span>
                     </td>
-                    <td>{material.materialCode}</td>
-                    <td>
+
+                    <td className="materialId-data">{material.materialId}</td>
+
+                    <td className="materialName-data">
                       <strong>{material.materialName}</strong>
-                      <br />
-                      <small>
-                        {material.specification} | {material.materialCategory}
-                      </small>
                     </td>
 
-                    <td>
-                      {material.currentStock.toLocaleString()} {material.unit}
+                    <td className="currentStock-data">
+                      {material.currentStock.toLocaleString() ?? "데이터 없음"}{" "}
+                      개
                     </td>
-                    <td>
-                      {material.minimumStock.toLocaleString()} {material.unit}
+                    <td className="safetyStock-data">
+                      {material.safetyStock.toLocaleString() ?? "데이터 없음"}{" "}
+                      개
                     </td>
-                    <td>{material.unitPrice.toLocaleString()}원</td>
 
-                    <td>
-                      <button onClick={() => nav("/order/write")}>
-                        <FaCartPlus /> 즉시 발주
+                    <td className="deficitQuantity-data">
+                      {material.deficitQuantity.toLocaleString() ??
+                        "데이터 없음"}{" "}
+                      개
+                    </td>
+
+                    <td className="unitPrice-data">
+                      {material.unitPrice.toLocaleString() ?? "데이터 없음"} 원
+                    </td>
+
+                    <td className="go-to-order">
+                      <button
+                        className="go-to-order-btn"
+                        onClick={() => nav("/order/write")}
+                      >
+                        <FaCartPlus className="order-icon" /> 즉시 발주
                       </button>
                     </td>
                   </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={7}>
-                  현재 최소 재고량 미달로 경고가 발생한 자재가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                ))
+              ) : (
+                <tr className="no-data">
+                  <td colSpan={8} className="no-data-message">
+                    현재 최소 재고량 미달로 경고가 발생한 자재가 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          <div className="pagination-area">
+            <button
+              className="prev-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+            >
+              이전
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                className="current-page-btn"
+                key={index}
+                onClick={() => handlePageChange(index)}
+                disabled={currentPage === index}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              className="next-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages - 1 || totalPages === 0}
+            >
+              다음
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
