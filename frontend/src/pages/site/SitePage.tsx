@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiPlus,
   FiSearch,
   FiMapPin,
   FiCalendar,
-  FiDollarSign,
   FiCheckCircle,
   FiClock,
   FiEdit3,
@@ -15,60 +14,178 @@ import {
 } from "react-icons/fi";
 import "../../styles/SitePage.css";
 
-const sites = [
-  {
-    id: 1,
-    name: "강남 오피스 신축",
-    type: "오피스",
-    address: "서울특별시 강남구 테헤란로 120",
-    cost: "1,250,000,000",
-    status: "진행중",
-    startDate: "2026-06-01",
-    endDate: "2026-12-31",
-  },
-  {
-    id: 2,
-    name: "송도 아파트 건설",
-    type: "아파트",
-    address: "인천광역시 연수구 송도동 88",
-    cost: "3,800,000,000",
-    status: "진행중",
-    startDate: "2026-05-01",
-    endDate: "2027-03-31",
-  },
-  {
-    id: 3,
-    name: "부산 상가 리모델링",
-    type: "상가",
-    address: "부산광역시 부산진구 중앙대로 708",
-    cost: "420,000,000",
-    status: "예정",
-    startDate: "2026-07-10",
-    endDate: "2026-10-20",
-  },
-  {
-    id: 4,
-    name: "판교 오피스 건설",
-    type: "오피스",
-    address: "경기도 성남시 분당구 판교로 255",
-    cost: "2,100,000,000",
-    status: "완료",
-    startDate: "2025-11-01",
-    endDate: "2026-05-30",
-  },
-];
+type Site = {
+  id: number;
+  siteName: string;
+  constructionType: string;
+  address: string;
+  cost: number;
+  status: string;
+  startDate: string;
+  expectedEndDate: string;
+};
+
+type SiteResponse = {
+  totalSiteCount: number;
+  progressCount: number;
+  plannedCount: number;
+  completedCount: number;
+  currentPage?: number;
+  pageSize?: number;
+  totalElements?: number;
+  totalPages?: number;
+  sites: Site[];
+};
 
 function SitePage() {
   const [keyword, setKeyword] = useState("");
-  const selected = sites[0];
+  const [constructionType, setConstructionType] = useState("");
+  const [status, setStatus] = useState("");
+  const [sites, setSites] = useState<Site[]>([]);
+  const [selected, setSelected] = useState<Site | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [summary, setSummary] = useState({
+    totalSiteCount: 0,
+    progressCount: 0,
+    plannedCount: 0,
+    completedCount: 0,
+  });
+
   const navigate = useNavigate();
 
-  const filteredSites = sites.filter(
-    (site) =>
-      site.name.includes(keyword) ||
-      site.address.includes(keyword) ||
-      site.type.includes(keyword),
-  );
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("토큰이 없습니다. localStorage에 token을 저장해주세요.");
+      return null;
+    }
+
+    return token;
+  };
+
+  const getProgress = (site: Site) => {
+    if (site.status === "완료") return 100;
+
+    const today = new Date();
+    const start = new Date(site.startDate);
+    const end = new Date(site.expectedEndDate);
+
+    today.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    if (today < start) return 0;
+    if (today >= end) return 100;
+
+    const total = end.getTime() - start.getTime();
+    const passed = today.getTime() - start.getTime();
+
+    return Math.round((passed / total) * 100);
+  };
+
+  const getDisplayStatus = (site: Site) => {
+    const progress = getProgress(site);
+
+    if (site.status === "완료" || progress === 100) return "완료";
+    if (progress === 0) return "예정";
+    return "진행중";
+  };
+
+  const getStatusClass = (site: Site) => {
+    const displayStatus = getDisplayStatus(site);
+
+    return displayStatus === "진행중"
+      ? "site-status progress"
+      : displayStatus === "완료"
+        ? "site-status done"
+        : "site-status ready";
+  };
+
+  const fetchSites = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const params = new URLSearchParams({
+        keyword,
+        constructionType,
+        status,
+        page: String(page),
+        size: "10",
+      });
+
+      const response = await fetch(
+        `http://localhost:8080/api/sites?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("공사 현장 목록 조회 실패");
+      }
+
+      const data: SiteResponse = await response.json();
+
+      setSites(data.sites ?? []);
+      setSummary({
+        totalSiteCount: data.totalSiteCount,
+        progressCount: data.progressCount,
+        plannedCount: data.plannedCount,
+        completedCount: data.completedCount,
+      });
+      setTotalPages(data.totalPages ?? 1);
+      setSelected(data.sites?.[0] ?? null);
+    } catch (error) {
+      console.error(error);
+      alert("공사 현장 목록을 불러오지 못했습니다.");
+    }
+  };
+
+  useEffect(() => {
+    fetchSites();
+  }, [page, constructionType, status]);
+
+  const handleSearch = () => {
+    setPage(0);
+    fetchSites();
+  };
+
+  const handleDelete = async (siteId: number) => {
+    if (!window.confirm("공사 현장을 삭제하시겠습니까?")) return;
+
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch(
+        `http://localhost:8080/api/sites/${siteId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("공사 현장 삭제 실패");
+      }
+
+      alert("공사 현장이 삭제되었습니다.");
+      setSelected(null);
+      fetchSites();
+    } catch (error) {
+      console.error(error);
+      alert("공사 현장 삭제에 실패했습니다.");
+    }
+  };
 
   return (
     <div className="site-page">
@@ -91,10 +208,30 @@ function SitePage() {
       </div>
 
       <div className="site-stat-grid">
-        <StatCard icon={<FiMapPin />} title="전체 현장" value="24" unit="개" />
-        <StatCard icon={<FiClock />} title="진행중" value="12" unit="개" />
-        <StatCard icon={<FiCalendar />} title="예정" value="7" unit="개" />
-        <StatCard icon={<FiCheckCircle />} title="완료" value="5" unit="개" />
+        <StatCard
+          icon={<FiMapPin />}
+          title="전체 현장"
+          value={String(summary.totalSiteCount)}
+          unit="개"
+        />
+        <StatCard
+          icon={<FiClock />}
+          title="진행중"
+          value={String(summary.progressCount)}
+          unit="개"
+        />
+        <StatCard
+          icon={<FiCalendar />}
+          title="예정"
+          value={String(summary.plannedCount)}
+          unit="개"
+        />
+        <StatCard
+          icon={<FiCheckCircle />}
+          title="완료"
+          value={String(summary.completedCount)}
+          unit="개"
+        />
       </div>
 
       <div className="site-layout">
@@ -105,22 +242,38 @@ function SitePage() {
                 placeholder="현장명, 주소, 공사 유형 검색..."
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
               />
-              <FiSearch />
+              <FiSearch onClick={handleSearch} />
             </div>
 
-            <select>
-              <option>전체 유형</option>
-              <option>오피스</option>
-              <option>아파트</option>
-              <option>상가</option>
+            <select
+              value={constructionType}
+              onChange={(e) => {
+                setConstructionType(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">전체 유형</option>
+              <option value="오피스">오피스</option>
+              <option value="아파트">아파트</option>
+              <option value="상가">상가</option>
+              <option value="건축">건축</option>
             </select>
 
-            <select>
-              <option>전체 상태</option>
-              <option>예정</option>
-              <option>진행중</option>
-              <option>완료</option>
+            <select
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value);
+                setPage(0);
+              }}
+            >
+              <option value="">전체 상태</option>
+              <option value="예정">예정</option>
+              <option value="진행중">진행중</option>
+              <option value="완료">완료</option>
             </select>
           </div>
 
@@ -139,40 +292,39 @@ function SitePage() {
             </thead>
 
             <tbody>
-              {filteredSites.map((site) => (
-                <tr key={site.id}>
-                  <td className="site-name">{site.name}</td>
-                  <td>{site.type}</td>
+              {sites.map((site) => (
+                <tr key={site.id} onClick={() => setSelected(site)}>
+                  <td className="site-name">{site.siteName}</td>
+                  <td>{site.constructionType}</td>
                   <td>{site.address}</td>
-                  <td>{site.cost}원</td>
+                  <td>{site.cost.toLocaleString()}원</td>
                   <td>{site.startDate}</td>
-                  <td>{site.endDate}</td>
+                  <td>{site.expectedEndDate}</td>
                   <td>
-                    <span
-                      className={
-                        site.status === "진행중"
-                          ? "site-status progress"
-                          : site.status === "완료"
-                            ? "site-status done"
-                            : "site-status ready"
-                      }
-                    >
-                      {site.status}
+                    <span className={getStatusClass(site)}>
+                      {getDisplayStatus(site)}
                     </span>
                   </td>
                   <td>
                     <div className="site-actions">
                       <button
                         className="edit"
-                        onClick={() =>
+                        onClick={(e) => {
+                          e.stopPropagation();
                           navigate(`/site/edit/${site.id}`, {
                             state: site,
-                          })
-                        }
+                          });
+                        }}
                       >
                         <FiEdit3 />
                       </button>
-                      <button className="delete">
+                      <button
+                        className="delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(site.id);
+                        }}
+                      >
                         <FiTrash2 />
                       </button>
                     </div>
@@ -183,50 +335,71 @@ function SitePage() {
           </table>
 
           <div className="site-pagination">
-            <button>
+            <button
+              onClick={() => page > 0 && setPage(page - 1)}
+              disabled={page === 0}
+            >
               <FiChevronLeft />
             </button>
-            <button className="active">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>
+
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                className={page === index ? "active" : ""}
+                onClick={() => setPage(index)}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => page < totalPages - 1 && setPage(page + 1)}
+              disabled={page >= totalPages - 1}
+            >
               <FiChevronRight />
             </button>
           </div>
         </section>
 
-        <aside className="site-detail-panel">
-          <h3>현장 상세 정보</h3>
+        {selected && (
+          <aside className="site-detail-panel">
+            <h3>현장 상세 정보</h3>
 
-          <div className="site-detail-top">
-            <div className="site-detail-icon">
-              <FiMapPin />
+            <div className="site-detail-top">
+              <div className="site-detail-icon">
+                <FiMapPin />
+              </div>
+              <div>
+                <h2>{selected.siteName}</h2>
+                <span className={getStatusClass(selected)}>
+                  {getDisplayStatus(selected)}
+                </span>
+                <p>{selected.constructionType}</p>
+              </div>
             </div>
-            <div>
-              <h2>{selected.name}</h2>
-              <span className="site-status progress">{selected.status}</span>
-              <p>{selected.type}</p>
-            </div>
-          </div>
 
-          <div className="site-detail-list">
-            <Info label="현장 주소" value={selected.address} />
-            <Info label="공사 비용" value={`${selected.cost}원`} />
-            <Info label="착공일" value={selected.startDate} />
-            <Info label="준공 예정일" value={selected.endDate} />
-            <Info label="공사 상태" value={selected.status} />
-          </div>
+            <div className="site-detail-list">
+              <Info label="현장 주소" value={selected.address} />
+              <Info
+                label="공사 비용"
+                value={`${selected.cost.toLocaleString()}원`}
+              />
+              <Info label="착공일" value={selected.startDate} />
+              <Info label="준공 예정일" value={selected.expectedEndDate} />
+              <Info label="공사 상태" value={getDisplayStatus(selected)} />
+            </div>
 
-          <div className="site-progress-box">
-            <div className="progress-title">
-              <span>공정 진행률</span>
-              <strong>62%</strong>
+            <div className="site-progress-box">
+              <div className="progress-title">
+                <span>공정 진행률</span>
+                <strong>{getProgress(selected)}%</strong>
+              </div>
+              <div className="progress-bar">
+                <div style={{ width: `${getProgress(selected)}%` }}></div>
+              </div>
             </div>
-            <div className="progress-bar">
-              <div></div>
-            </div>
-          </div>
-        </aside>
+          </aside>
+        )}
       </div>
     </div>
   );

@@ -158,12 +158,6 @@
   border-color: #2563eb;
 }
 
-.site-memo {
-  height: 130px;
-  padding: 14px;
-  resize: none;
-}
-
 .site-form-actions {
   display: flex;
   justify-content: center;

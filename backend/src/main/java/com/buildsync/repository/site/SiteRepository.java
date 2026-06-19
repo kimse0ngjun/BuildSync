@@ -8,11 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SiteRepository extends JpaRepository<Site, Long> {
 
     Optional<Site> findByIdAndCompany(Long siteId, Company company);
+
+    List<Site> findAllByCompany(Company company);
 
     @Query("SELECT s FROM Site s " +
             "WHERE s.company = :company " +

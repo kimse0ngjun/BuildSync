@@ -177,6 +177,14 @@
   border-bottom: 1px solid #eef2f7;
 }
 
+.site-table tbody tr {
+  cursor: pointer;
+}
+
+.site-table tbody tr:hover {
+  background: #f4f8ff;
+}
+
 .site-name {
   color: #10284a !important;
   font-weight: 700 !important;
