@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.buildsync.dto.order.MaterialSelectResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Material;
 import com.buildsync.entity.SupStock;
@@ -71,4 +72,15 @@ public interface SupStockRepository extends JpaRepository<SupStock, Long> {
             @Param("category") String category,
             Pageable pageable
     );
+    
+    @Query("""
+    	    SELECT new com.buildsync.dto.order.MaterialSelectResponse(
+    	        m.id, m.materialName, m.specification, m.unit, s.unitPrice
+    	    )
+    	    FROM SupStock s
+    	    JOIN s.material m
+    	    WHERE s.company.id = :companyId
+    	    ORDER BY m.materialName
+    	""")
+    	List<MaterialSelectResponse> findMaterialsBySupplierForSelect(@Param("companyId") Long companyId);
 }

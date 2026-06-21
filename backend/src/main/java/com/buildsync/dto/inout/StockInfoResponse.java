@@ -4,18 +4,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class StockInfoResponse {
 
-	private Long materialId;
-    private String unit;
-    private Integer currentQuantity;
-    private Integer minimumQuantity;
-    
-    private Integer totalAmount;
-    private Integer expectedQuantity;
+    private List<MaterialStockDetail> materials;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MaterialStockDetail {
+        private Long materialId;
+        private String materialName; 
+        private String materialCode; 
+        private String unit;
+        private Integer currentQuantity;
+        private Integer minimumQuantity;
+        private Integer unitPrice;
+    }
 }
