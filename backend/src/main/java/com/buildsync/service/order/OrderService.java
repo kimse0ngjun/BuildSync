@@ -349,6 +349,33 @@ public class OrderService {
             );
         }
     }
+    
+    @Transactional
+	public void cancelOrderByConstruction(Long orderId) {
+		Orders order = orderRepository.findByOrderDetail(orderId);
+		if (order == null) {
+			throw new IllegalArgumentException("해당 발주서가 없습니다.");
+		}
+
+		if (order.getStatus() != OrderStatus.PENDING) {
+			throw new IllegalStateException("공급업체가 이미 접수했거나 처리가 완료된 발주서는 취소할 수 없습니다.");
+		}
+
+		order.changeStatus(OrderStatus.CANCELED);
+
+		Long supplierCompanyId = (order.getContact() != null && order.getContact().getCompany() != null) 
+				? order.getContact().getCompany().getId() : null;
+		
+		if (supplierCompanyId != null) {
+			notificationService.sendNotification(
+					supplierCompanyId,
+					"ORDER_CANCELED_BY_CONSTRUCTION",
+					"발주 취소 안내",
+					"건설사 요청에 의해 대기 중이던 발주서 #" + orderId + " 건이 취소되었습니다.",
+					orderId
+			);
+		}
+	}
 	
 	private OrderListResponse convertToOrderListResponse(Orders order, String viewType) {
 

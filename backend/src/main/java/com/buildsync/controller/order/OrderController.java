@@ -127,7 +127,7 @@ public class OrderController {
 	@PatchMapping("/cancel/{orderId}")
 	public ResponseEntity<String> cancelOrderByConstruction(@PathVariable("orderId") Long orderId) {
 		try {
-			orderService.updateStatusBySupplier(orderId, "CANCELED");
+			orderService.cancelOrderByConstruction(orderId);
 			return ResponseEntity.ok("발주서가 성공적으로 취소되었습니다.");
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
