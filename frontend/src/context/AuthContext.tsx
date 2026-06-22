@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
-import type { AuthContextType } from "../types/Auth.ts";
+import type { LoginResponse } from "../types/Auth.ts";
+import type { AuthContextType } from "../types/authContext";
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -16,11 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   // 로그인
-  const login = (data: {
-    token: string;
-    ceoName: string;
-    companyName: string;
-  }) => {
+  const login = (data: LoginResponse) => {
     localStorage.setItem("token", data.token);
     localStorage.setItem("ceoName", data.ceoName);
     localStorage.setItem("companyName", data.companyName);
