@@ -30,7 +30,6 @@ import "../styles/Layout.css";
 function Layout() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openBottom, setOpenBottom] = useState<string | null>(null);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { isLogin, ceoName, companyName, logout } = useAuth();
 
   const toggleMenu = (menu: string) => {
@@ -181,42 +180,30 @@ function Layout() {
           </BottomGroup>
 
           {isLogin ? (
-            <div className="profile-wrapper">
-              <div
-                className="login-profile"
-                onClick={() => setIsProfileOpen((prev) => !prev)}
-              >
-                <div className="login-avatar">
-                  <FiUser />
-                </div>
-                <div className="login-info">
-                  <strong>{ceoName}</strong>
-                  <small>{companyName}</small>
-                </div>
+            <div className="login-profile">
+
+              <div className="login-avatar">
+                <FiUser />
               </div>
 
-              {isProfileOpen && (
-                <div className="profile-dropdown">
-                  <div className="profile-header">
-                    <div className="profile-avatar">
-                      <FiUser />
-                    </div>
-                    <div className="profile-user-info">
-                      <strong>{ceoName}</strong>
-                      <small>{companyName}</small>
-                    </div>
-                  </div>
-                  <div className="profile-divider" />
-                  <button type="button" className="logout-btn" onClick={logout}>
-                    <FiLogIn />
-                    로그아웃
-                  </button>
-                </div>
-              )}
+              <div className="login-info">
+                <strong>{ceoName}</strong>
+                <small>{companyName}</small>
+              </div>
+
+              <button
+                type="button"
+                className="logout-btn"
+                onClick={logout}
+              >
+                <FiLogIn />
+              </button>
+
             </div>
           ) : (
             <NavLink to="/login">
               <div className="login-profile">
+
                 <div className="login-avatar">
                   <FiLogIn />
                 </div>
@@ -225,6 +212,7 @@ function Layout() {
                   <strong>로그인</strong>
                   <small>서비스 이용하기</small>
                 </div>
+
               </div>
             </NavLink>
           )}
