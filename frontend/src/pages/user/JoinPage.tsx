@@ -28,6 +28,7 @@ function JoinPage() {
     address: "",
     homepageUrl: "",
     phone: "",
+    email: "",
     createdAt: new Date().toISOString().split("T")[0],
   });
 
@@ -70,6 +71,7 @@ function JoinPage() {
     if (!form.businessNumber) return setError("사업자등록번호를 입력하세요.");
     if (!form.phone) return setError("연락처를 입력하세요.");
     if (!form.address) return setError("주소를 입력하세요.");
+    if (!form.email) return setError("이메일을 입력하세요.");
 
     try {
       await authApi.signup({
@@ -198,6 +200,16 @@ function JoinPage() {
                 onChange={handlePhoneChange}
                 placeholder="예) 010-1234-5678"
                 maxLength={13}
+              />
+            </FormField>
+
+            <FormField icon={<FiUser />} label="이메일" required>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="example@email.com"
               />
             </FormField>
 
