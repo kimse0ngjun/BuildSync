@@ -24,6 +24,7 @@ import SuccessInput from "./pages/inoutput/SuccessInput";
 import SuccessOutput from "./pages/inoutput/SuccessOutput";
 
 import LoginPage from "./pages/user/LoginPage";
+import AdminLoginPage from "./pages/user/AdminLoginPage";
 import JoinPage from "./pages/user/JoinPage";
 
 import FindIdPage from "./pages/auth/FindIdPage";
@@ -44,6 +45,9 @@ import SiteCreatePage from "./pages/site/SiteCreatePage";
 import SiteEditPage from "./pages/site/SiteEditPage";
 import MaterialUsagePage from "./pages/site/MaterialUsagePage";
 import SchedulePage from "./pages/schedule/SchedulePage";
+
+import MaterialCategoryCreatePage from "./pages/admin/MaterialCategoryCreatePage";
+import MaterialCategoryEditPage from "./pages/admin/MaterialCategoryEditPage";
 
 function App() {
   useEffect(() => {
@@ -71,6 +75,15 @@ function App() {
 
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+
+            <Route
+              path="/admin/material-categories/create"
+              element={<MaterialCategoryCreatePage />}
+            />
+            <Route
+              path="/admin/material-categories/edit/:categoryId"
+              element={<MaterialCategoryEditPage />}
+            />
 
             <Route path="/company" element={<CompanyList />} />
             <Route path="/company/:id" element={<CompanyDetail />} />
@@ -101,6 +114,7 @@ function App() {
             />
 
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
             <Route path="/join" element={<JoinPage />} />
             <Route path="/find-id" element={<FindIdPage />} />
             <Route path="/find-password" element={<FindPasswordPage />} />

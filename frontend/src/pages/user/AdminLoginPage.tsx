@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiLock, FiUser, FiArrowRight } from "react-icons/fi";
-import authApi from "../../api/authApi";
+import adminApi from "../../api/adminApi";
 import { useAuth } from "../../context/AuthContext";
 import "../../styles/LoginPage.css";
 
-function LoginPage() {
+function AdminLoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -21,23 +21,23 @@ function LoginPage() {
     }
 
     try {
-      const res = await authApi.login({
+      const res = await adminApi.login({
         loginId,
         password,
       });
 
       login({
         token: res.data.token,
-        ceoName: res.data.ceoName,
-        companyName: res.data.companyName,
+        ceoName: res.data.adminName,
+        companyName: "관리자",
       });
 
-      localStorage.removeItem("isAdmin");
+      localStorage.setItem("isAdmin", "true");
 
       setError("");
-      navigate("/dashboard");
+      window.location.href = "/dashboard";
     } catch {
-      setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+      setError("운영자 아이디 또는 비밀번호가 올바르지 않습니다.");
     }
   };
 
@@ -52,7 +52,7 @@ function LoginPage() {
           </span>
         </div>
 
-        <h1>로그인</h1>
+        <h1>운영자 로그인</h1>
 
         <form className="login-form">
           <label>
@@ -61,7 +61,7 @@ function LoginPage() {
               <FiUser />
               <input
                 type="text"
-                placeholder="아이디를 입력하세요"
+                placeholder="운영자 아이디를 입력하세요"
                 value={loginId}
                 onChange={(e) => {
                   setLoginId(e.target.value);
@@ -99,26 +99,14 @@ function LoginPage() {
           </label>
 
           <button type="button" className="login-submit" onClick={handleLogin}>
-            로그인
+            운영자 로그인
             <FiArrowRight />
           </button>
         </form>
 
         <div className="login-links">
-          <button type="button" onClick={() => navigate("/find-id")}>
-            아이디 찾기
-          </button>
-          <span />
-          <button type="button" onClick={() => navigate("/find-password")}>
-            비밀번호 찾기
-          </button>
-          <span />
-          <button type="button" onClick={() => navigate("/join")}>
-            회원가입
-          </button>
-          <span />
-          <button type="button" onClick={() => navigate("/admin/login")}>
-            운영자 로그인
+          <button type="button" onClick={() => navigate("/login")}>
+            일반 로그인
           </button>
         </div>
       </div>
@@ -126,4 +114,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default AdminLoginPage;
