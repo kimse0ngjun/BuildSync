@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiBox, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
+import { materialApi } from "../../api/materialApi";
 import "../../styles/MaterialWrite.css";
 
 type CategoryItem = {
@@ -28,37 +29,9 @@ function MaterialWrite() {
   const isEnough =
     Number(form.currentStock || 0) >= Number(form.minimumStock || 0);
 
-  const getToken = () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      return null;
-    }
-
-    return token;
-  };
-
   const fetchCategories = async () => {
     try {
-      const token = getToken();
-      if (!token) return;
-
-      const response = await fetch(
-        "http://localhost:8080/api/material-categories",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("카테고리 목록 조회 실패");
-      }
-
-      const data: CategoryItem[] = await response.json();
+      const data: CategoryItem[] = await materialApi.getCategories();
       setCategories(data);
     } catch (error) {
       console.error(error);
@@ -115,9 +88,6 @@ function MaterialWrite() {
     }
 
     try {
-      const token = getToken();
-      if (!token) return;
-
       const requestBody = {
         materialCode: form.materialCode,
         materialName: form.materialName,
@@ -129,18 +99,7 @@ function MaterialWrite() {
         unitPrice: Number(form.price),
       };
 
-      const response = await fetch("http://localhost:8080/api/materials", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        throw new Error("자재 등록 실패");
-      }
+      await materialApi.createMaterial(requestBody);
 
       alert("자재가 등록되었습니다.");
       navigate("/material");

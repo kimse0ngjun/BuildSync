@@ -52,8 +52,8 @@ public class AdminCompanyService {
 
         try {
             mailService.sendApprovalMail(savedCompany.getEmail(), savedCompany.getCompanyName());
-        } catch (MessagingException e) {
-            throw new RuntimeException("승인 메일 전송에 실패했습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return AdminCompanyResponse.from(savedCompany);
@@ -70,8 +70,8 @@ public class AdminCompanyService {
 
         try {
             mailService.sendRejectMail(savedCompany.getEmail(), savedCompany.getCompanyName());
-        } catch (MessagingException e) {
-            throw new RuntimeException("반려 메일 전송에 실패했습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return AdminCompanyResponse.from(savedCompany);

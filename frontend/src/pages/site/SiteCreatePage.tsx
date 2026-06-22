@@ -10,6 +10,7 @@ import {
   FiFlag,
   FiSave,
 } from "react-icons/fi";
+import { siteApi } from "../../api/siteApi";
 import "../../styles/SiteCreatePage.css";
 
 type SiteForm = {
@@ -41,17 +42,6 @@ function SiteCreatePage() {
     startDate: "",
     endDate: "",
   });
-
-  const getToken = () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      alert("로그인이 필요한 서비스입니다.");
-      return null;
-    }
-
-    return token;
-  };
 
   const getAutoStatus = () => {
     if (!form.startDate || !form.endDate) return "예정";
@@ -105,9 +95,6 @@ function SiteCreatePage() {
     try {
       setLoading(true);
 
-      const token = getToken();
-      if (!token) return;
-
       const payload = {
         siteName: form.name,
         constructionType: form.type,
@@ -118,18 +105,7 @@ function SiteCreatePage() {
         expectedEndDate: form.endDate,
       };
 
-      const response = await fetch("http://localhost:8080/api/sites", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error("공사 현장 등록 실패");
-      }
+      await siteApi.createSite(payload);
 
       alert("공사 현장이 등록되었습니다.");
       navigate("/site");
