@@ -1,17 +1,11 @@
 package com.buildsync.service.company;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.buildsync.dto.company.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.buildsync.dto.company.CompanyDeleteResponse;
-import com.buildsync.dto.company.CompanyResponse;
-import com.buildsync.dto.company.CompanyUpdateRequest;
-import com.buildsync.dto.company.CompanyUpdateResponse;
 import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.CompanyStatus;
@@ -26,8 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class CompanyService {
 
 	private final CompanyRepository companyRepository;
-	
-	
+
+
 	// 업체 목록 조회
     public PageResponse<CompanyResponse> getCompanies(
             CompanyType type,
@@ -45,21 +39,16 @@ public class CompanyService {
     	            .map(item ->
     	                CompanyResponse.builder()
     	                .companyId(item.getCompanyId())
-    	                .companyType(
-    	                		CompanyType.valueOf(item.getCompanyType())
-    	                		)
+                                .companyType(
+                                        item.getCompanyType() == null
+                                                ? null
+                                                : CompanyType.valueOf(item.getCompanyType())
+                                )
     	                .companyName(item.getCompanyName())
     	                .ceoName(item.getCeoName())
     	                .phone(item.getPhone())
     	                .address(item.getAddress())
     	                .createdAt(item.getCreatedAt())
-    	                .materials(
-    	                    item.getMaterials() == null
-    	                    ? List.of()
-    	                    : Arrays.asList(
-    	                        item.getMaterials().split(",")
-    	                    )
-    	                )
     	                .build()
     	            );
     	    return new PageResponse<>(
@@ -67,8 +56,19 @@ public class CompanyService {
     	        pageable,
     	        page.getTotalElements()
     	    );
-    	}
-    
+    }
+
+    // 업체 상세
+    public CompanyDetailResponse getCompany(Long companyId){
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(
+                        () -> new RuntimeException("업체 없음")
+                );
+
+        return CompanyDetailResponse.from(company);
+    }
+
     // 업체 수정
     @Transactional
     public CompanyUpdateResponse updateCompany(
@@ -112,7 +112,7 @@ public class CompanyService {
 
         return CompanyUpdateResponse.from(company);
     }
-    
+
     // 업체 삭제
     @Transactional
     public CompanyDeleteResponse deleteCompany(Long id){
