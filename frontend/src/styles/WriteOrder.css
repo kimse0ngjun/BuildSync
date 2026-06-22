@@ -459,3 +459,16 @@ body.dark-mode .order-item-add button:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.order-site-address-box {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #2563eb;
+  font-weight: 600;
+  padding: 6px 10px;
+  background: #f4f8ff;
+  border-radius: 8px;
+  border: 1px dashed #dbe6f4;
+  line-height: 1.4;
+  word-break: keep-all;
+}

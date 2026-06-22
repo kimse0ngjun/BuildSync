@@ -376,3 +376,42 @@ body.dark-mode .order-pagination button:hover:not(:disabled) {
   background: #2563eb;
   color: #ffffff;
 }
+
+// 모달
+.base-modal-overlay,
+.modal-overlay,
+.modal-backdrop {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 9999 !important;
+}
+
+.base-modal-container,
+.modal-container,
+.modal-content {
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  width: 100% !important;
+  max-width: 650px !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+body.dark-mode .base-modal-container,
+body.dark-mode .modal-container,
+body.dark-mode .modal-content {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f8fafc !important;
+}

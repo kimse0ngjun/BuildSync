@@ -18,7 +18,8 @@ import StockInOutList from "./pages/material/StockInOutList";
 import StockInOutWrite from "./pages/material/StockInOutWrite";
 
 import { WriteOrder } from "./pages/order/WriteOrder";
-import { OrderList } from "./pages/order/OrderList";
+import "./pages/order/OrderListForConstruction";
+import "./pages/order/OrderListForSupplier";
 
 import SuccessInput from "./pages/inoutput/SuccessInput";
 import SuccessOutput from "./pages/inoutput/SuccessOutput";
@@ -32,7 +33,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 import CostAnalysisPage from "./pages/analysis/CostAnalysisPage";
 
-import { Notifications } from "./pages/notification/Notifications";
+import Notifications from "./pages/notification/Notifications";
 import { NotificationStock } from "./pages/notification/NotificationStock";
 
 import AccountSetting from "./pages/settings/AccountSetting";
@@ -44,6 +45,9 @@ import SiteCreatePage from "./pages/site/SiteCreatePage";
 import SiteEditPage from "./pages/site/SiteEditPage";
 import MaterialUsagePage from "./pages/site/MaterialUsagePage";
 import SchedulePage from "./pages/schedule/SchedulePage";
+import { EditOrder } from "./pages/order/EditOrder";
+import { OrderListForSupplier } from "./pages/order/OrderListForSupplier";
+import { OrderListForConstruction } from "./pages/order/OrderListForConstruction";
 
 function App() {
   useEffect(() => {
@@ -55,6 +59,8 @@ function App() {
       document.body.classList.remove("dark-mode");
     }
   }, []);
+
+  const myCompanyType = localStorage.getItem("companyType");
 
   return (
     <AuthProvider>
@@ -85,12 +91,21 @@ function App() {
 
             <Route path="/stock" element={<StockInOutList />} />
             <Route path="/stock/write" element={<StockInOutWrite />} />
-
-            <Route path="/order/write" element={<WriteOrder />} />
-            <Route path="/order/list" element={<OrderList />} />
-
             <Route path="/input/success-input" element={<SuccessInput />} />
             <Route path="/output/success-output" element={<SuccessOutput />} />
+
+            <Route path="/order/write" element={<WriteOrder />} />
+            <Route
+              path="/order/list"
+              element={
+                myCompanyType === "SUPPLIER" ? (
+                  <OrderListForSupplier />
+                ) : (
+                  <OrderListForConstruction />
+                )
+              }
+            />
+            <Route path="/order/edit/:orderId" element={<EditOrder />} />
 
             <Route path="/analysis" element={<CostAnalysisPage />} />
 

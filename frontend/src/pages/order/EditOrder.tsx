@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   FiArrowLeft,
   FiUser,
@@ -13,9 +13,8 @@ import {
   FiFileText,
   FiSave,
 } from "react-icons/fi";
-import { writeOrderApi } from "../../api/orderApi";
+import { orderListApi, writeOrderApi } from "../../api/orderApi";
 import type {
-  ContactInfo,
   MaterialSelectResponse,
   OrderItemDto,
   OrderItemRequest,
@@ -25,102 +24,111 @@ import type {
 
 import "../../styles/WriteOrder.css";
 
-export const WriteOrder = () => {
+export const EditOrder = () => {
   const navigate = useNavigate();
-  const orderDate = new Date().toISOString().split("T")[0];
+  const { orderId } = useParams<{ orderId: string }>();
+  const location = useLocation();
 
-  const [supplierList, setSupplierList] = useState<SelectResponse[]>([]);
-  const [siteList, setSiteList] = useState<SelectResponse[]>([]);
-  const [selectedSupplierId, setSelectedSupplierId] = useState<string>("");
-  const [selectedSiteId, setSelectedSiteId] = useState<string>("");
+  const [supplierName, setSupplierName] = useState<string>("-");
+
+  const [orderDate, setOrderDate] = useState<string>("");
 
   const [materialOptions, setMaterialOptions] = useState<
     MaterialSelectResponse[]
   >([]);
+  const [siteList, setSiteList] = useState<SelectResponse[]>([]);
+  const [selectedSiteId, setSelectedSiteId] = useState<string>("");
+  const [selectedSiteAddress, setSelectedSiteAddress] = useState<string>("");
+
   const [inputMaterialId, setInputMaterialId] = useState<number>(0);
   const [inputQuantity, setInputQuantity] = useState<number>(0);
   const [basketList, setBasketList] = useState<OrderItemDto[]>([]);
 
-  const [contactList, setContactList] = useState<ContactInfo[]>([]);
-  const [selectedContactId, setSelectedContactId] = useState<string>("");
+  const [contactName, setContactName] = useState<string>("-");
+  const [contactPhone, setContactPhone] = useState<string>("-");
+  const [contactEmail, setContactEmail] = useState<string>("-");
+
   const [orderManagerName, setOrderManagerName] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
 
-  useEffect(() => {
-    writeOrderApi
-      .getPartnerSelectOptions("SUPPLIER")
-      .then((data: any[]) => {
-        if (data) {
-          const formattedSuppliers = data.map((item) => ({
-            value: item.id,
-            label: item.companyName,
-          }));
-          setSupplierList(formattedSuppliers);
-        }
-      })
-      .catch(console.error);
+  // 백엔드 통신
+  const [fixedSupplierId, setFixedSupplierId] = useState<number | null>(null);
+  const [fixedContactId, setFixedContactId] = useState<number | null>(null);
 
+  useEffect(() => {
     writeOrderApi
       .getSiteSelectOptions()
-      .then((data: any[]) => {
-        if (data) {
-          const formattedSites = data.map((item) => ({
-            value: item.value,
-            label: item.label || `현장 [ID: ${item.value}]`,
-          }));
-          setSiteList(formattedSites);
-        }
-      })
+      .then((data) => setSiteList(data || []))
       .catch(console.error);
-  }, []);
+    const stateData = location.state as { orderData: any } | null;
 
-  useEffect(() => {
-    if (!selectedSupplierId) {
-      setMaterialOptions([]);
-      setContactList([]);
-      setSelectedContactId("");
+    if (stateData?.orderData) {
+      initFormData(stateData.orderData);
+    } else if (orderId) {
+      orderListApi
+        .getOrderDetail(Number(orderId))
+        .then((data) => {
+          initFormData(data);
+        })
+        .catch(console.error);
+    }
+  }, [orderId, location.state]);
+
+  const handleSiteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const siteIdStr = e.target.value;
+    setSelectedSiteId(siteIdStr);
+
+    if (!siteIdStr) {
+      setSelectedSiteAddress("");
       return;
     }
 
-    const companyId = Number(selectedSupplierId);
+    const currentSite = siteList.find((s) => String(s.value) === siteIdStr);
 
-    writeOrderApi
-      .getMaterialSelectOptions(companyId)
-      .then((data) => {
-        setMaterialOptions(data || []);
-      })
-      .catch(console.error);
+    if (currentSite && currentSite.label.includes("|")) {
+      const addressPart = currentSite.label.split("|")[1];
+      setSelectedSiteAddress(addressPart || "주소 정보 없음");
+    } else {
+      setSelectedSiteAddress("");
+    }
+  };
 
-    writeOrderApi
-      .getContactOptions(companyId)
-      .then((data) => {
-        setContactList(data || []);
+  const initFormData = (data: any) => {
+    setOrderManagerName(data.orderManagerName || "");
+    setOrderDate(data.orderDate ? data.orderDate.split("T")[0] : "");
+    setSupplierName(data.companyName || "-");
+    setContactName(data.contactName || "-");
+    setContactPhone(data.contactPhone || "-");
+    setContactEmail(data.contactEmail || "-");
+    setMemo(data.memo || "");
+    setBasketList(data.items || []);
 
-        if (data && data.length > 0) {
-          setSelectedContactId(String(data[0].contactId));
-        } else {
-          setSelectedContactId("");
-        }
-      })
-      .catch((err) => console.error("담당자 연동 실패:", err));
-  }, [selectedSupplierId]);
+    setFixedSupplierId(data.companyId);
+    setFixedContactId(data.contactId);
+
+    setSelectedSiteId(data.siteId ? String(data.siteId) : "");
+
+    if (data.siteName) {
+      const siteParts = data.siteName.split("|");
+
+      if (siteParts[1]) {
+        setSelectedSiteAddress(siteParts[1]);
+      }
+    }
+
+    if (data.companyId) {
+      writeOrderApi
+        .getMaterialSelectOptions(data.companyId)
+        .then((res) => setMaterialOptions(res || []))
+        .catch(console.error);
+    }
+  };
 
   const currentSelectedMaterialInfo = materialOptions.find(
     (m) => m.value === inputMaterialId,
   );
 
-  const currentContactInfo = contactList.find(
-    (c) => String(c.contactId) === selectedContactId,
-  );
-
   const totalAmountSum = basketList.reduce((sum, item) => sum + item.amount, 0);
-
-  const handleCompanyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const companyIdStr = e.target.value;
-    setSelectedSupplierId(companyIdStr);
-    setInputMaterialId(0);
-    setBasketList([]);
-  };
 
   const handleAddMaterial = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -144,8 +152,6 @@ export const WriteOrder = () => {
       return;
     }
 
-    const price = currentSelectedMaterialInfo.unitPrice || 0;
-
     const newItem: OrderItemDto = {
       materialId: currentSelectedMaterialInfo.value,
       materialName: currentSelectedMaterialInfo.label,
@@ -153,7 +159,7 @@ export const WriteOrder = () => {
       unit: currentSelectedMaterialInfo.unit,
       unitPrice: currentSelectedMaterialInfo.unitPrice,
       quantity: inputQuantity,
-      amount: price * inputQuantity,
+      amount: currentSelectedMaterialInfo.unitPrice * inputQuantity,
     };
 
     setBasketList([...basketList, newItem]);
@@ -165,22 +171,11 @@ export const WriteOrder = () => {
     setBasketList(basketList.filter((item) => item.materialId !== id));
   };
 
-  const handleUploadOrder = async (e: React.FormEvent) => {
+  const handleUpdateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    const myCompanyId = Number(localStorage.getItem("companyId"));
-
-    if (!selectedSupplierId) {
-      alert("거래처를 선택해 주세요.");
-      return;
-    }
-
-    if (!orderManagerName.trim()) {
-      alert("주문 담당자명을 입력해 주세요.");
-      return;
-    }
 
     if (basketList.length === 0) {
-      alert("발주할 품목을 최소 1개 이상 추가해 주세요.");
+      alert("발주할 품목을 최소 1개 이상 유지해 주세요.");
       return;
     }
 
@@ -191,24 +186,21 @@ export const WriteOrder = () => {
         unitPrice: item.unitPrice,
       }));
 
-      const cleanMemo = memo ? memo.trim() : "";
-      const formattedMemo = `[담당자: ${orderManagerName.trim()}] ${cleanMemo}`;
-
       const orderPayload: OrderRequest = {
-        companyId: myCompanyId,
+        companyId: fixedSupplierId,
         siteId: selectedSiteId ? Number(selectedSiteId) : null,
-        contactId: selectedContactId ? Number(selectedContactId) : null,
-        memo: formattedMemo,
+        contactId: fixedContactId,
+        memo: memo || "",
         orderManagerName: orderManagerName.trim(),
         items: orderItemsPayload,
       };
 
-      await writeOrderApi.registOrder(orderPayload);
-      alert("발주서 전송이 완료되었습니다.");
+      await writeOrderApi.modifyOrderByCompany(Number(orderId), orderPayload);
+      alert("발주서 수정이 완료되었습니다.");
       navigate("/order/list");
     } catch (error) {
-      console.error("발주서 전송 실패:", error);
-      alert("서버 오류로 발주서 전송에 실패했습니다.");
+      console.error("발주서 수정 실패:", error);
+      alert("서버 오류로 발주서 수정에 실패했습니다.");
     }
   };
 
@@ -221,20 +213,20 @@ export const WriteOrder = () => {
 
         <div>
           <p className="order-page-label">발주 관리</p>
-          <h1>발주 요청</h1>
+          <h1>발주서 수정</h1>
           <p className="order-page-desc">
-            공급업체와 자재 품목을 선택하여 발주서를 작성하세요.
+            기존 발주서의 담당자 정보, 자재 품목 및 메모 내용을 수정합니다.
           </p>
         </div>
       </div>
 
-      <form className="order-write-form" onSubmit={handleUploadOrder}>
+      <form className="order-write-form" onSubmit={handleUpdateOrder}>
         <section className="order-section">
           <div className="order-section-title">
             <FiFileText />
             <div>
-              <h2>기본 정보</h2>
-              <p>발주 담당자와 발주일을 확인하세요.</p>
+              <h2>기본 정보 수정</h2>
+              <p>담당자명만 변경이 가능합니다.</p>
             </div>
           </div>
 
@@ -249,21 +241,26 @@ export const WriteOrder = () => {
             </FormField>
 
             <FormField label="발주일" required icon={<FiCalendar />}>
-              <input type="date" defaultValue={orderDate} readOnly />
+              <input type="date" value={orderDate} readOnly />
             </FormField>
 
             <FormField label="공사 현장" icon={<FiBriefcase />}>
-              <select
-                value={selectedSiteId}
-                onChange={(e) => setSelectedSiteId(e.target.value)}
-              >
+              <select value={selectedSiteId} onChange={handleSiteChange}>
                 <option value="">본사 수령 (현장 없음)</option>
                 {siteList.map((site, index) => (
                   <option key={`${site.value}-${index}`} value={site.value}>
-                    {site.label}
+                    {site.label?.includes("|")
+                      ? site.label.split("|")[0]
+                      : site.label || `현장 (ID: ${site.value})`}
                   </option>
                 ))}
               </select>
+
+              {selectedSiteAddress && (
+                <div className="order-site-address-box">
+                  📍 현장 주소: {selectedSiteAddress}
+                </div>
+              )}
             </FormField>
           </div>
         </section>
@@ -273,32 +270,27 @@ export const WriteOrder = () => {
             <FiBriefcase />
             <div>
               <h2>거래처 정보</h2>
-              <p>발주를 요청할 공급업체를 선택하세요.</p>
+              <p>기존 지정된 거래처는 수정할 수 없습니다.</p>
             </div>
           </div>
 
           <div className="order-form-grid">
             <FormField label="거래처 선택" required icon={<FiBriefcase />}>
-              <select onChange={handleCompanyChange} value={selectedSupplierId}>
-                <option value="">거래처를 선택하세요</option>
-                {supplierList.map((item, index) => (
-                  <option key={`${item.value}-${index}`} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
+              <select disabled value="">
+                <option value="">{supplierName}</option>
               </select>
             </FormField>
 
             <FormField label="담당자명" icon={<FiUser />}>
-              <input value={currentContactInfo?.contactName ?? "-"} readOnly />
+              <input value={contactName} readOnly />
             </FormField>
 
             <FormField label="연락처" icon={<FiPhone />}>
-              <input value={currentContactInfo?.phone ?? "-"} readOnly />
+              <input value={contactPhone} readOnly />
             </FormField>
 
             <FormField label="이메일" icon={<FiMail />}>
-              <input value={currentContactInfo?.email ?? "-"} readOnly />
+              <input value={contactEmail} readOnly />
             </FormField>
           </div>
         </section>
@@ -308,7 +300,7 @@ export const WriteOrder = () => {
             <FiPackage />
             <div>
               <h2>발주 품목</h2>
-              <p>발주할 자재와 수량을 선택하세요.</p>
+              <p>해당 거래처 품목 내에서 추가 및 삭제가 가능합니다.</p>
             </div>
           </div>
 
@@ -372,8 +364,8 @@ export const WriteOrder = () => {
 
               <tbody>
                 {basketList.length > 0 ? (
-                  basketList.map((item) => (
-                    <tr key={item.materialId}>
+                  basketList.map((item, idx) => (
+                    <tr key={`${item.materialId}-${idx}`}>
                       <td className="order-material-name">
                         {item.materialName}
                       </td>
@@ -382,8 +374,8 @@ export const WriteOrder = () => {
                         {item.quantity} {item.unit}
                       </td>
                       <td>{item.specification || "-"}</td>
-                      <td>{(item.unitPrice || 0).toLocaleString()}원</td>
-                      <td>총 {(item.amount || 0).toLocaleString()}원</td>
+                      <td>{item.unitPrice.toLocaleString()}원</td>
+                      <td>총 {item.amount.toLocaleString()}원</td>
                       <td>
                         <button
                           type="button"
@@ -417,7 +409,7 @@ export const WriteOrder = () => {
             <FiFileText />
             <div>
               <h2>기타</h2>
-              <p>발주 요청 관련 추가 사항을 작성하세요.</p>
+              <p>수정 보완 사항 메모를 입력하세요.</p>
             </div>
           </div>
 
@@ -441,7 +433,7 @@ export const WriteOrder = () => {
 
           <button type="submit" className="order-submit-btn">
             <FiSave />
-            승인 요청
+            수정 완료
           </button>
         </div>
       </form>
