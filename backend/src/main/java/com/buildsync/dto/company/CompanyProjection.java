@@ -11,5 +11,4 @@ public interface CompanyProjection {
     String getPhone();
     String getAddress();
     LocalDateTime getCreatedAt();
-    String getMaterials();
 }

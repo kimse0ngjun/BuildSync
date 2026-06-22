@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.buildsync.dto.company.CompanyProjection;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.CompanyStatus;
+import com.buildsync.entity.CompanyType;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +28,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	Optional<Company> findByPhone(String phone);
 	boolean existsByEmail(String email);
 	
-	List<Company> findByCompanyType(String companyType);
+	List<Company> findByCompanyType(CompanyType companyType);
 	List<Company> findByStatus(CompanyStatus status);
 	
 	long countByStatus(CompanyStatus status);
@@ -37,62 +38,63 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	Page<Company> findByStatus(CompanyStatus status, Pageable pageable);
 	
 	// Company
-	@Query(value = """
-	        SELECT
-	            c.company_id AS companyId,
-	            c.company_type AS companyType,
-	            c.company_name AS companyName,
-	            c.ceo_name AS ceoName,
-	            c.phone AS phone,
-	            c.address AS address,
-	            c.created_at AS createdAt,
+    @Query(value = """
+        SELECT
+            c.company_id AS companyId,
+            c.company_type AS companyType,
+            c.company_name AS companyName,
+            c.ceo_name AS ceoName,
+            c.phone AS phone,
+            c.address AS address,
+            c.created_at AS createdAt
 
-	            GROUP_CONCAT(
-	                m.material_name
-	            ) AS materials
+        FROM company c
 
+        WHERE
 
-	        FROM company c
+        c.status = 'ACTIVE'
 
-	        LEFT JOIN sup_material sm
-	            ON c.company_id = sm.company_id
+        AND
+        (
+            :type IS NULL
+            OR c.company_type = :type
+        )
 
-	        LEFT JOIN material m
-	            ON sm.material_id = m.material_id
+        AND
+        (
+            :keyword IS NULL
+            OR c.company_name LIKE CONCAT('%',:keyword,'%')
+            OR c.ceo_name LIKE CONCAT('%',:keyword,'%')
+            OR c.phone LIKE CONCAT('%',:keyword,'%')
+        )
 
+        """,
+            countQuery = """
+        SELECT COUNT(*)
+        FROM company c
 
-	        WHERE
+        WHERE
 
-	        c.status = 'ACTIVE'
+        c.status = 'ACTIVE'
 
-	        AND
-	        (
-	            :type IS NULL
-	            OR c.company_type = :type
-	        )
+        AND
+        (
+            :type IS NULL
+            OR c.company_type = :type
+        )
 
-	        AND
-	        (
-	            :keyword IS NULL
-	            OR c.company_name LIKE CONCAT('%',:keyword,'%')
-	            OR c.ceo_name LIKE CONCAT('%',:keyword,'%')
-	            OR c.phone LIKE CONCAT('%',:keyword,'%')
-	        )
-
-
-	        GROUP BY
-	            c.company_id,
-	            c.company_type,
-	            c.company_name,
-	            c.ceo_name,
-	            c.phone,
-	            c.address,
-	            c.created_at
-
-	        """, nativeQuery = true)
-		Page<CompanyProjection> findCompanies(
-		    @Param("type") String type,
-		    @Param("keyword") String keyword,
-		    Pageable pageable
-		);
+        AND
+        (
+            :keyword IS NULL
+            OR c.company_name LIKE CONCAT('%',:keyword,'%')
+            OR c.ceo_name LIKE CONCAT('%',:keyword,'%')
+            OR c.phone LIKE CONCAT('%',:keyword,'%')
+        )
+        """,
+            nativeQuery = true)
+    Page<CompanyProjection> findCompanies(
+            @Param("type") String type,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 }

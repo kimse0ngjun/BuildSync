@@ -7,9 +7,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class OrderStatusResponse {
 
-	private long totalCount;
-	private long pendingCount;
-	private long acceptedCount; // 접수 완료
-	private long endCount; // 발주 완료
-	private long cancelCount;
+	private Long totalCount;
+	private Long pendingCount;
+	private Long acceptedCount; // 접수 완료
+	private Long endCount; // 발주 완료
+	private Long cancelCount;
 }

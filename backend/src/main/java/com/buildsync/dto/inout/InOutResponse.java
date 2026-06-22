@@ -8,6 +8,7 @@ import java.util.List;
 @Builder
 public class InOutResponse {
 
+	private Long stockInoutId;
     private Long siteId;
     private String siteName;
     private Long orderId;
@@ -22,9 +23,10 @@ public class InOutResponse {
     @Data
     @Builder
     public static class ItemInfo {
-        private Long stockInoutId;
+        
         private Long materialId;
         private String materialName;
         private int quantity;
+        private String unit;
     }
 }

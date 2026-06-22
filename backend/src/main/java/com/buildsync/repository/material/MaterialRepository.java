@@ -1,5 +1,6 @@
 package com.buildsync.repository.material;
 
+import com.buildsync.dto.inout.SelectResponse;
 import com.buildsync.entity.Material;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,14 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
     List<Material> searchMaterials(@Param("keyword") String keyword);
     
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    
+    @Query("""
+    	    SELECT new com.buildsync.dto.inout.SelectResponse(
+    	        m.id,
+    	        m.materialName
+    	    )
+    	    FROM Material m
+    	    ORDER BY m.materialName
+    	""")
+    	List<SelectResponse> findAllForSelect();
 }

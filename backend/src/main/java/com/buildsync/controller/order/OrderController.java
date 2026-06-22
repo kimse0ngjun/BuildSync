@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,14 +17,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.buildsync.dto.inout.SelectResponse;
+import com.buildsync.dto.order.ContactResponse;
+import com.buildsync.dto.order.MaterialSelectResponse;
+import com.buildsync.dto.order.OrderDetailResponse;
+import com.buildsync.dto.order.OrderListResponse;
 import com.buildsync.dto.order.OrderRequest;
 import com.buildsync.dto.order.OrderStatusResponse;
 import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.Company;
-import com.buildsync.entity.Contact;
 import com.buildsync.entity.OrderStatus;
-import com.buildsync.entity.Orders;
-import com.buildsync.entity.SupMaterial;
 import com.buildsync.service.order.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -58,62 +61,93 @@ public class OrderController {
 	
 	// 담당자 불러오기
 	@GetMapping("/contact")
-	public ResponseEntity<List<Contact>> getContact(@RequestParam("companyId") Long companyId) {
-		List<Contact> contact = orderService.getContactList(companyId);
+	public ResponseEntity<List<ContactResponse>> getContact(@RequestParam("companyId") Long companyId) {
+		List<ContactResponse> contact = orderService.getContactList(companyId);
 		return ResponseEntity.ok(contact);
 	}
 	
 	// 자재 목록
 	@GetMapping("/material")
-	public ResponseEntity<List<SupMaterial>> getOurMaterial(@RequestParam("companyId") Long companyId) {
-		List<SupMaterial> material = orderService.getOurMaterialList(companyId);
+	public ResponseEntity<List<MaterialSelectResponse>> getOurMaterial(@RequestParam("companyId") Long companyId) {
+		List<MaterialSelectResponse> material = orderService.getMaterialsBySupplier(companyId);
 		return ResponseEntity.ok(material);
 	}
 	
+	// 공사 현장
+	@GetMapping("/site")
+    public ResponseEntity<List<SelectResponse>> getSiteListForSelect() {
+        List<SelectResponse> site = orderService.getSiteListForSelect();
+        return ResponseEntity.ok(site);
+    }
+	
 	// 건설업체 발주 목록 (검색 + 상태 필터 + 페이징)
 	@GetMapping("/construction")
-	public ResponseEntity<PageResponse<Orders>> getOrderListForConstruction(
+	public ResponseEntity<PageResponse<OrderListResponse>> getOrderListForConstruction(
 			@RequestParam("companyId") Long companyId,
 			@RequestParam(value = "status", required = false) OrderStatus status,
 			@RequestParam(value = "keyword", required = false) String keyword,
 			@PageableDefault(page = 0, size = 10) Pageable pageable) {
-		PageResponse<Orders> list = orderService.getOrderListForConstruction(companyId, status, keyword, pageable);
+		PageResponse<OrderListResponse> list = orderService.getOrderListForConstruction(companyId, status, keyword, pageable);
 			return ResponseEntity.ok(list);
 	}
 
 	// 공급업체 발주 목록 (검색 + 상태 필터 + 페이징)
 	@GetMapping("/supplier")
-	public ResponseEntity<PageResponse<Orders>> getOrderListForSupplier(
+	public ResponseEntity<PageResponse<OrderListResponse>> getOrderListForSupplier(
 			@RequestParam("companyId") Long companyId,
 			@RequestParam(value = "status", required = false) OrderStatus status,
 			@RequestParam(value = "keyword", required = false) String keyword,
 			@PageableDefault(page = 0, size = 10) Pageable pageable) {
-		PageResponse<Orders> list = orderService.getOrderListForSupplier(companyId, status, keyword, pageable);
+		PageResponse<OrderListResponse> list = orderService.getOrderListForSupplier(companyId, status, keyword, pageable);
 		return ResponseEntity.ok(list);
 	}
 	
 	// 발주서 상세 화면
 	@GetMapping("/detail/{orderId}")
-	public ResponseEntity<Orders> getOrderDetail(@PathVariable("orderId") Long orderId) {
+	public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable("orderId") Long orderId) {
 		return ResponseEntity.ok(orderService.getOrderDetail(orderId));
 	}
 	
-	// 발주서 수정
+	// 건설업체 발주서 수정
 	@PutMapping("/update/{orderId}")
-	public ResponseEntity<String> updateOrderDetail(
+	public ResponseEntity<String> modifyOrderByCompany(
 			@PathVariable("orderId") Long orderId,
 			@RequestBody OrderRequest orderReq) {
 		try {
-			if (orderReq.getOrders() != null && orderReq.getOrders().getStatus() != null) {
-				String newStatus = orderReq.getOrders().getStatus();
-				orderService.updateStatusBySupplier(orderId, newStatus);
-				return ResponseEntity.ok("발주서 상태가 [" + newStatus + "](으)로 변경되었습니다.");
-			} else {
-				orderService.modifyOrderByCompany(orderId, orderReq);
-				return ResponseEntity.ok("발주서 수정이 완료되었습니다.");
-			}
-		} catch (Exception e) {
+			orderService.modifyOrderByCompany(orderId, orderReq);
+			return ResponseEntity.ok("발주서 수정이 완료되었습니다.");
+		} catch (IllegalArgumentException | IllegalStateException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().body("서버 오류가 발생했습니다: " + e.getMessage());
+		}
+	}
+	
+	// 건설업체 발주서 취소
+	@PatchMapping("/cancel/{orderId}")
+	public ResponseEntity<String> cancelOrderByConstruction(@PathVariable("orderId") Long orderId) {
+		try {
+			orderService.cancelOrderByConstruction(orderId);
+			return ResponseEntity.ok("발주서가 성공적으로 취소되었습니다.");
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().body("서버 오류가 발생했습니다: " + e.getMessage());
+		}
+	}
+	
+	// 건설업체 발주서 상태 수정
+	@PatchMapping("/update/status/{orderId}")
+	public ResponseEntity<String> updateStatusBySupplier(
+			@PathVariable("orderId") Long orderId,
+			@RequestParam("status") String status) {
+		try {
+			orderService.updateStatusBySupplier(orderId, status);
+			return ResponseEntity.ok("발주서 상태가 [" + status.toUpperCase() + "](으)로 변경되었습니다.");
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().body("서버 오류가 발생했습니다: " + e.getMessage());
 		}
 	}
 	

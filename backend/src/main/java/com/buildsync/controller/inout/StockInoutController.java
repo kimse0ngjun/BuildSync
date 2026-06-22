@@ -1,12 +1,14 @@
 package com.buildsync.controller.inout;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.buildsync.dto.inout.InOutRegRequest;
 import com.buildsync.dto.inout.InOutResponse;
 import com.buildsync.dto.inout.InOutSumResponse;
+import com.buildsync.dto.inout.SelectResponse;
 import com.buildsync.dto.inout.StockInfoResponse;
 import com.buildsync.service.inout.StockInoutService;
 
@@ -26,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/inout")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class StockInoutController {
 
 	private final StockInoutService stockInoutService;
@@ -81,19 +85,6 @@ public class StockInoutController {
 		return ResponseEntity.ok(res);
 	}
 	
-	// 등록 - 미리보기 + 예상
-	@GetMapping("/stock-calc")
-	public ResponseEntity<StockInfoResponse> getStockCalculation(
-			@RequestParam("companyId") Long companyId,
-			@RequestParam("materialId") Long materialId,
-			@RequestParam("type") String type,
-			@RequestParam(value = "quantity", required = false) Integer quantity,
-			@RequestParam(value = "unitPrice", required = false) Integer unitPrice) {
-		StockInfoResponse res = stockInoutService.getStockCalculation(
-				companyId, materialId, type, quantity, unitPrice);
-		return ResponseEntity.ok(res);
-	}
-	
 	@PatchMapping("/update")
 	public ResponseEntity<String> updateInout(@RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
@@ -109,17 +100,35 @@ public class StockInoutController {
 	}
 	
 	@GetMapping("/detail")
-	public ResponseEntity<?> detailInout(
-			@RequestParam(value = "orderId", required = false) Long orderId,
-			@RequestParam(value = "processedDate", required = false) String processedDate,
-			@RequestParam(value = "siteId", required = false) Long siteId,
-			@RequestParam(value = "contactId", required = false) Long contactId,
-			@RequestParam(value = "type", required = false) String type) {
-		try {
-			InOutResponse res = stockInoutService.getInoutDetail(orderId, processedDate, siteId, contactId, type);
-			return ResponseEntity.ok(res);
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
+	public ResponseEntity<InOutResponse> detailInout(
+	        @RequestParam(value = "orderId", required = false) Long orderId,
+	        @RequestParam(value = "processedDate", required = false) String processedDate,
+	        @RequestParam(value = "siteId", required = false) Long siteId,
+	        @RequestParam(value = "contactId", required = false) Long contactId,
+	        @RequestParam(value = "type", required = false) String type) {
+
+	    InOutResponse res = stockInoutService.getInoutDetail(
+	            orderId,
+	            processedDate,
+	            siteId,
+	            contactId,
+	            type);
+
+	    return ResponseEntity.ok(res);
+	}
+	
+	@GetMapping("/materials")
+	public ResponseEntity<List<SelectResponse>> materials() {
+	    return ResponseEntity.ok(stockInoutService.getMaterials());
+	}
+
+	@GetMapping("/sites")
+	public ResponseEntity<List<SelectResponse>> sites() {
+	    return ResponseEntity.ok(stockInoutService.getSites());
+	}
+
+	@GetMapping("/orders")
+	public ResponseEntity<List<SelectResponse>> orders() {
+	    return ResponseEntity.ok(stockInoutService.getOrders());
 	}
 }
