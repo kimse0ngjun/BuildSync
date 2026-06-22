@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import type { NotificationResponse } from "../../types/NotificationDTO";
+import type { NotificationResponse } from "../../types/Notification";
 import { notificationListApi } from "../../api/notificationApi";
 import { MdDeleteOutline } from "react-icons/md";
+import "../../styles/Notifications.css";
 
 export default function NotificationPage() {
   const [notifications, setNotifications] = useState<NotificationResponse[]>(
@@ -87,7 +88,7 @@ export default function NotificationPage() {
   // 모든 알림 읽음 처리 핸들러
   const handleReadAllNotifications = () => {
     notificationListApi
-      .setAllReadNotification(1)
+      .setAllReadNotification(companyId)
       .then(() => {
         setNotifications((prev) =>
           prev.map((notice) => ({ ...notice, isRead: 1 })),
@@ -97,12 +98,6 @@ export default function NotificationPage() {
         }
       })
       .catch((err) => console.error("전체 읽음 실패", err));
-  };
-
-  // 읽음 처리 후 목록 뷰에서만 영구 삭제
-  const handleDeleteFromView = (e: React.MouseEvent, id: number) => {
-    e.stopPropagation();
-    setNotifications((prev) => prev.filter((notice) => notice.noticeId !== id));
   };
 
   useEffect(() => {
@@ -118,13 +113,13 @@ export default function NotificationPage() {
 
       <div className="tab-area">
         <button
-          className="all-notification-list"
+          className={`all-notification-list ${currentTab === "ALL" ? "active" : ""}`}
           onClick={() => handleGetAllNotifications(0)}
         >
           전체 알림
         </button>
         <button
-          className="not-read-list"
+          className={`not-read-list ${currentTab === "UNREAD" ? "active" : ""}`}
           onClick={() => handleGetUnreadNotifications(0)}
         >
           안 읽은 알림
@@ -150,7 +145,6 @@ export default function NotificationPage() {
               <th className="th-title">제목</th>
               <th className="th-content">내용</th>
               <th className="th-createdAt">받은 날짜</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -171,21 +165,11 @@ export default function NotificationPage() {
                   >
                     {notice.title}
                     {notice.isRead === 0 && <span> ●</span>}{" "}
-                    {/* 안 읽은 알림 ● 표시 (클릭 시 읽음 처리) */}
                   </td>
 
                   <td className="content-data">{notice.content}</td>
 
                   <td className="createdAt-data">{notice.createdAt}</td>
-
-                  <td className="delete-data">
-                    <button
-                      className="data-delete-btn"
-                      onClick={(e) => handleDeleteFromView(e, notice.noticeId)}
-                    >
-                      {deleteIcon}
-                    </button>
-                  </td>
                 </tr>
               ))
             )}
