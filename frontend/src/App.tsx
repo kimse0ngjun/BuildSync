@@ -92,8 +92,8 @@ function App() {
             />
 
             <Route path="/company" element={<CompanyList />} />
-            <Route path="/company/:id" element={<CompanyDetail />} />
-            <Route path="/company/:id/edit" element={<CompanyEdit />} />
+            <Route path="/company/:companyId" element={<CompanyDetail />} />
+            <Route path="/company/:companyId/edit" element={<CompanyEdit />} />
 
             <Route path="/material" element={<MaterialList />} />
             <Route path="/material/write" element={<MaterialWrite />} />
