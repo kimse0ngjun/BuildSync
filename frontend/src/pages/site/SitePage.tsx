@@ -116,7 +116,6 @@ function SitePage() {
       setSelected(null);
     } catch (error) {
       console.error(error);
-      alert("공사 현장 목록을 불러오지 못했습니다.");
     }
   };
 

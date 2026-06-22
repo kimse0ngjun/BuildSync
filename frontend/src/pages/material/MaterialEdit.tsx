@@ -79,7 +79,6 @@ function MaterialEdit() {
       });
     } catch (error) {
       console.error(error);
-      alert("자재 정보를 불러오지 못했습니다.");
       navigate("/material");
     }
   };

@@ -42,7 +42,6 @@ function MaterialCategoryEditPage() {
         setCategoryName(found.categoryName);
       } catch (error) {
         console.error(error);
-        alert("카테고리 정보를 불러오지 못했습니다.");
         navigate("/dashboard");
       }
     };

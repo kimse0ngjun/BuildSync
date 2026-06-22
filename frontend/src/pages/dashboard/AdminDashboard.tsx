@@ -79,7 +79,6 @@ function AdminDashboard() {
       setDashboard(data);
     } catch (error) {
       console.error(error);
-      alert("운영자 대시보드 정보를 불러오지 못했습니다.");
     }
   };
 
@@ -104,7 +103,6 @@ function AdminDashboard() {
       setPendingTotalPages(data.totalPages ?? 1);
     } catch (error) {
       console.error(error);
-      alert("승인 대기 업체 목록을 불러오지 못했습니다.");
     }
   };
 
@@ -114,7 +112,6 @@ function AdminDashboard() {
       setCategoryList(data);
     } catch (error) {
       console.error(error);
-      alert("자재 카테고리 목록을 불러오지 못했습니다.");
     }
   };
 
