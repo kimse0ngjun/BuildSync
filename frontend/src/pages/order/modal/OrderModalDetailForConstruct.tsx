@@ -39,6 +39,12 @@ export const OrderModalDetailForConstruct = ({
     }
   };
 
+  const siteData = selectedOrder.siteName
+    ? selectedOrder.siteName.split("|")
+    : [];
+  const displaySiteName = siteData[0] || "미지정";
+  const displaySiteAddress = siteData[1] || "";
+
   return (
     <div className="order-modal-detail-container">
       <div className="detail-info-section">
@@ -84,6 +90,19 @@ export const OrderModalDetailForConstruct = ({
             {selectedOrder.contactPhone || "-"}
           </span>
         </div>
+        <hr className="inner-divider" />
+
+        <div className="detail-row">
+          <span className="detail-label">공사 현장</span>
+          <span className="detail-value font-bold">{displaySiteName}</span>
+        </div>
+
+        {displaySiteAddress && (
+          <div className="detail-row">
+            <span className="detail-label">현장 주소</span>
+            <span className="detail-value">{displaySiteAddress}</span>
+          </div>
+        )}
         <hr className="inner-divider" />
 
         <div className="detail-label-title">발주 품목 목록</div>

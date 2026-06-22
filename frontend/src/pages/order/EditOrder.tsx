@@ -249,9 +249,9 @@ export const EditOrder = () => {
                 <option value="">본사 수령 (현장 없음)</option>
                 {siteList.map((site, index) => (
                   <option key={`${site.value}-${index}`} value={site.value}>
-                    {site.label.includes("|")
+                    {site.label?.includes("|")
                       ? site.label.split("|")[0]
-                      : site.label}
+                      : site.label || `현장 (ID: ${site.value})`}
                   </option>
                 ))}
               </select>
@@ -364,8 +364,8 @@ export const EditOrder = () => {
 
               <tbody>
                 {basketList.length > 0 ? (
-                  basketList.map((item) => (
-                    <tr key={item.materialId}>
+                  basketList.map((item, idx) => (
+                    <tr key={`${item.materialId}-${idx}`}>
                       <td className="order-material-name">
                         {item.materialName}
                       </td>

@@ -1,5 +1,6 @@
 import axios from "axios";
 import type {
+  ContactInfo,
   MaterialSelectResponse,
   OrderDetailResponse,
   OrderListResponse,
@@ -15,6 +16,19 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 export const orderListApi = {
   // 건설업체 대시보드 상태 카운트 조회
@@ -40,19 +54,27 @@ export const orderListApi = {
   // 발주 목록
   getOrderList: async (
     companyId: number,
-    partnerType: string,
+    partnerType: string, // 💡 "CONSTRUCTION" 또는 "SUPPLIER"가 들어옵니다.
     page: number = 0,
     size: number = 10,
   ): Promise<PageResponse<OrderListResponse>> => {
-    const response = await api.get("/orders/list", {
-      params: { companyId, partnerType, page, size },
+    const targetUrl =
+      partnerType === "CONSTRUCTION" ? "/construction" : "/supplier";
+
+    const response = await api.get(targetUrl, {
+      params: {
+        companyId,
+        page,
+        size,
+      },
     });
+
     return response.data;
   },
 
   // 발주서 상세 보기
   getOrderDetail: async (orderId: number): Promise<OrderDetailResponse> => {
-    const response = await api.get(`/orders/detail/${orderId}`);
+    const response = await api.get(`/detail/${orderId}`);
     return response.data;
   },
 };
@@ -60,7 +82,7 @@ export const orderListApi = {
 export const writeOrderApi = {
   // 공사현장 셀렉트 박스 조회
   getSiteSelectOptions: async (): Promise<SelectResponse[]> => {
-    const response = await api.get("/sites/select");
+    const response = await api.get("/site");
     return response.data;
   },
 
@@ -68,7 +90,7 @@ export const writeOrderApi = {
   getMaterialSelectOptions: async (
     companyId: number,
   ): Promise<MaterialSelectResponse[]> => {
-    const response = await api.get("/materials/select", {
+    const response = await api.get("/material", {
       params: { companyId },
     });
     return response.data;
@@ -78,15 +100,21 @@ export const writeOrderApi = {
   getPartnerSelectOptions: async (
     companyType: "SUPPLIER" | "CONSTRUCTION",
   ): Promise<SelectResponse[]> => {
-    const response = await api.get("/companies/select", {
+    const response = await api.get("/company", {
       params: { companyType },
     });
     return response.data;
   },
 
+  // 담당자 자동 채움
+  getContactOptions: async (companyId: number): Promise<ContactInfo[]> => {
+    const response = await api.get("/contact", { params: { companyId } });
+    return response.data;
+  },
+
   // 발주서 등록
   registOrder: async (data: OrderRequest): Promise<void> => {
-    await api.post("/orders", data);
+    await api.post("/write", data);
   },
 
   // 건설업체 발주서 전체 수정

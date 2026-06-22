@@ -49,15 +49,27 @@ export const WriteOrder = () => {
   useEffect(() => {
     writeOrderApi
       .getPartnerSelectOptions("SUPPLIER")
-      .then((data) => {
-        setSupplierList(data || []);
+      .then((data: any[]) => {
+        if (data) {
+          const formattedSuppliers = data.map((item) => ({
+            value: item.id,
+            label: item.companyName,
+          }));
+          setSupplierList(formattedSuppliers);
+        }
       })
       .catch(console.error);
 
     writeOrderApi
       .getSiteSelectOptions()
-      .then((data) => {
-        setSiteList(data || []);
+      .then((data: any[]) => {
+        if (data) {
+          const formattedSites = data.map((item) => ({
+            value: item.value,
+            label: item.label || `현장 [ID: ${item.value}]`,
+          }));
+          setSiteList(formattedSites);
+        }
       })
       .catch(console.error);
   }, []);
@@ -79,11 +91,11 @@ export const WriteOrder = () => {
       })
       .catch(console.error);
 
-    const mockContactApiUrl = `http://localhost:8080/api/order/contact?companyId=${companyId}`;
-    fetch(mockContactApiUrl)
-      .then((res) => res.json())
+    writeOrderApi
+      .getContactOptions(companyId)
       .then((data) => {
         setContactList(data || []);
+
         if (data && data.length > 0) {
           setSelectedContactId(String(data[0].contactId));
         } else {
@@ -132,6 +144,8 @@ export const WriteOrder = () => {
       return;
     }
 
+    const price = currentSelectedMaterialInfo.unitPrice || 0;
+
     const newItem: OrderItemDto = {
       materialId: currentSelectedMaterialInfo.value,
       materialName: currentSelectedMaterialInfo.label,
@@ -139,7 +153,7 @@ export const WriteOrder = () => {
       unit: currentSelectedMaterialInfo.unit,
       unitPrice: currentSelectedMaterialInfo.unitPrice,
       quantity: inputQuantity,
-      amount: currentSelectedMaterialInfo.unitPrice * inputQuantity,
+      amount: price * inputQuantity,
     };
 
     setBasketList([...basketList, newItem]);
@@ -177,11 +191,14 @@ export const WriteOrder = () => {
         unitPrice: item.unitPrice,
       }));
 
+      const cleanMemo = memo ? memo.trim() : "";
+      const formattedMemo = `[담당자: ${orderManagerName.trim()}] ${cleanMemo}`;
+
       const orderPayload: OrderRequest = {
         companyId: myCompanyId,
         siteId: selectedSiteId ? Number(selectedSiteId) : null,
         contactId: selectedContactId ? Number(selectedContactId) : null,
-        memo: memo || "",
+        memo: formattedMemo,
         orderManagerName: orderManagerName.trim(),
         items: orderItemsPayload,
       };
@@ -365,8 +382,8 @@ export const WriteOrder = () => {
                         {item.quantity} {item.unit}
                       </td>
                       <td>{item.specification || "-"}</td>
-                      <td>{item.unitPrice.toLocaleString()}원</td>
-                      <td>총 {item.amount.toLocaleString()}원</td>
+                      <td>{(item.unitPrice || 0).toLocaleString()}원</td>
+                      <td>총 {(item.amount || 0).toLocaleString()}원</td>
                       <td>
                         <button
                           type="button"

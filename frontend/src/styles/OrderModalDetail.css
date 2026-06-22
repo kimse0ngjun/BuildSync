@@ -245,3 +245,79 @@
 .btn-supplier-close:hover {
   background: #e5e5ea !important;
 }
+
+.base-modal-header,
+.modal-header,
+[class*="modal-header"],
+.base-modal-container > div:first-child {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  margin-bottom: 20px !important;
+  position: relative !important;
+}
+
+.modal-title-group,
+.base-modal-header > div:first-child,
+[class*="modal-title"] {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+
+.base-modal-header h2,
+.modal-title h2,
+[class*="modal-title"] h2,
+.base-modal-container h2 {
+  margin: 0 !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  color: #10284a !important;
+  line-height: 1.4 !important;
+}
+
+.base-modal-header p,
+.modal-subtitle,
+[class*="subtitle"],
+.base-modal-container p {
+  width: 100% !important;
+  margin: 4px 0 0 0 !important;
+  color: #64748b !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.base-modal-header svg:last-child,
+.modal-close-btn,
+[class*="close"] svg,
+[class*="exit"] {
+  font-size: 22px !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  transition: color 0.2s !important;
+}
+
+.base-modal-header svg:last-child:hover,
+.modal-close-btn:hover {
+  color: #ef4444 !important;
+}
+
+body.dark-mode .base-modal-header h2,
+body.dark-mode .modal-title h2 {
+  color: #f8fafc !important;
+}
+body.dark-mode .base-modal-header p {
+  color: #94a3b8 !important;
+}
+
+.site-name-highlight {
+  color: #1e3a8a !important;
+  font-weight: 700 !important;
+}
+
+.site-address-text {
+  color: #475569 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
