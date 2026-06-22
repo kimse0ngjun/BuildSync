@@ -6,3 +6,9 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+export const inoutListApi = {
+  getInoutList: () => {
+    api;
+  },
+};

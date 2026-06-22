@@ -44,6 +44,7 @@ import SiteCreatePage from "./pages/site/SiteCreatePage";
 import SiteEditPage from "./pages/site/SiteEditPage";
 import MaterialUsagePage from "./pages/site/MaterialUsagePage";
 import SchedulePage from "./pages/schedule/SchedulePage";
+import { EditOrder } from "./pages/order/EditOrder";
 
 function App() {
   useEffect(() => {
@@ -85,12 +86,12 @@ function App() {
 
             <Route path="/stock" element={<StockInOutList />} />
             <Route path="/stock/write" element={<StockInOutWrite />} />
+            <Route path="/input/success-input" element={<SuccessInput />} />
+            <Route path="/output/success-output" element={<SuccessOutput />} />
 
             <Route path="/order/write" element={<WriteOrder />} />
             <Route path="/order/list" element={<OrderList />} />
-
-            <Route path="/input/success-input" element={<SuccessInput />} />
-            <Route path="/output/success-output" element={<SuccessOutput />} />
+            <Route path="/order/edit" element={<EditOrder />} />
 
             <Route path="/analysis" element={<CostAnalysisPage />} />
 

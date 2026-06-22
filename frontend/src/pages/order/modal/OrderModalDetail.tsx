@@ -2,32 +2,29 @@ import { useEffect, useState } from "react";
 import { OrderModalDetailForConstruct } from "./OrderModalDetailForConstruct";
 import { OrderModalDetailForSupplier } from "./OrderModalDetailForSupplier";
 import { orderListApi } from "../../../api/orderApi";
-
-interface OrderModalDetailProps {
-  selectedOrder: any;
-  onClose: () => void;
-  myCompanyType: "CONSTRUCTION" | "SUPPLIER";
-}
+import type { OrderModalDetailProps } from "../../../types/Modal";
+import type { OrderDetailResponse } from "../../../types/Order";
 
 export const OrderModalDetail = ({
   selectedOrder,
   onClose,
   myCompanyType,
 }: OrderModalDetailProps) => {
-  const [fullOrderDetail, setFullOrderDetail] = useState<any>(null);
+  const [fullOrderDetail, setFullOrderDetail] =
+    useState<OrderDetailResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (selectedOrder?.orderId) {
+    if (selectedOrder) {
       setLoading(true);
       orderListApi
-        .getOrderDetail(selectedOrder.orderId)
+        .getOrderDetail(selectedOrder)
         .then((data) => {
           setFullOrderDetail(data);
           setLoading(false);
         })
         .catch((err) => {
-          console.error(err);
+          console.error("발주서 상세 조회 실패:", err);
           setLoading(false);
         });
     }
@@ -36,17 +33,17 @@ export const OrderModalDetail = ({
   if (!selectedOrder) return null;
   if (loading)
     return <div className="loading">데이터를 불러오는 중입니다...</div>;
-
-  const combinedOrder = { ...selectedOrder, ...fullOrderDetail };
+  if (!fullOrderDetail)
+    return <div className="modal-error">발주서 정보를 찾을 수 없습니다.</div>;
 
   return myCompanyType === "CONSTRUCTION" ? (
     <OrderModalDetailForConstruct
-      selectedOrder={combinedOrder}
+      selectedOrder={fullOrderDetail}
       onClose={onClose}
     />
   ) : (
     <OrderModalDetailForSupplier
-      selectedOrder={combinedOrder}
+      selectedOrder={fullOrderDetail}
       onClose={onClose}
     />
   );

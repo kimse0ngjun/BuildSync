@@ -1,0 +1,247 @@
+.order-modal-detail-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 5px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.detail-row.align-center {
+  align-items: center;
+}
+
+.detail-row.flex-col {
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.detail-label {
+  color: #64748b;
+  font-weight: 600;
+  min-width: 100px;
+}
+
+.detail-value {
+  color: #1e293b;
+  text-align: right;
+  font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700 !important;
+  color: #0f172a;
+}
+
+.inner-divider {
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  margin: 8px 0;
+}
+
+.material-item-box {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.total-amount-text {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+
+.status-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.status-tag.PENDING {
+  background: #fff7ed;
+  color: #f97316;
+}
+.status-tag.ACCEPTED {
+  background: #e8f1ff;
+  color: #2563eb;
+}
+.status-tag.END {
+  background: #e7f8ef;
+  color: #10b981;
+}
+.status-tag.CANCELED {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.detail-textarea {
+  width: 100%;
+  height: 80px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  color: #334155;
+  resize: none;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.modal-action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.modal-action-buttons button {
+  flex: 1;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-modify {
+  background: #8e8e93;
+  color: #ffffff;
+}
+.btn-modify:hover:not(:disabled) {
+  background: #707074;
+}
+
+.btn-cancel {
+  background: #f2f2f7;
+  color: #1c1c1e;
+}
+.btn-cancel:hover:not(:disabled) {
+  background: #e5e5ea;
+}
+
+.modal-action-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-loading,
+.modal-error {
+  padding: 40px 0;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.detail-label-title {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.material-items-scroll-area {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.material-items-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+.material-items-scroll-area::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.material-items-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.material-item-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.item-inner-label {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.item-empty-text {
+  text-align: center;
+  color: #94a3b8;
+  padding: 20px 0;
+  font-size: 14px;
+}
+
+.modal-action-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+// 공급업체 전용
+.modal-action-buttons.supplier-buttons {
+  gap: 10px;
+}
+
+.btn-supplier-accept {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+.btn-supplier-accept:hover {
+  background: #1d4ed8 !important;
+}
+
+.btn-supplier-end {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+.btn-supplier-end:hover {
+  background: #059669 !important;
+}
+
+.btn-supplier-reject {
+  background: #fee2e2 !important;
+  color: #ef4444 !important;
+  border: 1px solid #fca5a5 !important;
+}
+.btn-supplier-reject:hover {
+  background: #fecaca !important;
+}
+
+.btn-supplier-close {
+  background: #f2f2f7 !important;
+  color: #1c1c1e !important;
+}
+.btn-supplier-close:hover {
+  background: #e5e5ea !important;
+}

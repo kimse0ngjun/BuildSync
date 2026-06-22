@@ -13,7 +13,8 @@ import {
 import "../../styles/OrderList.css";
 
 import { FaRegCircleCheck } from "react-icons/fa6";
-import { IoIosClose } from "react-icons/io";
+import { IoMdExit } from "react-icons/io";
+
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetail } from "./modal/OrderModalDetail";
 import { orderListApi } from "../../api/orderApi";
@@ -29,6 +30,7 @@ export const OrderList = () => {
   const [page, setPage] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [stats, setStats] = useState({
     total: 0,
@@ -39,7 +41,7 @@ export const OrderList = () => {
   });
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<any>(null);
 
   const pageSize = 10;
 
@@ -50,59 +52,74 @@ export const OrderList = () => {
   const myCompanyId = 1;
   const myCompanyType = "CONSTRUCTION";
 
-  const fetchOrderList = () => {
-    const filters = {
-      companyId: myCompanyId,
-      status: selectedStatus || undefined,
-      keyword: keyword.trim() || undefined,
-      page: page - 1,
-      size: pageSize,
-    };
+  const fetchCountsData = async () => {
+    try {
+      const counts =
+        myCompanyType === "CONSTRUCTION"
+          ? await orderListApi.getConstructionCounts(myCompanyId)
+          : await orderListApi.getSupplierCounts(myCompanyId);
 
-    orderListApi
-      .getOrderListConstruction(filters)
-      .then((data) => {
-        if (data && (data.content || data.list)) {
-          const contentList = data.content || data.list || [];
-          setOrders(contentList);
-
-          const totalElements =
-            data.totalElements || data.totalCount || contentList.length;
-          setTotalCount(totalElements);
-
-          const calculatedTotalPages =
-            data.totalPages || Math.ceil(totalElements / pageSize) || 1;
-          setTotalPages(calculatedTotalPages);
-
-          setStats({
-            total: totalElements,
-            pending:
-              data.pendingCount ||
-              contentList.filter((o: any) => o.status === "PENDING").length,
-            accepted:
-              data.acceptedCount ||
-              contentList.filter((o: any) => o.status === "ACCEPTED").length,
-            end:
-              data.endCount ||
-              contentList.filter((o: any) => o.status === "END").length,
-            canceled:
-              data.canceledCount ||
-              contentList.filter((o: any) => o.status === "CANCELED").length,
-          });
-        }
-      })
-      .catch((err) => {
-        console.error("발주 목록 로드 실패:", err);
-        setOrders([]);
+      setStats({
+        total: counts.totalCount,
+        pending: counts.pendingCount,
+        accepted: counts.acceptedCount,
+        end: counts.endCount,
+        canceled: counts.cancelCount,
       });
+    } catch (err) {
+      console.error("통계 카드 로드 실패:", err);
+    }
   };
+
+  const fetchOrderList = async () => {
+    setIsLoading(true);
+    try {
+      const data = await orderListApi.getOrderList(
+        myCompanyId,
+        myCompanyType,
+        page - 1,
+        pageSize,
+      );
+
+      if (data && data.content) {
+        let filtered = data.content;
+
+        if (selectedStatus) {
+          filtered = filtered.filter((o) => o.status === selectedStatus);
+        }
+        if (keyword) {
+          filtered = filtered.filter(
+            (o) =>
+              o.orderId.toString().includes(keyword) ||
+              o.partnerName.includes(keyword) ||
+              o.managerName.includes(keyword) ||
+              o.mainItemName.includes(keyword),
+          );
+        }
+
+        setOrders(filtered);
+        setTotalCount(data.totalElements);
+        setTotalPages(data.totalPages || 1);
+      }
+    } catch (err) {
+      console.error("발주 목록 로드 실패:", err);
+      setOrders([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 통계 카드 고정
+  useEffect(() => {
+    fetchCountsData();
+  }, []);
 
   // 필터 및 페이지 번호 체인 시 재조회
   useEffect(() => {
     fetchOrderList();
   }, [selectedStatus, keyword, page]);
 
-  // 페이지네이션 번호 가방 계산
+  // 페이지네이션 계산
   const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -116,13 +133,13 @@ export const OrderList = () => {
     setPage(1);
   };
 
-  const handleRowClick = (order: any) => {
-    setSelectedOrder(order);
+  const handleRowClick = (orderId: number) => {
+    setSelectedOrderId(orderId);
     setIsModalOpen(true);
   };
 
   const icon = <FaRegCircleCheck />;
-  const deleteIcon = <IoIosClose onClick={() => setIsModalOpen(false)} />;
+  const exitIcon = <IoMdExit onClick={() => setIsModalOpen(false)} />;
 
   return (
     <div className="order-list-page">
@@ -172,6 +189,17 @@ export const OrderList = () => {
         />
       </div>
 
+      <div
+        style={{
+          fontSize: "14px",
+          color: "#64748b",
+          fontWeight: 600,
+          marginBottom: "8px",
+        }}
+      >
+        검색 결과 : 총 <span style={{ color: "#2563eb" }}>{totalCount}</span>건
+      </div>
+
       <div className="order-toolbar">
         <form className="order-search" onSubmit={handleSearchSubmit}>
           <input
@@ -207,36 +235,38 @@ export const OrderList = () => {
           </thead>
 
           <tbody>
-            {orders.length > 0 ? (
+            {isLoading ? (
+              <tr>
+                <td className="order-empty" colSpan={6}>
+                  데이터를 불러오는 중입니다...
+                </td>
+              </tr>
+            ) : orders.length > 0 ? (
               orders.map((order, index) => {
-                const items = order.orderItems || [];
-                const representativeItem =
-                  items.length > 0 ? items[0].materialName : "품목 없음";
-                const itemCount = items.length;
+                const representativeItem = order.mainItemName || "품목 없음";
+                const extraCount = order.extraItemCount || 0;
 
                 return (
                   <tr
                     key={`${order.orderId ?? "order"}-${index}`}
-                    onClick={() => handleRowClick(order)}
+                    onClick={() => handleRowClick(order.orderId)}
                     style={{ cursor: "pointer" }}
                   >
                     <td className="order-number">{order.orderId}</td>
-                    <td className="order-company">{order.companyName}</td>
-                    <td>{order.contactName || "-"}</td>
+                    <td className="order-company">{order.partnerName}</td>
+                    <td>{order.managerName || "-"}</td>
                     <td className="order-material">
                       {representativeItem}
-                      {itemCount > 1 && <span> 외 {itemCount - 1}건</span>}
+                      {extraCount > 0 && <span> 외 {extraCount}건</span>}
                     </td>
                     <td>
                       <span className={`order-status ${order.status}`}>
-                        {STATUS_MAP[order.status] ?? order.status}
+                        {STATUS_MAP[order.status] ??
+                          getStatusText(order.status)}
                       </span>
                     </td>
-
                     <td>
-                      {order.orderDate
-                        ? String(order.orderDate).split("T")[0]
-                        : "-"}
+                      {order.orderDate ? order.orderDate.split("T")[0] : "-"}
                     </td>
                   </tr>
                 );
@@ -253,7 +283,10 @@ export const OrderList = () => {
       </div>
 
       <div className="order-pagination">
-        <button onClick={() => setPage(page - 1)} disabled={page === 1}>
+        <button
+          onClick={() => setPage(page - 1)}
+          disabled={page === 1 || isLoading}
+        >
           <FiChevronLeft />
         </button>
 
@@ -262,6 +295,7 @@ export const OrderList = () => {
             key={num}
             onClick={() => setPage(num)}
             className={page === num ? "active" : ""}
+            disabled={isLoading}
           >
             {num}
           </button>
@@ -269,7 +303,7 @@ export const OrderList = () => {
 
         <button
           onClick={() => setPage(page + 1)}
-          disabled={page === totalPages}
+          disabled={page === totalPages || isLoading}
         >
           <FiChevronRight />
         </button>
@@ -281,13 +315,13 @@ export const OrderList = () => {
         subtitle="제출한 발주서의 상세 정보를 확인할 수 있습니다."
         content={
           <OrderModalDetail
-            selectedOrder={selectedOrder}
+            selectedOrder={selectedOrderId}
             onClose={() => setIsModalOpen(false)}
             myCompanyType={myCompanyType}
           />
         }
         icon={icon}
-        deleteIcon={deleteIcon}
+        deleteIcon={exitIcon}
       />
     </div>
   );

@@ -1,141 +1,184 @@
-import { orderListApi } from "../../../api/orderApi";
+import { writeOrderApi } from "../../../api/orderApi";
+import { STATUS_MAP } from "../../../constants/status";
+import type { ForCompanyProps } from "../../../types/Modal";
 
 export const OrderModalDetailForSupplier = ({
   selectedOrder,
   onClose,
-}: {
-  selectedOrder: any;
-  onClose: () => void;
-}) => {
-  const items = selectedOrder.orderItems || [];
+}: ForCompanyProps) => {
+  const handleStatusUpdate = async (
+    targetStatus: "ACCEPTED" | "END" | "CANCELED",
+  ) => {
+    let confirmMsg = "";
+    if (targetStatus === "ACCEPTED")
+      confirmMsg = "이 발주 요청을 접수(수락)하시겠습니까?";
+    if (targetStatus === "END")
+      confirmMsg = "자재 배송을 완료 처리하시겠습니까?";
+    if (targetStatus === "CANCELED")
+      confirmMsg = "이 발주 요청을 거절(취소)하시겠습니까?";
 
-  const totalAmountSum = items.reduce(
-    (sum: number, item: any) => sum + (item.amount || 0),
-    0,
-  );
-
-  const handleAcceptOrder = async () => {
-    if (!window.confirm("이 발주 요청을 접수하시겠습니까?")) {
-      return;
-    }
-
-    try {
-      await orderListApi.updateOrderStatus(selectedOrder.orderId, "ACCEPTED");
-      alert("발주가 접수되었습니다.");
-      onClose();
-      window.location.reload();
-    } catch (error) {
-      console.error(error);
-      alert("접수 처리 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleRejectOrder = async () => {
-    if (!window.confirm("이 발주 요청을 거절하시겠습니까?")) return;
-
-    try {
-      await orderListApi.updateOrderStatus(selectedOrder.orderId, "CANCELED");
-      alert("발주가 거절되었습니다.");
-      onClose();
-      window.location.reload();
-    } catch (error) {
-      console.error(error);
-      alert("거절 처리 중 오류가 발생했습니다.");
+    if (window.confirm(confirmMsg)) {
+      try {
+        await writeOrderApi.updateStatusBySupplier(
+          selectedOrder.orderId,
+          targetStatus,
+        );
+        alert(`발주서 상태가 성공적으로 변경되었습니다.`);
+        onClose();
+        window.location.reload();
+      } catch (err: any) {
+        alert(err.response?.data || "상태 변경 중 오류가 발생했습니다.");
+      }
     }
   };
-
-  const isRejected =
-    selectedOrder.status === "CANCELED" || selectedOrder.status === "REJECTED";
-  const isAccepted = selectedOrder.status === "ACCEPTED";
 
   return (
-    <div className="order-detail-view supplier">
-      <div className="order-info top">
-        <label className="order-num-label">발주 번호</label>
-        <input
-          value={String(selectedOrder.orderId).padStart(2, "0")}
-          className="order-num-input"
-          readOnly
-        />
+    <div className="order-modal-detail-container">
+      <div className="detail-info-section">
+        <div className="detail-row">
+          <span className="detail-label">발주 번호</span>
+          <span className="detail-value font-bold">
+            {selectedOrder.orderId}
+          </span>
+        </div>
 
-        <label className="order-req-name-label">주문자</label>
-        <input
-          value={selectedOrder.contactName}
-          className="order-req-name-input"
-          readOnly
-        />
+        <div className="detail-row">
+          <span className="detail-label">요청자(건설사 담당)</span>
+          <span className="detail-value">
+            {selectedOrder.orderManagerName || "미지정"}
+          </span>
+        </div>
+        <hr className="inner-divider" />
 
-        <label className="order-num-label">건설사</label>
-        <input
-          value={selectedOrder.companyName}
-          className="company-name-input"
-          readOnly
-        />
+        <div className="detail-row">
+          <span className="detail-label">발주 건설사</span>
+          <span className="detail-value font-bold">
+            {selectedOrder.companyName}
+          </span>
+        </div>
 
-        <label className="order-num-label">이메일</label>
-        <input
-          value={selectedOrder.email || "미등록"}
-          className="company-name-input"
-          readOnly
-        />
+        <div className="detail-row">
+          <span className="detail-label">수신 담당자 (나)</span>
+          <span className="detail-value">
+            {selectedOrder.contactName || "-"}
+          </span>
+        </div>
 
-        <label className="order-num-label">전화번호</label>
-        <input
-          value={selectedOrder.phone || "미등록"}
-          className="company-name-input"
-          readOnly
-        />
-      </div>
-      <hr />
+        <div className="detail-row">
+          <span className="detail-label">담당자 이메일</span>
+          <span className="detail-value">
+            {selectedOrder.contactEmail || "-"}
+          </span>
+        </div>
 
-      <div className="order-info middle">
-        <label className="status-label">상태</label>
-        <input value={selectedOrder.status} className="status-input" readOnly />
+        <div className="detail-row">
+          <span className="detail-label">담당자 전화번호</span>
+          <span className="detail-value">
+            {selectedOrder.contactPhone || "-"}
+          </span>
+        </div>
+        <hr className="inner-divider" />
 
-        <label className="address-label">주소</label>
-        <input
-          value={selectedOrder.address || "본사 주소 대체"}
-          className="address-label"
-          readOnly
-        />
-      </div>
+        <div className="detail-label-title">발주 품목 목록</div>
+        <div className="material-items-scroll-area">
+          {selectedOrder.items && selectedOrder.items.length > 0 ? (
+            selectedOrder.items.map((item, idx) => (
+              <div className="material-item-box" key={item.materialId || idx}>
+                <div className="detail-row">
+                  <span className="item-inner-label">품목명</span>
+                  <span className="detail-value font-bold">
+                    {item.materialName}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="item-inner-label">수량</span>
+                  <span className="detail-value">
+                    {item.quantity.toLocaleString()} {item.unit || "kg"}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="item-inner-label">단가</span>
+                  <span className="detail-value">
+                    {item.unitPrice.toLocaleString()}원
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="item-empty-text">발주 품목이 없습니다.</div>
+          )}
+        </div>
+        <hr className="inner-divider" />
 
-      <div className="order-info botton">
-        <label className="total-label">합계</label>
-        <input
-          value={`${totalAmountSum.toLocaleString()}원`}
-          className="total-input"
-          readOnly
-        />
-
-        <label className="memo-label">기타(메모)</label>
-        <div>
+        <div className="detail-row">
+          <span className="detail-label">합계 금액</span>
+          <span className="detail-value total-amount-text">
+            {selectedOrder.totalAmount.toLocaleString()}원
+          </span>
+        </div>
+        <div className="detail-row align-center">
+          <span className="detail-label">현재 상태</span>
+          <span className="detail-value">
+            <span className={`status-tag ${selectedOrder.status}`}>
+              {STATUS_MAP[selectedOrder.status] || selectedOrder.status}
+            </span>
+          </span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">발주 요청일</span>
+          <span className="detail-value">{selectedOrder.orderDate || "-"}</span>
+        </div>
+        <div className="detail-row flex-col">
+          <span className="detail-label">건설사 전달 메모</span>
           <textarea
-            className="memo-input"
-            value={selectedOrder.memo || "전달된 특이사항이 없습니다."}
+            className="detail-textarea"
             readOnly
-            placeholder="추가 전달 사항을 적어주세요."
+            value={selectedOrder.memo || "내용이 없습니다."}
           />
         </div>
       </div>
 
-      <div className="btn-area">
-        <button
-          onClick={handleAcceptOrder}
-          type="button"
-          className="btn-accept"
-          disabled={isAccepted || isRejected}
-        >
-          접수
-        </button>
-        <button
-          onClick={handleRejectOrder}
-          type="button"
-          className="btn-reject"
-          disabled={isRejected}
-        >
-          거절
-        </button>
+      <div className="modal-action-buttons supplier-buttons">
+        {selectedOrder.status === "PENDING" && (
+          <>
+            <button
+              className="btn-supplier-accept"
+              onClick={() => handleStatusUpdate("ACCEPTED")}
+            >
+              발주 접수
+            </button>
+            <button
+              className="btn-supplier-reject"
+              onClick={() => handleStatusUpdate("CANCELED")}
+            >
+              거절하기
+            </button>
+          </>
+        )}
+
+        {selectedOrder.status === "ACCEPTED" && (
+          <>
+            <button
+              className="btn-supplier-end"
+              onClick={() => handleStatusUpdate("END")}
+            >
+              배송 완료 (출고)
+            </button>
+            <button
+              className="btn-supplier-reject"
+              onClick={() => handleStatusUpdate("CANCELED")}
+            >
+              접수 취소
+            </button>
+          </>
+        )}
+
+        {(selectedOrder.status === "END" ||
+          selectedOrder.status === "CANCELED") && (
+          <button className="btn-supplier-close" onClick={onClose}>
+            확인 (닫기)
+          </button>
+        )}
       </div>
     </div>
   );
