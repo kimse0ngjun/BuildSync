@@ -1,94 +1,83 @@
 import axios from "axios";
 import type {
-  Schedule,
-  ScheduleRequest
+  CalendarEventResponse,
+  ScheduleResponse,
+  ScheduleListResponse,
+  ScheduleRequest,
 } from "../types/schedule";
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const BASE =
+  `${import.meta.env.VITE_API_URL}/schedule`;
 
 
 const getAuthHeader = () => {
-
   const token = localStorage.getItem("token");
 
   return {
-    Authorization:`Bearer ${token}`
+    Authorization: `Bearer ${token}`,
   };
 };
 
 
+export const getCalendarEvents = (
+  companyId: number,
+  year: number,
+  month: number,
+  type = "ALL",
+  status = "ALL"
+) =>
+  axios.get<CalendarEventResponse[]>(`${BASE}/calendar`, {
+    params: {
+      companyId,
+      year,
+      month,
+      type,
+      status,
+    },
+    headers: getAuthHeader(),
+  });
 
-export const getSchedules = () => {
 
- return axios.get<Schedule[]>(
-   `${API_URL}/api/schedules`,
-   {
-    headers:getAuthHeader()
-   }
- );
-
-};
-
+export const getSchedules = (
+  companyId: number,
+  page = 0,
+  size = 10
+) =>
+  axios.get<ScheduleListResponse>(`${BASE}/list`, {
+    params: {
+      companyId,
+      page,
+      size,
+      sort: "startDate,desc",
+    },
+    headers: getAuthHeader(),
+  });
 
 
 export const getSchedule = (
- id:number
-)=>{
-
- return axios.get<Schedule>(
-  `${API_URL}/api/schedules/${id}`,
-  {
-   headers:getAuthHeader()
-  }
- );
-
-};
-
-
+  companyId: number,
+  scheduleId: number
+) =>
+  axios.get<ScheduleResponse>(`${BASE}/${scheduleId}`, {
+    params: {
+      companyId,
+    },
+    headers: getAuthHeader(),
+  });
 
 export const createSchedule = (
- data:ScheduleRequest
-)=>{
-
- return axios.post(
-  `${API_URL}/api/schedules`,
-  data,
-  {
-   headers:getAuthHeader()
-  }
- );
-
-};
-
-
-
-export const updateSchedule = (
- id:number,
- data:ScheduleRequest
-)=>{
-
- return axios.put(
-  `${API_URL}/api/schedules/${id}`,
-  data,
-  {
-   headers:getAuthHeader()
-  }
- );
-
-};
-
-
-
-export const deleteSchedule = (
- id:number
-)=>{
-
- return axios.delete(
-  `${API_URL}/api/schedules/${id}`,
-  {
-   headers:getAuthHeader()
-  }
- );
-
+  companyId: number,
+  data: ScheduleRequest
+) => {
+  return axios.post<ScheduleResponse>(
+    `${BASE}`,
+    data,
+    {
+      params: {
+        companyId,
+      },
+      headers: getAuthHeader(),
+    }
+  );
 };

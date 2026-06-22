@@ -1,24 +1,40 @@
-export interface Schedule {
-  scheduleId: number;
-  companyId: number;
-  companyName: string;
+export type EventType = "SITES" | "MATERIALS";
 
+export interface CalendarEventResponse {
+  eventId: number;
   title: string;
-  content: string;
-
   startDate: string;
   endDate: string;
-
   status: string;
+  eventType: EventType;
+  siteId?: number;
+  siteName?: string;
+  supplierId?: number;
+  supplierName?: string;
 }
 
-
-export interface ScheduleRequest {
-  companyId: number;
-
+export interface ScheduleResponse {
+  scheduleId: number;
   title: string;
   content: string;
-
   startDate: string;
   endDate: string;
+  siteId: number;
+  siteName: string;
+}
+
+export interface ScheduleListResponse {
+  list: ScheduleResponse[];
+  totalElements: number;
+  totalPages: number;
+  pageNum: number;
+  pageSize: number;
+}
+
+export interface ScheduleRequest {
+  title: string;
+  content: string;
+  startDate: string;
+  endDate: string;
+  siteId: number;
 }
