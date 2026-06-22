@@ -1,5 +1,6 @@
 package com.buildsync.repository.site;
 
+import com.buildsync.dto.inout.SelectResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.Site;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SiteRepository extends JpaRepository<Site, Long> {
@@ -29,4 +31,14 @@ public interface SiteRepository extends JpaRepository<Site, Long> {
             @Param("status") String status,
             Pageable pageable
     );
+    
+    @Query("""
+    	    SELECT new com.buildsync.dto.inout.SelectResponse(
+    	        s.id,
+    	        CONCAT(s.siteName, '|', s.address)
+    	    )
+    	    FROM Site s
+    	    ORDER BY s.siteName
+    	""")
+    	List<SelectResponse> findAllForSelect();
 }

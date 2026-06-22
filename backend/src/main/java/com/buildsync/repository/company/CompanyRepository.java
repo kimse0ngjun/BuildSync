@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import com.buildsync.dto.company.CompanyProjection;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.CompanyStatus;
+import com.buildsync.entity.CompanyType;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +28,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	Optional<Company> findByPhone(String phone);
 	boolean existsByEmail(String email);
 	
-	List<Company> findByCompanyType(String companyType);
+	List<Company> findByCompanyType(CompanyType companyType);
 	List<Company> findByStatus(CompanyStatus status);
 	
 	long countByStatus(CompanyStatus status);
