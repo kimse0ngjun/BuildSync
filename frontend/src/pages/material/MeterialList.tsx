@@ -109,7 +109,6 @@ function MaterialList() {
       setTotalPages(data.totalPages ?? 1);
     } catch (error) {
       console.error(error);
-      alert("자재 목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }

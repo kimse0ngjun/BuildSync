@@ -99,7 +99,6 @@ function MaterialUsagePage() {
       setSelected(null);
     } catch (error) {
       console.error(error);
-      alert("자재 사용내역을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
