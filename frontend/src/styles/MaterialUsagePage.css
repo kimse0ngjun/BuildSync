@@ -159,6 +159,15 @@
   border-bottom: 1px solid #eef2f7;
 }
 
+.usage-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.usage-table tbody tr:hover {
+  cursor: pointer;
+  background: #f4f8ff;
+}
+
 .usage-site-name,
 .usage-material-name {
   color: #10284a !important;
@@ -237,6 +246,21 @@
 
 .usage-detail-list {
   border-top: 1px solid #eef2f7;
+}
+
+.usage-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.usage-detail-header button {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 18px;
 }
 
 .usage-info-row {

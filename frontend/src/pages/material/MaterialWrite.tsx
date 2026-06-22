@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiBox, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
 import "../../styles/MaterialWrite.css";
 
+type CategoryItem = {
+  categoryId: number;
+  categoryName: string;
+  createdAt: string;
+};
+
 function MaterialWrite() {
   const navigate = useNavigate();
+
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
 
   const [form, setForm] = useState({
     materialCode: "",
@@ -15,11 +23,51 @@ function MaterialWrite() {
     minimumStock: "",
     price: "",
     specification: "",
-    memo: "",
   });
 
   const isEnough =
     Number(form.currentStock || 0) >= Number(form.minimumStock || 0);
+
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("로그인이 필요한 서비스입니다.");
+      return null;
+    }
+
+    return token;
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch(
+        "http://localhost:8080/api/material-categories",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("카테고리 목록 조회 실패");
+      }
+
+      const data: CategoryItem[] = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -28,6 +76,78 @@ function MaterialWrite() {
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleReset = () => {
+    setForm({
+      materialCode: "",
+      materialName: "",
+      materialCategory: "",
+      unit: "",
+      currentStock: "",
+      minimumStock: "",
+      price: "",
+      specification: "",
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (
+      !form.materialCode ||
+      !form.materialName ||
+      !form.materialCategory ||
+      !form.unit ||
+      !form.currentStock ||
+      !form.minimumStock ||
+      !form.price
+    ) {
+      alert("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
+    if (
+      Number(form.currentStock) < 0 ||
+      Number(form.minimumStock) < 0 ||
+      Number(form.price) < 0
+    ) {
+      alert("수량과 단가는 0 이상으로 입력해주세요.");
+      return;
+    }
+
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const requestBody = {
+        materialCode: form.materialCode,
+        materialName: form.materialName,
+        materialCategory: form.materialCategory,
+        unit: form.unit,
+        specification: form.specification,
+        currentQuantity: Number(form.currentStock),
+        minimumQuantity: Number(form.minimumStock),
+        unitPrice: Number(form.price),
+      };
+
+      const response = await fetch("http://localhost:8080/api/materials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error("자재 등록 실패");
+      }
+
+      alert("자재가 등록되었습니다.");
+      navigate("/material");
+    } catch (error) {
+      console.error(error);
+      alert("자재 등록에 실패했습니다.");
+    }
   };
 
   return (
@@ -77,12 +197,11 @@ function MaterialWrite() {
                   onChange={handleChange}
                 >
                   <option value="">자재 분류를 선택하세요</option>
-                  <option value="철강">철강</option>
-                  <option value="시멘트">시멘트</option>
-                  <option value="유리">유리</option>
-                  <option value="목재">목재</option>
-                  <option value="배관자재">배관자재</option>
-                  <option value="전기자재">전기자재</option>
+                  {categories.map((item) => (
+                    <option key={item.categoryId} value={item.categoryName}>
+                      {item.categoryName}
+                    </option>
+                  ))}
                 </select>
               </FormField>
 
@@ -90,6 +209,8 @@ function MaterialWrite() {
                 <select name="unit" value={form.unit} onChange={handleChange}>
                   <option value="">단위를 선택하세요</option>
                   <option value="EA">EA</option>
+                  <option value="KG">KG</option>
+                  <option value="M">M</option>
                   <option value="포">포</option>
                   <option value="롤">롤</option>
                   <option value="통">통</option>
@@ -102,6 +223,8 @@ function MaterialWrite() {
                 <div className="input-with-unit">
                   <input
                     name="currentStock"
+                    type="number"
+                    min="0"
                     value={form.currentStock}
                     onChange={handleChange}
                     placeholder="현재 재고 수량을 입력하세요"
@@ -115,6 +238,8 @@ function MaterialWrite() {
                 <div className="input-with-unit">
                   <input
                     name="minimumStock"
+                    type="number"
+                    min="0"
                     value={form.minimumStock}
                     onChange={handleChange}
                     placeholder="최소 재고 수량을 입력하세요"
@@ -128,6 +253,8 @@ function MaterialWrite() {
                 <div className="input-with-unit">
                   <input
                     name="price"
+                    type="number"
+                    min="0"
                     value={form.price}
                     onChange={handleChange}
                     placeholder="단가를 입력하세요"
@@ -149,21 +276,6 @@ function MaterialWrite() {
             </div>
           </div>
 
-          <div className="write-section">
-            <h2>추가 정보</h2>
-
-            <FormField label="메모">
-              <textarea
-                name="memo"
-                value={form.memo}
-                onChange={handleChange}
-                placeholder="메모를 입력하세요. (선택사항)"
-                maxLength={200}
-              />
-              <div className="text-count">{form.memo.length} / 200</div>
-            </FormField>
-          </div>
-
           <div className="write-actions">
             <button
               className="cancel-btn"
@@ -171,7 +283,9 @@ function MaterialWrite() {
             >
               취소
             </button>
-            <button className="submit-btn">등록하기</button>
+            <button className="submit-btn" onClick={handleSubmit}>
+              등록하기
+            </button>
           </div>
         </section>
 
@@ -179,7 +293,7 @@ function MaterialWrite() {
           <div className="preview-card">
             <div className="preview-title">
               <h3>자재 미리보기</h3>
-              <button>
+              <button onClick={handleReset}>
                 <FiRefreshCw />
                 초기화
               </button>
@@ -216,7 +330,9 @@ function MaterialWrite() {
             <PreviewInfo label="단위" value={form.unit || "-"} />
             <PreviewInfo
               label="단가"
-              value={form.price ? `${form.price} 원` : "-"}
+              value={
+                form.price ? `${Number(form.price).toLocaleString()} 원` : "-"
+              }
             />
             <PreviewInfo label="규격" value={form.specification || "-"} />
           </div>

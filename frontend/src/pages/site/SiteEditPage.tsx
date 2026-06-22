@@ -6,11 +6,8 @@ import {
   FiMapPin,
   FiHome,
   FiCalendar,
-  FiUser,
-  FiPhone,
   FiDollarSign,
   FiFlag,
-  FiFileText,
   FiSave,
 } from "react-icons/fi";
 import "../../styles/SiteEditPage.css";
@@ -20,14 +17,20 @@ type SiteForm = {
   name: string;
   type: string;
   address: string;
-  detailAddress: string;
   startDate: string;
   endDate: string;
-  manager: string;
-  phone: string;
   budget: string;
+};
+
+type SiteState = {
+  id: number;
+  siteName: string;
+  constructionType: string;
+  address: string;
+  cost: number;
   status: string;
-  memo: string;
+  startDate: string;
+  expectedEndDate: string;
 };
 
 type FormFieldProps = {
@@ -38,72 +41,73 @@ type FormFieldProps = {
   children: ReactNode;
 };
 
-const sampleSites: SiteForm[] = [
-  {
-    id: "1",
-    name: "강남 오피스 신축",
-    type: "신축",
-    address: "서울특별시 강남구 테헤란로 120",
-    detailAddress: "5층",
-    startDate: "2026-06-01",
-    endDate: "2026-12-31",
-    manager: "홍길동",
-    phone: "010-1234-5678",
-    budget: "100000000",
-    status: "진행중",
-    memo: "초기 공사 및 자재 점검 필요",
-  },
-  {
-    id: "2",
-    name: "송도 아파트 건설",
-    type: "신축",
-    address: "인천광역시 연수구 송도동 12",
-    detailAddress: "101동",
-    startDate: "2026-05-01",
-    endDate: "2027-03-31",
-    manager: "김철수",
-    phone: "010-2222-3333",
-    budget: "200000000",
-    status: "진행중",
-    memo: "파일럿 공사",
-  },
-];
-
 function SiteEditPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
+
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState<SiteForm>({
     id: "",
     name: "",
     type: "",
     address: "",
-    detailAddress: "",
     startDate: "",
     endDate: "",
-    manager: "",
-    phone: "",
     budget: "",
-    status: "예정",
-    memo: "",
   });
 
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("로그인이 필요한 서비스입니다.");
+      return null;
+    }
+
+    return token;
+  };
+
+  const getAutoStatus = () => {
+    if (!form.startDate || !form.endDate) return "예정";
+
+    const today = new Date();
+    const start = new Date(form.startDate);
+    const end = new Date(form.endDate);
+
+    today.setHours(0, 0, 0, 0);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    if (today < start) return "예정";
+    if (today >= end) return "완료";
+    return "진행중";
+  };
+
   useEffect(() => {
-    const stateData = location.state as SiteForm | undefined;
-    const foundSite = sampleSites.find((site) => site.id === id);
+    const stateData = location.state as SiteState | undefined;
 
     if (stateData) {
-      setForm(stateData);
-    } else if (foundSite) {
-      setForm(foundSite);
+      setForm({
+        id: String(stateData.id),
+        name: stateData.siteName,
+        type: stateData.constructionType,
+        address: stateData.address,
+        startDate: stateData.startDate,
+        endDate: stateData.expectedEndDate,
+        budget: String(stateData.cost),
+      });
+    } else if (id) {
+      setForm((prev) => ({
+        ...prev,
+        id,
+      }));
     }
   }, [id, location.state]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
 
@@ -113,9 +117,75 @@ function SiteEditPage() {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log("현장 수정 데이터:", form);
-    navigate("/site");
+  const handleSubmit = async () => {
+    const siteId = form.id || id;
+
+    if (!siteId) {
+      alert("현장 ID가 없습니다.");
+      return;
+    }
+
+    if (
+      !form.name ||
+      !form.type ||
+      !form.address ||
+      !form.startDate ||
+      !form.endDate
+    ) {
+      alert("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
+    if (new Date(form.startDate) > new Date(form.endDate)) {
+      alert("준공 예정일은 착공일보다 빠를 수 없습니다.");
+      return;
+    }
+
+    if (form.budget && Number(form.budget) < 0) {
+      alert("비용은 0 이상으로 입력해주세요.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const token = getToken();
+      if (!token) return;
+
+      const payload = {
+        siteName: form.name,
+        constructionType: form.type,
+        address: form.address,
+        cost: Number(form.budget || 0),
+        status: getAutoStatus(),
+        startDate: form.startDate,
+        expectedEndDate: form.endDate,
+      };
+
+      const response = await fetch(
+        `http://localhost:8080/api/sites/${siteId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("공사 현장 수정 실패");
+      }
+
+      alert("공사 현장이 수정되었습니다.");
+      navigate("/site");
+    } catch (error) {
+      console.error(error);
+      alert("공사 현장 수정에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -161,28 +231,23 @@ function SiteEditPage() {
             <FormField icon={<FiHome />} label="공사 유형" required>
               <select name="type" value={form.type} onChange={handleChange}>
                 <option value="">공사 유형을 선택하세요</option>
+                <option value="건축">건축</option>
                 <option value="신축">신축</option>
                 <option value="증축">증축</option>
                 <option value="리모델링">리모델링</option>
                 <option value="보수">보수</option>
+                <option value="오피스">오피스</option>
+                <option value="아파트">아파트</option>
+                <option value="상가">상가</option>
               </select>
             </FormField>
 
-            <FormField icon={<FiMapPin />} label="주소" required>
+            <FormField icon={<FiMapPin />} label="주소" required full>
               <input
                 name="address"
                 value={form.address}
                 onChange={handleChange}
                 placeholder="주소를 입력하세요"
-              />
-            </FormField>
-
-            <FormField icon={<FiMapPin />} label="상세 주소">
-              <input
-                name="detailAddress"
-                value={form.detailAddress}
-                onChange={handleChange}
-                placeholder="상세 주소를 입력하세요"
               />
             </FormField>
           </div>
@@ -220,40 +285,10 @@ function SiteEditPage() {
 
         <section className="site-edit-section">
           <div className="site-edit-section-title">
-            <FiUser />
-            <div>
-              <h2>담당 정보</h2>
-              <p>현장 담당자와 연락처를 수정하세요.</p>
-            </div>
-          </div>
-
-          <div className="site-edit-grid">
-            <FormField icon={<FiUser />} label="담당자" required>
-              <input
-                name="manager"
-                value={form.manager}
-                onChange={handleChange}
-                placeholder="담당자 이름을 입력하세요"
-              />
-            </FormField>
-
-            <FormField icon={<FiPhone />} label="연락처">
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="예) 010-1234-5678"
-              />
-            </FormField>
-          </div>
-        </section>
-
-        <section className="site-edit-section">
-          <div className="site-edit-section-title">
             <FiDollarSign />
             <div>
               <h2>비용 및 상태</h2>
-              <p>공사 비용과 현장 상태를 수정하세요.</p>
+              <p>공사 비용과 일정에 따른 상태를 확인하세요.</p>
             </div>
           </div>
 
@@ -261,39 +296,18 @@ function SiteEditPage() {
             <FormField icon={<FiDollarSign />} label="비용">
               <input
                 name="budget"
+                type="number"
+                min="0"
                 value={form.budget}
                 onChange={handleChange}
                 placeholder="예) 100000000"
               />
             </FormField>
 
-            <FormField icon={<FiFlag />} label="상태" required>
-              <select name="status" value={form.status} onChange={handleChange}>
-                <option value="예정">예정</option>
-                <option value="진행중">진행중</option>
-                <option value="중단">중단</option>
-                <option value="완료">완료</option>
-              </select>
+            <FormField icon={<FiFlag />} label="상태">
+              <input value={getAutoStatus()} readOnly />
             </FormField>
           </div>
-        </section>
-
-        <section className="site-edit-section">
-          <div className="site-edit-section-title">
-            <FiFileText />
-            <div>
-              <h2>메모</h2>
-              <p>현장 관련 추가 사항을 수정하세요.</p>
-            </div>
-          </div>
-
-          <textarea
-            className="site-edit-memo"
-            name="memo"
-            value={form.memo}
-            onChange={handleChange}
-            placeholder="메모를 입력하세요. (선택사항)"
-          />
         </section>
 
         <div className="site-edit-actions">
@@ -309,9 +323,10 @@ function SiteEditPage() {
             type="button"
             className="site-edit-submit-btn"
             onClick={handleSubmit}
+            disabled={loading}
           >
             <FiSave />
-            저장하기
+            {loading ? "저장 중..." : "저장하기"}
           </button>
         </div>
       </div>

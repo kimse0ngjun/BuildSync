@@ -13,6 +13,7 @@ import CompanyEdit from "./pages/company/CompanyEdit";
 
 import MaterialList from "./pages/material/MeterialList";
 import MaterialWrite from "./pages/material/MaterialWrite";
+import MaterialEdit from "./pages/material/MaterialEdit";
 import StockInOutList from "./pages/material/StockInOutList";
 import StockInOutWrite from "./pages/material/StockInOutWrite";
 
@@ -42,7 +43,6 @@ import SitePage from "./pages/site/SitePage";
 import SiteCreatePage from "./pages/site/SiteCreatePage";
 import SiteEditPage from "./pages/site/SiteEditPage";
 import MaterialUsagePage from "./pages/site/MaterialUsagePage";
-import MaterialUsageEditPage from "./pages/site/MaterialUsageEditPage";
 import SchedulePage from "./pages/schedule/SchedulePage";
 
 function App() {
@@ -78,6 +78,10 @@ function App() {
 
             <Route path="/material" element={<MaterialList />} />
             <Route path="/material/write" element={<MaterialWrite />} />
+            <Route
+              path="/material/edit/:materialId"
+              element={<MaterialEdit />}
+            />
 
             <Route path="/stock" element={<StockInOutList />} />
             <Route path="/stock/write" element={<StockInOutWrite />} />
@@ -110,10 +114,6 @@ function App() {
             <Route path="/site/create" element={<SiteCreatePage />} />
             <Route path="/site/edit/:id" element={<SiteEditPage />} />
             <Route path="/site/material" element={<MaterialUsagePage />} />
-            <Route
-              path="/site/material/edit/:id"
-              element={<MaterialUsageEditPage />}
-            />
 
             <Route path="/schedule" element={<SchedulePage />} />
           </Route>

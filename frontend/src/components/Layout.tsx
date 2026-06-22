@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   FiHome,
   FiUsers,
@@ -29,6 +30,7 @@ import "../styles/Layout.css";
 function Layout() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openBottom, setOpenBottom] = useState<string | null>(null);
+  const { isLogin, ceoName, companyName, logout } = useAuth();
 
   const toggleMenu = (menu: string) => {
     setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -105,7 +107,7 @@ function Layout() {
             isOpen={openMenu === "site"}
             onClick={() => toggleMenu("site")}
           >
-            <NavLink to="/site">
+            <NavLink to="/site" end>
               <FiMapPin />
               현장 목록
             </NavLink>
@@ -177,18 +179,43 @@ function Layout() {
             </NavLink>
           </BottomGroup>
 
-          <NavLink to="/login">
+          {isLogin ? (
             <div className="login-profile">
+
               <div className="login-avatar">
-                <FiLogIn />
+                <FiUser />
               </div>
 
               <div className="login-info">
-                <strong>로그인</strong>
-                <small>서비스 이용하기</small>
+                <strong>{ceoName}</strong>
+                <small>{companyName}</small>
               </div>
+
+              <button
+                type="button"
+                className="logout-btn"
+                onClick={logout}
+              >
+                <FiLogIn />
+              </button>
+
             </div>
-          </NavLink>
+          ) : (
+            <NavLink to="/login">
+              <div className="login-profile">
+
+                <div className="login-avatar">
+                  <FiLogIn />
+                </div>
+
+                <div className="login-info">
+                  <strong>로그인</strong>
+                  <small>서비스 이용하기</small>
+                </div>
+
+              </div>
+            </NavLink>
+          )}
         </div>
       </aside>
 

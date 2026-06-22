@@ -224,6 +224,23 @@
   border-bottom: 1px solid #eef2f7;
 }
 
+.material-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.material-table tbody tr:hover {
+  cursor: pointer;
+  background: #f4f8ff;
+}
+
+.material-table tbody tr.selected-row {
+  background: #eef5ff;
+}
+
+body.dark-mode .material-table tbody tr.selected-row {
+  background: #1e3a5f;
+}
+
 .material-name {
   color: #10284a !important;
   font-weight: 700 !important;
@@ -419,6 +436,16 @@
 .pagination button:hover {
   background: #2563eb;
   color: white;
+}
+
+body.dark-mode .panel-actions .delete-btn {
+  color: #f87171;
+}
+
+body.dark-mode .panel-actions .delete-btn:hover {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
 }
 
 /* dark mode */
