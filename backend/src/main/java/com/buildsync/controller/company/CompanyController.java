@@ -2,6 +2,7 @@ package com.buildsync.controller.company;
 
 import java.util.List;
 
+import com.buildsync.dto.company.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -14,10 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.buildsync.dto.company.CompanyDeleteResponse;
-import com.buildsync.dto.company.CompanyResponse;
-import com.buildsync.dto.company.CompanyUpdateRequest;
-import com.buildsync.dto.company.CompanyUpdateResponse;
 import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.CompanyType;
 import com.buildsync.service.company.CompanyService;
@@ -60,6 +57,14 @@ public class CompanyController {
 	            pageable
 	    );
 	}
+
+    // 업체 상세 조회
+    @GetMapping("/{companyId}")
+    public CompanyDetailResponse getCompany(
+            @PathVariable("companyId") Long companyId
+    ){
+        return companyService.getCompany(companyId);
+    }
 	
 	// 업체 수정
 	@PutMapping("/{companyId}")
@@ -80,8 +85,6 @@ public class CompanyController {
 	public CompanyDeleteResponse deleteCompany(
             @PathVariable("companyId") Long companyId
     ){
-
-        companyService.deleteCompany(companyId);
 
         return companyService.deleteCompany(companyId);
     }

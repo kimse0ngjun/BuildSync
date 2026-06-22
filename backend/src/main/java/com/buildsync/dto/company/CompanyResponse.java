@@ -19,7 +19,6 @@ public class CompanyResponse {
     private String ceoName;
     private String phone;
     private String address;
-    private List<String> materials;
     private LocalDateTime createdAt;
     
     public static CompanyResponse from(Company company) {
@@ -32,7 +31,6 @@ public class CompanyResponse {
                 .phone(company.getPhone())
                 .address(company.getAddress())
                 .createdAt(company.getCreatedAt())
-                .materials(List.of())
                 .build();
     }
 }
