@@ -5,8 +5,9 @@ import { useNavigate } from "react-router-dom";
 import type {
   MaterialShortageResponse,
   StockShortageResponse,
-} from "../../types/NotificationDTO";
+} from "../../types/Notification";
 import { stockShortageApi } from "../../api/stockStortageApi";
+import "../../styles/Notifications.css";
 
 export const NotificationStock = () => {
   const nav = useNavigate();
@@ -27,8 +28,8 @@ export const NotificationStock = () => {
   const handleFetchStockData = (page: number = 0) => {
     setLoading(true);
     return Promise.all([
-      stockShortageApi.getShortageCard(1), // 회사 ID
-      stockShortageApi.getShortageList(1, page),
+      stockShortageApi.getShortageCard(companyId), // 회사 ID
+      stockShortageApi.getShortageList(companyId, page),
     ])
       .then(([boardRes, listRes]) => {
         setBoardData(boardRes);
@@ -88,7 +89,7 @@ export const NotificationStock = () => {
         <div className="ordering-area">
           <FaBoxes className="ordering-icon" />
           <div className="ordering-material-area">
-            <h4 className="ordering-title">현재 발주 진행 중인 자재</h4>
+            <h4 className="ordering-title">주문 집중으로 인한 부족 자재</h4>
             <p className="ordering-data">
               {boardData ? boardData.onOrderCount : 0} 품목
             </p>
@@ -128,7 +129,6 @@ export const NotificationStock = () => {
                 <th className="th-safeStock">설정 최소 재고</th>
                 <th className="th-deficitQuantity">부족 수량</th>
                 <th className="th-unitPrice">예상 단가</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -162,15 +162,6 @@ export const NotificationStock = () => {
 
                     <td className="unitPrice-data">
                       {material.unitPrice.toLocaleString() ?? "데이터 없음"} 원
-                    </td>
-
-                    <td className="go-to-order">
-                      <button
-                        className="go-to-order-btn"
-                        onClick={() => nav("/order/write")}
-                      >
-                        <FaCartPlus className="order-icon" /> 즉시 발주
-                      </button>
                     </td>
                   </tr>
                 ))

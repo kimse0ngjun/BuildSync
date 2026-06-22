@@ -2,7 +2,7 @@ import axios from "axios";
 import {
   type NotificationResponse,
   type PageResponse,
-} from "../types/NotificationDTO";
+} from "../types/Notification";
 
 const api = axios.create({
   baseURL: "http://localhost:8080/api/notification",
@@ -10,6 +10,19 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 export const notificationListApi = {
   // 모든 알림 조회
