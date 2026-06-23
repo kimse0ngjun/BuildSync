@@ -40,6 +40,14 @@ function Layout() {
     setOpenBottom((prev) => (prev === menu ? null : menu));
   };
 
+  const handleLogout = () => {
+    const ok = window.confirm("로그아웃 하시겠습니까?");
+    if (!ok) return;
+
+    localStorage.removeItem("isAdmin");
+    logout();
+  };
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -169,7 +177,7 @@ function Layout() {
             isOpen={openBottom === "notification"}
             onClick={() => toggleBottom("notification")}
           >
-            <NavLink to="/notifications">
+            <NavLink to="/notifications" end>
               <FiMail />
               알림 목록
             </NavLink>
@@ -181,7 +189,6 @@ function Layout() {
 
           {isLogin ? (
             <div className="login-profile">
-
               <div className="login-avatar">
                 <FiUser />
               </div>
@@ -194,16 +201,14 @@ function Layout() {
               <button
                 type="button"
                 className="logout-btn"
-                onClick={logout}
+                onClick={handleLogout}
               >
                 <FiLogIn />
               </button>
-
             </div>
           ) : (
             <NavLink to="/login">
               <div className="login-profile">
-
                 <div className="login-avatar">
                   <FiLogIn />
                 </div>
@@ -212,7 +217,6 @@ function Layout() {
                   <strong>로그인</strong>
                   <small>서비스 이용하기</small>
                 </div>
-
               </div>
             </NavLink>
           )}

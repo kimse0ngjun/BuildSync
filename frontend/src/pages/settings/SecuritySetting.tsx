@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 import {
   FiLock,
   FiShield,
@@ -11,6 +13,7 @@ import {
 import "../../styles/SecuritySetting.css";
 
 function SecuritySetting() {
+  const { isLogin } = useAuth();
   const [form, setForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -22,6 +25,10 @@ function SecuritySetting() {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="security-setting-page">
