@@ -27,7 +27,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long>{
 			@Param("lastDay") LocalDate lastDay
 	);
 	
-	// 일정 계시판 조회
+	// 일정 게시판 조회
     Page<Schedule> findByCompanyId(
             Long companyId,
             Pageable pageable

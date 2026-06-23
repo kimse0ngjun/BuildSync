@@ -8,6 +8,7 @@ import lombok.Getter;
 public class LoginResponse {
 
 	private String token;
+	private Long companyId;
 	private String ceoName;
 	private String companyName;
 }
