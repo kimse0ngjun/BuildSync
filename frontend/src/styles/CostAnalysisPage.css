@@ -1,32 +1,47 @@
 .analysis-page {
-  padding: 30px;
+  width: 100%;
   min-height: 100vh;
+  background: #fafafa;
+  padding: 30px 40px;
 }
 
 .analysis-title {
-  font-size: 28px;
+  color: #10284a;
+  font-size: 34px;
   font-weight: 700;
   margin-bottom: 25px;
+  letter-spacing: -0.8px;
 }
 
 .analysis-tabs {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   margin-bottom: 25px;
 }
 
 .analysis-tab {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 18px 30px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
   cursor: pointer;
-  font-weight: 600;
-  transition: 0.2s;
+
+  background: #f4f8ff;
+  border: 1px solid #dbe6f4;
+
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .analysis-tab:hover {
-  transform: translateY(-2px);
+  background: #e8f1ff;
+  color: #2563eb;
+  border-color: #c7dcff;
 }
 
 .analysis-tab.active {
@@ -39,12 +54,15 @@
   background: white;
   border-radius: 16px;
   padding: 25px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+
+  border: 1px solid #eef2f7;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
 .analysis-card h2 {
-  color: #000000;
   margin-bottom: 20px;
+  color: #10284a;
+  font-size: 20px;
 }
 
 .analysis-card table {
@@ -53,60 +71,96 @@
 }
 
 .analysis-card th {
-  background: #f1f5f9;
-  padding: 14px;
-  text-align: center;
+  height: 48px;
+
+  background: #f8fbff;
+
+  color: #64748b;
+
+  font-size: 13px;
   font-weight: 700;
+
+  text-align: center;
+
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .analysis-card td {
-  padding: 14px;
+  height: 56px;
+
+  padding: 0 14px;
+
+  color: #334155;
+
   text-align: center;
-  border-bottom: 1px solid #eee;
+
+  font-size: 14px;
+
+  border-bottom: 1px solid #eef2f7;
+}
+
+.analysis-card tr {
+  transition: 0.2s ease;
 }
 
 .analysis-card tr:hover {
-  background: #f8fafc;
+  background: #f8fbff;
 }
 
-.dark .analysis-page {
-  background: #111827;
+body.dark-mode .analysis-page {
+  background: #0f172a;
 }
 
-.dark .analysis-title {
-  color: #f9fafb;
+body.dark-mode .analysis-title {
+  color: #f8fafc;
 }
 
-.dark .analysis-card {
-  background: #1f2937;
+body.dark-mode .analysis-tab {
+  background: #1e293b;
+  border-color: #334155;
+
+  color: #cbd5e1;
+}
+
+body.dark-mode .analysis-tab:hover {
+  background: #243247;
+  color: #93c5fd;
+}
+
+body.dark-mode .analysis-tab.active {
+  background: #2563eb;
+
+  color: white;
+
+  border-color: #2563eb;
+}
+
+body.dark-mode .analysis-card {
+  background: #1e293b;
+
+  border-color: #334155;
+
   box-shadow: none;
 }
 
-.dark .analysis-card h2 {
-  color: #f9fafb;
+body.dark-mode .analysis-card h2 {
+  color: #f8fafc;
 }
 
-.dark .analysis-tab {
-  background: #1f2937;
+body.dark-mode .analysis-card th {
+  background: #111827;
+
+  color: #cbd5e1;
+
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .analysis-card td {
   color: #e5e7eb;
-  border-color: #374151;
+
+  border-bottom-color: #334155;
 }
 
-.dark .analysis-tab.active {
-  background: #2563eb;
-  color: white;
-}
-
-.dark .analysis-card th {
-  background: #374151;
-  color: #f9fafb;
-}
-
-.dark .analysis-card td {
-  color: #e5e7eb;
-  border-color: #374151;
-}
-
-.dark .analysis-card tr:hover {
-  background: #273449;
+body.dark-mode .analysis-card tr:hover {
+  background: #243247;
 }

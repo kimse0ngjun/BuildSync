@@ -35,6 +35,8 @@ function CostAnalysisPage() {
         getSiteMaterialUsage(companyId),
       ]);
 
+      console.log(site.data);
+
       setMonthlyData(monthly.data);
       setSiteData(site.data);
     } catch (e) {
@@ -70,8 +72,8 @@ function CostAnalysisPage() {
             <thead>
               <tr>
                 <th>월</th>
-                <th>총 입고량</th>
-                <th>발주 금액</th>
+                <th>총 발주량</th>
+                <th>총 자재 비용</th>
               </tr>
             </thead>
 
@@ -108,7 +110,7 @@ function CostAnalysisPage() {
 
             <tbody>
               {siteData.map((item) => (
-                <tr key={item.siteId}>
+                <tr key={`${item.siteId}-${item.materialName}`}>
                   <td>{item.siteName}</td>
 
                   <td>{item.materialName}</td>
