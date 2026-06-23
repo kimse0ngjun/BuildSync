@@ -11,4 +11,5 @@ public class LoginResponse {
 	private Long companyId;
 	private String ceoName;
 	private String companyName;
+	private String companyType;
 }
