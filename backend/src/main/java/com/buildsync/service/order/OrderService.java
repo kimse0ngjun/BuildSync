@@ -290,7 +290,9 @@ public class OrderService {
                 })
                 .toList();
         
-        order.modifyOrderDetails(finalMemo, newOrderItems);
+        order.getItems().clear();
+        order.getItems().addAll(newOrderItems);
+        order.modifyOrderDetails(finalMemo, order.getItems());
         
         if (supplierCompanyId != null) {
             notificationService.sendNotification(
