@@ -225,5 +225,15 @@ public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 	        @Param("companyId") Long companyId,
 	        @Param("startDate") LocalDate startDate,
 	        @Param("endDate") LocalDate endDate
+
+	// 현장별 자재 사용 내역 통계용 전체 조회
+	@Query("SELECT s FROM StockInout s " +
+	        "JOIN FETCH s.site si " +
+	        "JOIN FETCH s.material m " +
+	        "LEFT JOIN FETCH s.contact c " +
+	        "WHERE si.company.loginId = :loginId " +
+	        "AND s.type = '출고'")
+	List<StockInout> findAllSiteMaterialUsagesForSummary(
+	        @Param("loginId") String loginId
 	);
 }

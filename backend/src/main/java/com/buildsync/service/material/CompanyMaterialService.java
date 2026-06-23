@@ -49,18 +49,30 @@ public class CompanyMaterialService {
                     return CompanyMaterialResponse.from(supMaterial, stock);
                 });
 
-        List<CompanyMaterialResponse> materials = materialPage.getContent()
+        List<CompanyMaterialResponse> pageMaterials = materialPage.getContent()
                 .stream()
                 .filter(material -> status == null || status.isBlank() || status.equals(material.getStatus()))
                 .toList();
 
-        long totalMaterialCount = materialPage.getTotalElements();
+        List<CompanyMaterialResponse> allMaterialsForSummary = supMaterialRepository
+                .searchCompanyMaterials(company.getId(), null, null, Pageable.unpaged())
+                .stream()
+                .map(supMaterial -> {
+                    SupStock stock = supStockRepository
+                            .findByCompanyAndMaterial(company, supMaterial.getMaterial())
+                            .orElseThrow(() -> new RuntimeException("재고 정보가 존재하지 않습니다."));
 
-        long normalStockCount = materials.stream()
+                    return CompanyMaterialResponse.from(supMaterial, stock);
+                })
+                .toList();
+
+        long totalMaterialCount = allMaterialsForSummary.size();
+
+        long normalStockCount = allMaterialsForSummary.stream()
                 .filter(material -> "정상".equals(material.getStatus()))
                 .count();
 
-        long shortageStockCount = materials.stream()
+        long shortageStockCount = allMaterialsForSummary.stream()
                 .filter(material -> "부족".equals(material.getStatus()))
                 .count();
 
@@ -75,7 +87,7 @@ public class CompanyMaterialService {
                 .pageSize(materialPage.getSize())
                 .totalElements(materialPage.getTotalElements())
                 .totalPages(materialPage.getTotalPages())
-                .materials(materials)
+                .materials(pageMaterials)
                 .build();
     }
 

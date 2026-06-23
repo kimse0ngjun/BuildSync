@@ -86,18 +86,29 @@ public class MaterialService {
                         )
                 );
 
-        List<MaterialResponse> materials = materialPage.getContent()
+        List<MaterialResponse> pageMaterials = materialPage.getContent()
                 .stream()
                 .filter(material -> status == null || status.isBlank() || status.equals(material.getStatus()))
                 .toList();
 
-        long totalMaterialCount = materialPage.getTotalElements();
+        List<MaterialResponse> allMaterialsForSummary = supStockRepository
+                .searchStocks(null, null, Pageable.unpaged())
+                .stream()
+                .map(stock ->
+                        MaterialResponse.from(
+                                stock.getMaterial(),
+                                stock
+                        )
+                )
+                .toList();
 
-        long normalStockCount = materials.stream()
+        long totalMaterialCount = allMaterialsForSummary.size();
+
+        long normalStockCount = allMaterialsForSummary.stream()
                 .filter(material -> "정상".equals(material.getStatus()))
                 .count();
 
-        long shortageStockCount = materials.stream()
+        long shortageStockCount = allMaterialsForSummary.stream()
                 .filter(material -> "부족".equals(material.getStatus()))
                 .count();
 
@@ -112,7 +123,7 @@ public class MaterialService {
                 .pageSize(materialPage.getSize())
                 .totalElements(materialPage.getTotalElements())
                 .totalPages(materialPage.getTotalPages())
-                .materials(materials)
+                .materials(pageMaterials)
                 .build();
     }
 

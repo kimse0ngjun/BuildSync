@@ -1,0 +1,493 @@
+.material-write-page {
+  width: 100%;
+  min-height: 100%;
+  background: #fafafa;
+  padding: 0 40px;
+}
+
+.write-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.back-icon-btn {
+  width: 38px;
+  height: 38px;
+  margin-top: 30px;
+  border: none;
+  background: transparent;
+  color: #10284a;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-label {
+  margin: 0 0 10px;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.write-header h1 {
+  margin: 0;
+  color: #10284a;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+
+.page-desc {
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.write-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.write-main {
+  min-width: 0;
+}
+
+.write-section {
+  background: #ffffff;
+  border: 1px solid #dbe6f4;
+  border-radius: 18px;
+  padding: 28px;
+  margin-bottom: 18px;
+}
+
+.write-section h2 {
+  margin: 0 0 22px;
+  color: #10284a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field > span {
+  color: #10284a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-field em {
+  color: #ef4444;
+  font-style: normal;
+  margin-left: 3px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  border: 1px solid #dbe6f4;
+  background: #ffffff;
+  color: #10284a;
+  border-radius: 12px;
+  padding: 0 14px;
+  outline: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-field input,
+.form-field select {
+  height: 44px;
+}
+
+.form-field textarea {
+  height: 90px;
+  padding: 14px;
+  resize: none;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: #2563eb;
+}
+
+.form-field small {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.input-with-unit {
+  display: flex;
+  border: 1px solid #dbe6f4;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.input-with-unit input {
+  border: none;
+  border-radius: 0;
+}
+
+.input-with-unit span {
+  width: 52px;
+  border-left: 1px solid #dbe6f4;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-with-unit:focus-within {
+  border-color: #2563eb;
+}
+
+.text-count {
+  margin-top: -2px;
+  text-align: right;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.write-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.write-actions button {
+  height: 46px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  width: 140px;
+  border: 1px solid #dbe6f4;
+  background: #ffffff;
+  color: #64748b;
+  transition: 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #f8fafc;
+}
+
+.submit-btn {
+  width: 180px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+  transition: 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #1d4ed8;
+}
+
+.write-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.preview-card {
+  background: #ffffff;
+  border: 1px solid #dbe6f4;
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.preview-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.preview-card h3 {
+  margin: 0;
+  color: #10284a;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.preview-title button {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.preview-material {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.preview-thumb {
+  width: 74px;
+  height: 74px;
+  border-radius: 14px;
+  background: #e8f1ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.preview-material h4 {
+  margin: 0 0 8px;
+  color: #10284a;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.preview-material span {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.preview-info {
+  height: 42px;
+  border-bottom: 1px solid #eef2f7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-info span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.preview-info strong {
+  color: #10284a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.preview-desc {
+  margin: 12px 0 18px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.stock-status {
+  padding: 18px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stock-status svg {
+  font-size: 26px;
+}
+
+.stock-status.normal {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.stock-status.warning {
+  background: #fff7ed;
+  color: #f97316;
+}
+
+.stock-status strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.stock-status p {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* dark mode */
+body.dark-mode .material-write-page {
+  background: #0f172a;
+}
+
+body.dark-mode .back-icon-btn {
+  color: #f8fafc;
+}
+
+body.dark-mode .page-label {
+  color: #93c5fd;
+}
+
+body.dark-mode .write-header h1,
+body.dark-mode .write-section h2,
+body.dark-mode .form-field > span,
+body.dark-mode .preview-card h3,
+body.dark-mode .preview-material h4,
+body.dark-mode .preview-info strong,
+body.dark-mode .stock-status strong {
+  color: #f8fafc;
+}
+
+body.dark-mode .page-desc,
+body.dark-mode .form-field small,
+body.dark-mode .text-count,
+body.dark-mode .preview-title button,
+body.dark-mode .preview-info span,
+body.dark-mode .preview-desc,
+body.dark-mode .stock-status p {
+  color: #94a3b8;
+}
+
+body.dark-mode .write-section,
+body.dark-mode .preview-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .form-field input,
+body.dark-mode .form-field select,
+body.dark-mode .form-field textarea {
+  background: #111827;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .form-field input::placeholder,
+body.dark-mode .form-field textarea::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .form-field input:focus,
+body.dark-mode .form-field select:focus,
+body.dark-mode .form-field textarea:focus {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .input-with-unit {
+  background: #111827;
+  border-color: #334155;
+}
+
+body.dark-mode .input-with-unit input {
+  background: #111827;
+  color: #f8fafc;
+}
+
+body.dark-mode .input-with-unit span {
+  background: #1e293b;
+  border-left-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .input-with-unit:focus-within {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .cancel-btn {
+  background: #111827;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .cancel-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+body.dark-mode .submit-btn {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+body.dark-mode .submit-btn:hover {
+  background: #1d4ed8;
+}
+
+body.dark-mode .preview-thumb {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+body.dark-mode .preview-material span {
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+body.dark-mode .preview-info {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .stock-status.normal {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+}
+
+body.dark-mode .stock-status.warning {
+  background: rgba(249, 115, 22, 0.14);
+  color: #fb923c;
+}
+
+@media (max-width: 1100px) {
+  .write-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .write-actions {
+    flex-direction: column;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}
