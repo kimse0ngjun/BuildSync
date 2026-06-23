@@ -57,6 +57,7 @@ public class AuthService {
 
 	    return new LoginResponse(
 	            token,
+	            company.getId(),
 	            company.getCeoName(),
 	            company.getCompanyName()
 	    );

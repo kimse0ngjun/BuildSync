@@ -38,7 +38,7 @@ public class ScheduleController {
         );
     }
     
-    // 일정 계시판 조회
+    // 일정 게시판 조회
     @GetMapping("/list")
     public ResponseEntity<PageResponse<ScheduleResponse>> getScheduleList(
             @RequestParam("companyId") Long companyId,
