@@ -4,7 +4,7 @@ public interface MonthlyMaterialCostProjection {
 
 	String getMonth();
 	
-	Integer getTotalOrderAmount();
+	Long getTotalOrderAmount();
 	
-	Integer getTotalMaterialCost();
+	Long getTotalMaterialCost();
 }
