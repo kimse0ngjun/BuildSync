@@ -59,36 +59,35 @@ public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 
 	// 입출고 목록
 	@Query("""
-	    SELECT DISTINCT s
-	    FROM StockInout s
-	    JOIN FETCH s.material m
-	    JOIN SupMaterial sm
-	        ON m.id = sm.material.id
-	    LEFT JOIN FETCH s.site si
-	    LEFT JOIN FETCH s.contact c
-	    WHERE sm.company.id = :companyId
-	    AND sm.company.companyType = com.buildsync.entity.CompanyType.SUPPLIER
-	    AND (:type IS NULL OR :type = '' OR s.type = :type)
-	    AND (:materialId IS NULL OR m.id = :materialId)
-	    AND (:siteId IS NULL OR si.id = :siteId)
-	    AND (:orderId IS NULL OR s.orders.orderId = :orderId)
-	    AND (:startDate IS NULL OR s.processedDate >= :startDate)
-	    AND (:endDate IS NULL OR s.processedDate <= :endDate)
-	    AND (
-	        :keyword IS NULL
-	        OR m.materialName LIKE CONCAT('%', :keyword, '%')
-	        OR s.memo LIKE CONCAT('%', :keyword, '%')
-	    )
-	""")
-	List<StockInout> inoutListByFilters(
-	        @Param("companyId") Long companyId,
-	        @Param("type") String type,
-	        @Param("materialId") Long materialId,
-	        @Param("siteId") Long siteId,
-	        @Param("orderId") Long orderId,
-	        @Param("startDate") LocalDate startDate,
-	        @Param("endDate") LocalDate endDate,
-	        @Param("keyword") String keyword);
+		    SELECT DISTINCT s
+		    FROM StockInout s
+		    JOIN FETCH s.material m
+		    LEFT JOIN FETCH s.site si
+		    LEFT JOIN FETCH s.contact c
+		    LEFT JOIN s.orders o
+		    WHERE c.company.id = :companyId
+		    AND (:type IS NULL OR :type = '' OR s.type = :type)
+		    AND (:materialId IS NULL OR m.id = :materialId)
+		    AND (:siteId IS NULL OR si.id = :siteId)
+		    AND (:orderId IS NULL OR o.orderId = :orderId)
+		    AND (:startDate IS NULL OR s.processedDate >= :startDate)
+		    AND (:endDate IS NULL OR s.processedDate <= :endDate)
+		    AND (
+		        :keyword IS NULL
+		        OR m.materialName LIKE CONCAT('%', :keyword, '%')
+		        OR s.memo LIKE CONCAT('%', :keyword, '%')
+		    )
+		    ORDER BY s.processedDate DESC, s.id DESC
+		""")
+		List<StockInout> inoutListByFilters(
+		        @Param("companyId") Long companyId,
+		        @Param("type") String type,
+		        @Param("materialId") Long materialId,
+		        @Param("siteId") Long siteId,
+		        @Param("orderId") Long orderId,
+		        @Param("startDate") LocalDate startDate,
+		        @Param("endDate") LocalDate endDate,
+		        @Param("keyword") String keyword);
 
 
 	// 입출고 총 수량
@@ -150,25 +149,22 @@ public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 	        @Param("type") String type);
 	
 	// 입출고 차트
-		@Query("""
-		    SELECT new com.buildsync.dto.inout.InOutSumResponse$ChartData(
-		        CAST(s.processedDate AS string),
-		        SUM(CASE WHEN s.type = '입고' THEN s.quantity ELSE 0L END),
-		        SUM(CASE WHEN s.type = '출고' THEN s.quantity ELSE 0L END)
-		    )
-		    FROM StockInout s
-		    WHERE s.material.id IN (
-		        SELECT sm.material.id 
-		        FROM SupMaterial sm 
-		        WHERE sm.company.id = :companyId
-		    )
-		    AND (:materialId IS NULL OR s.material.id = :materialId)
-		    AND (:siteId IS NULL OR s.site.id = :siteId)
-		    AND (:startDate IS NULL OR s.processedDate >= :startDate)
-		    AND (:endDate IS NULL OR s.processedDate <= :endDate)
-		    GROUP BY s.processedDate
-		    ORDER BY s.processedDate ASC
-		""")
+	@Query("""
+	        SELECT new com.buildsync.dto.inout.InOutSumResponse$ChartData(
+	            CAST(s.processedDate AS string),
+	            SUM(CASE WHEN s.type = '입고' THEN 1L ELSE 0L END),
+	            SUM(CASE WHEN s.type = '출고' THEN 1L ELSE 0L END)
+	        )
+	        FROM StockInout s
+	        JOIN s.contact c   
+	        WHERE c.company.id = :companyId  
+	        AND (:materialId IS NULL OR s.material.id = :materialId)
+	        AND (:siteId IS NULL OR s.site.id = :siteId)
+	        AND (:startDate IS NULL OR s.processedDate >= :startDate)
+	        AND (:endDate IS NULL OR s.processedDate <= :endDate)
+	        GROUP BY s.processedDate
+	        ORDER BY s.processedDate ASC
+	    """)
 		List<InOutSumResponse.ChartData> getInoutChartData(
 		        @Param("companyId") Long companyId,
 		        @Param("materialId") Long materialId,
