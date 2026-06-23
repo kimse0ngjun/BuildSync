@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("companyName", data.companyName);
     localStorage.setItem("companyId", String(data.companyId));
     localStorage.setItem("companyType", data.companyType);
+    // localStorage.setItem("contactId", String(data.contactId));
 
     setIsLogin(true);
     setCeoName(data.ceoName);
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("ceoName");
     localStorage.removeItem("companyName");
     localStorage.removeItem("companyType");
+    // localStorage.removeItem("contactId");
 
     setIsLogin(false);
     setCeoName("");
@@ -55,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ceoName,
         companyName,
         companyType,
+        // contactId,
         login,
         logout,
       }}

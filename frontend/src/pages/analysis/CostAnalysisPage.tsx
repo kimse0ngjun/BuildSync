@@ -9,6 +9,8 @@ import type {
   SiteMaterialUsageAnalysisResponse,
 } from "../../types/analysis";
 
+import "../../styles/CostAnalysisPage.css";
+
 function CostAnalysisPage() {
   const [selected, setSelected] = useState("monthly");
 
@@ -41,41 +43,27 @@ function CostAnalysisPage() {
   };
 
   return (
-    <div>
-      <h1>통합 분석</h1>
+    <div className="analysis-page">
+      <h1 className="analysis-title">통합 분석</h1>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="analysis-tabs">
         <div
           onClick={() => setSelected("monthly")}
-          style={{
-            border: "1px solid #ddd",
-            padding: "20px",
-            cursor: "pointer",
-          }}
+          className={`analysis-tab ${selected === "monthly" ? "active" : ""}`}
         >
           월별 자재 구매 비용
         </div>
 
         <div
           onClick={() => setSelected("site")}
-          style={{
-            border: "1px solid #ddd",
-            padding: "20px",
-            cursor: "pointer",
-          }}
+          className={`analysis-tab ${selected === "site" ? "active" : ""}`}
         >
           현장별 자재 사용 비용
         </div>
       </div>
 
       {selected === "monthly" && (
-        <div>
+        <div className="analysis-card">
           <h2>월별 자재 구매 비용 분석</h2>
 
           <table>
@@ -94,7 +82,7 @@ function CostAnalysisPage() {
 
                   <td>{item.totalOrderAmount.toLocaleString()}</td>
 
-                  <td>{item.totalMaterialCost.toLocaleString()}</td>
+                  <td>{item.totalMaterialCost.toLocaleString()}원</td>
                 </tr>
               ))}
             </tbody>
@@ -103,7 +91,7 @@ function CostAnalysisPage() {
       )}
 
       {selected === "site" && (
-        <div>
+        <div className="analysis-card">
           <h2>현장별 자재 사용 비용 분석</h2>
 
           <table>
@@ -113,31 +101,34 @@ function CostAnalysisPage() {
                 <th>자재명</th>
                 <th>입고량</th>
                 <th>출고량</th>
-                <th>재고</th>
+                <th>현재재고</th>
+                <th>단가</th>
               </tr>
             </thead>
 
             <tbody>
-              {siteData.map((item, index) => (
-                <tr key={index}>
+              {siteData.map((item) => (
+                <tr key={item.siteId}>
                   <td>{item.siteName}</td>
 
                   <td>{item.materialName}</td>
 
                   <td>
-                    {item.inboundQuantity}
+                    {item.inboundQuantity.toLocaleString()}
                     {item.unit}
                   </td>
 
                   <td>
-                    {item.outboundQuantity}
+                    {item.outboundQuantity.toLocaleString()}
                     {item.unit}
                   </td>
 
                   <td>
-                    {item.currentStock}
+                    {item.currentStock.toLocaleString()}
                     {item.unit}
                   </td>
+
+                  <td>{item.unitPrice.toLocaleString()}원</td>
                 </tr>
               ))}
             </tbody>

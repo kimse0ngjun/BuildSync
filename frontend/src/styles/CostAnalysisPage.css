@@ -1,0 +1,112 @@
+.analysis-page {
+  padding: 30px;
+  min-height: 100vh;
+}
+
+.analysis-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.analysis-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.analysis-tab {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 18px 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.analysis-tab:hover {
+  transform: translateY(-2px);
+}
+
+.analysis-tab.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.analysis-card {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.analysis-card h2 {
+  color: #000000;
+  margin-bottom: 20px;
+}
+
+.analysis-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.analysis-card th {
+  background: #f1f5f9;
+  padding: 14px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.analysis-card td {
+  padding: 14px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.analysis-card tr:hover {
+  background: #f8fafc;
+}
+
+.dark .analysis-page {
+  background: #111827;
+}
+
+.dark .analysis-title {
+  color: #f9fafb;
+}
+
+.dark .analysis-card {
+  background: #1f2937;
+  box-shadow: none;
+}
+
+.dark .analysis-card h2 {
+  color: #f9fafb;
+}
+
+.dark .analysis-tab {
+  background: #1f2937;
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+.dark .analysis-tab.active {
+  background: #2563eb;
+  color: white;
+}
+
+.dark .analysis-card th {
+  background: #374151;
+  color: #f9fafb;
+}
+
+.dark .analysis-card td {
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+.dark .analysis-card tr:hover {
+  background: #273449;
+}
