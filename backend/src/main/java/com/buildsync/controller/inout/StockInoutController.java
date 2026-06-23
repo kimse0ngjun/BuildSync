@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,14 +86,14 @@ public class StockInoutController {
 		return ResponseEntity.ok(res);
 	}
 	
-	@PatchMapping("/update")
-	public ResponseEntity<String> updateInout(@RequestBody InOutRegRequest req) {
+	@PatchMapping("/update/{stockInoutId}")
+	public ResponseEntity<String> updateInout(@PathVariable("stockInoutId") Long stockInoutId, @RequestBody InOutRegRequest req) {
 		if (req.getType() == null || req.getItems() == null || req.getItems().isEmpty()) {
 			return ResponseEntity.badRequest().body("필수 등록 정보가 비어있습니다.");
 		}
 		
 		try {
-			stockInoutService.updateInoutStock(req);
+			stockInoutService.updateInoutStock(stockInoutId, req);
 			return ResponseEntity.ok("입출고 내역이 성공적으로 수정되었습니다.");
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
@@ -117,6 +118,15 @@ public class StockInoutController {
 	    return ResponseEntity.ok(res);
 	}
 	
+	@GetMapping("/detail/{stockInoutId}")
+	public ResponseEntity<InOutResponse> detailInoutById(
+	        @PathVariable("stockInoutId") Long stockInoutId) {
+
+	    InOutResponse res = stockInoutService.getInoutDetailById(stockInoutId);
+
+	    return ResponseEntity.ok(res);
+	}
+	
 	@GetMapping("/materials")
 	public ResponseEntity<List<SelectResponse>> materials() {
 	    return ResponseEntity.ok(stockInoutService.getMaterials());
@@ -128,7 +138,7 @@ public class StockInoutController {
 	}
 
 	@GetMapping("/orders")
-	public ResponseEntity<List<SelectResponse>> orders() {
-	    return ResponseEntity.ok(stockInoutService.getOrders());
+	public ResponseEntity<List<SelectResponse>> orders(@RequestParam("companyId") Long companyId) {
+	    return ResponseEntity.ok(stockInoutService.getOrders(companyId));
 	}
 }

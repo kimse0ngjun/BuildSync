@@ -45,16 +45,17 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	
 	// 공급
 	@Query("""
-	        SELECT new com.buildsync.dto.order.OrderStatusResponse(
-	            COUNT(o.orderId), 
-	            SUM(CASE WHEN o.status = 'PENDING' THEN 1L ELSE 0L END),
-	            SUM(CASE WHEN o.status = 'ACCEPTED' THEN 1L ELSE 0L END),
-	            SUM(CASE WHEN o.status = 'END' THEN 1L ELSE 0L END),
-	            SUM(CASE WHEN o.status = 'CANCEL' THEN 1L ELSE 0L END)
-	        )
-	        FROM Orders o
-	        WHERE o.company.id = :companyId
-	    """)
+		    SELECT new com.buildsync.dto.order.OrderStatusResponse(
+		        COUNT(o),
+		        SUM(CASE WHEN o.status = 'PENDING' THEN 1 ELSE 0 END),
+		        SUM(CASE WHEN o.status = 'ACCEPTED' THEN 1 ELSE 0 END),
+		        SUM(CASE WHEN o.status = 'END' THEN 1 ELSE 0 END),
+		        SUM(CASE WHEN o.status = 'CANCELED' THEN 1 ELSE 0 END) 
+		    )
+		    FROM Orders o
+		    JOIN o.contact c 
+		    WHERE c.company.id = :companyId 
+		""")
 	    OrderStatusResponse countDashboardForSupplier(@Param("companyId") Long companyId);
 	
 	@Query("""
@@ -131,12 +132,15 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
         );
 	
 	@Query("""
-		    SELECT new com.buildsync.dto.inout.SelectResponse(
+		    SELECT DISTINCT new com.buildsync.dto.inout.SelectResponse(
 		        o.orderId,
-		        CAST(o.orderId AS string)
+		        CONCAT(o.orderId, ' (', cp.companyName, ')')
 		    )
 		    FROM Orders o
+		    JOIN o.company cp  
+		    JOIN o.contact c   
+		    WHERE c.company.id = :companyId 
 		    ORDER BY o.orderId DESC
 		""")
-		List<SelectResponse> findAllForSelect();
+		List<SelectResponse> findAllForSelect(@Param("companyId") Long companyId);
 }
