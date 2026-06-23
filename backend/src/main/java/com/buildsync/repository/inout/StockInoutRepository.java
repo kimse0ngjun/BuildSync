@@ -211,6 +211,21 @@ public interface StockInoutRepository extends JpaRepository<StockInout, Long> {
 	        Pageable pageable
 	);
 	
+	// 캘린더 입출고 조회
+	@Query("""
+	    SELECT s
+	    FROM StockInout s
+	    JOIN FETCH s.material m
+	    LEFT JOIN FETCH s.site si
+	    LEFT JOIN FETCH s.contact c
+	    WHERE si.company.id = :companyId
+	    AND s.processedDate BETWEEN :startDate AND :endDate
+	""")
+	List<StockInout> findCalendarInout(
+	        @Param("companyId") Long companyId,
+	        @Param("startDate") LocalDate startDate,
+	        @Param("endDate") LocalDate endDate
+
 	// 현장별 자재 사용 내역 통계용 전체 조회
 	@Query("SELECT s FROM StockInout s " +
 	        "JOIN FETCH s.site si " +

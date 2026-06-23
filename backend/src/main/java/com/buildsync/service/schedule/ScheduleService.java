@@ -17,6 +17,8 @@ import com.buildsync.dto.schedule.ScheduleResponse;
 import com.buildsync.entity.Orders;
 import com.buildsync.entity.Schedule;
 import com.buildsync.entity.Site;
+import com.buildsync.entity.StockInout;
+import com.buildsync.repository.inout.StockInoutRepository;
 import com.buildsync.repository.order.OrderRepository;
 import com.buildsync.repository.schedule.ScheduleRepository;
 import com.buildsync.repository.site.SiteRepository;
@@ -30,6 +32,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final SiteRepository siteRepository;
     private final OrderRepository orderRepository;
+    private final StockInoutRepository stockInoutRepository;
 
     // 캘린더 조회
     @Transactional(readOnly = true)
@@ -58,18 +61,35 @@ public class ScheduleService {
         // 자재 입고 (orders)
         if (isMaterial) {
             orderRepository
-                    .findDeliveriesByCompanyAndMonth(companyId, firstDay, lastDay)
-                    .stream()
-                    .map(this::toDeliveryEvent)
-                    .filter(e -> matchesStatus(e, status))
-                    .forEach(events::add);
-        }
+            .findDeliveriesByCompanyAndMonth(
+                companyId,
+                firstDay,
+                lastDay
+            )
+            .stream()
+            .map(this::toDeliveryEvent)
+            .filter(e -> matchesStatus(e, status))
+            .forEach(events::add);
+
+
+        // 실제 입출고
+        stockInoutRepository
+            .findCalendarInout(
+                companyId,
+                firstDay,
+                lastDay
+            )
+            .stream()
+            .map(this::toMaterialEvent)
+            .filter(e -> matchesStatus(e, status))
+            .forEach(events::add);
+    }
 
         events.sort(Comparator.comparing(CalendarEventResponse::getStartDate));
         return events;
     }
     
-    // 일정 계시판 조회
+    // 일정 게시판 조회
     @Transactional(readOnly = true)
     public PageResponse<ScheduleResponse> getScheduleList(
             Long companyId,
@@ -253,23 +273,98 @@ public class ScheduleService {
     }
 
     // 자재 입출고 일정 상태 
-    private CalendarEventResponse toDeliveryEvent(Orders o) {
+    private CalendarEventResponse toMaterialEvent(StockInout s) {
 
         return CalendarEventResponse.builder()
-                .eventId(o.getOrderId())
-                .title("자재 입고: " + o.getCompany().getCompanyName())
-                .startDate(o.getOrderDate().toLocalDate())
-                .endDate(o.getExpectedDeliveryDate().toLocalDate())
+                .eventId(s.getId())
+
+                .title(
+                    "IN".equals(s.getType())
+                    ? "자재 입고"
+                    : "자재 출고"
+                )
+
+                .startDate(
+                	    s.getProcessedDate().toLocalDate()
+                	)
+                	.endDate(
+                	    s.getProcessedDate().toLocalDate()
+                	)
 
                 .eventType("MATERIAL")
 
-                .status(o.getStatus() != null ? o.getStatus().name() : null)
+                .materialType(s.getType())
 
-                .supplierId(o.getCompany().getId())
-                .supplierName(o.getCompany().getCompanyName())
+                .status("END")
 
-                .siteId(null)
-                .siteName(null)
+                .siteId(
+                    s.getSite() != null
+                    ? s.getSite().getId()
+                    : null
+                )
+
+                .siteName(
+                    s.getSite() != null
+                    ? s.getSite().getSiteName()
+                    : null
+                )
+                .build();
+    }
+    
+    // 입고 예정 일정
+    private CalendarEventResponse toDeliveryEvent(Orders o) {
+
+        boolean isOut =
+                o.getMemo() != null &&
+                o.getMemo().contains("출고");
+
+        return CalendarEventResponse.builder()
+                .eventId(o.getOrderId())
+
+                .title(
+                    isOut
+                    ? "자재 출고 예정"
+                    : "자재 입고 예정"
+                )
+
+                .startDate(
+                    o.getOrderDate().toLocalDate()
+                )
+
+                .endDate(
+                    o.getExpectedDeliveryDate().toLocalDate()
+                )
+
+                .eventType("MATERIAL")
+
+                .materialType(
+                    isOut ? "OUT" : "IN"
+                )
+
+                .status(
+                    o.getStatus().name()
+                )
+
+                .siteId(
+                    o.getSite() != null
+                    ? o.getSite().getId()
+                    : null
+                )
+
+                .siteName(
+                    o.getSite() != null
+                    ? o.getSite().getSiteName()
+                    : null
+                )
+
+                .supplierId(
+                    o.getCompany().getId()
+                )
+
+                .supplierName(
+                    o.getCompany().getCompanyName()
+                )
+
                 .build();
     }
 

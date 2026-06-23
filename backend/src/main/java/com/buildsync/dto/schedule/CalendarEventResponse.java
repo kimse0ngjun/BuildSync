@@ -24,4 +24,5 @@ public class CalendarEventResponse {
     // 자재 입고(MATERIALS) 전용
     private Long supplierId;
     private String supplierName;
+    private String materialType; // IN, OUT
 }
