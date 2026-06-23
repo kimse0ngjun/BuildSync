@@ -6,10 +6,7 @@ import type {
   ScheduleRequest,
 } from "../types/schedule";
 
-
-const BASE =
-  `${import.meta.env.VITE_API_URL}/schedule`;
-
+const BASE = `${import.meta.env.VITE_API_URL}/schedule`;
 
 const getAuthHeader = () => {
   const token = localStorage.getItem("token");
@@ -19,15 +16,14 @@ const getAuthHeader = () => {
   };
 };
 
-
 export const getCalendarEvents = (
   companyId: number,
   year: number,
   month: number,
   type = "ALL",
-  status = "ALL"
-) =>
-  axios.get<CalendarEventResponse[]>(`${BASE}/calendar`, {
+  status = "ALL",
+) => {
+  return axios.get<CalendarEventResponse[]>(`${BASE}/calendar`, {
     params: {
       companyId,
       year,
@@ -35,15 +31,13 @@ export const getCalendarEvents = (
       type,
       status,
     },
-    headers: getAuthHeader(),
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
   });
+};
 
-
-export const getSchedules = (
-  companyId: number,
-  page = 0,
-  size = 10
-) =>
+export const getSchedules = (companyId: number, page = 0, size = 10) =>
   axios.get<ScheduleListResponse>(`${BASE}/list`, {
     params: {
       companyId,
@@ -54,11 +48,7 @@ export const getSchedules = (
     headers: getAuthHeader(),
   });
 
-
-export const getSchedule = (
-  companyId: number,
-  scheduleId: number
-) =>
+export const getSchedule = (companyId: number, scheduleId: number) =>
   axios.get<ScheduleResponse>(`${BASE}/${scheduleId}`, {
     params: {
       companyId,
@@ -66,18 +56,11 @@ export const getSchedule = (
     headers: getAuthHeader(),
   });
 
-export const createSchedule = (
-  companyId: number,
-  data: ScheduleRequest
-) => {
-  return axios.post<ScheduleResponse>(
-    `${BASE}`,
-    data,
-    {
-      params: {
-        companyId,
-      },
-      headers: getAuthHeader(),
-    }
-  );
+export const createSchedule = (companyId: number, data: ScheduleRequest) => {
+  return axios.post<ScheduleResponse>(`${BASE}`, data, {
+    params: {
+      companyId,
+    },
+    headers: getAuthHeader(),
+  });
 };

@@ -1,4 +1,4 @@
-export type EventType = "SITES" | "MATERIALS";
+export type EventType = "SITES" | "MATERIAL";
 
 export interface CalendarEventResponse {
   eventId: number;

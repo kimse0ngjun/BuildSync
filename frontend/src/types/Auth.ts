@@ -27,4 +27,6 @@ export interface LoginResponse {
   token: string;
   ceoName: string;
   companyName: string;
+  companyId: number;
+  companyType: string;
 }

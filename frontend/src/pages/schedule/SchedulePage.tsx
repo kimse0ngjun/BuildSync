@@ -17,35 +17,57 @@ import {
   FiFileText,
 } from "react-icons/fi";
 import { getCalendarEvents, getSchedule } from "../../api/schedule";
-import type { CalendarEventResponse, ScheduleResponse } from "../../types/schedule";
+import type {
+  CalendarEventResponse,
+  ScheduleResponse,
+} from "../../types/schedule";
 import "../../styles/SchedulePage.css";
+import "../../styles/ScheduleList.css";
 
 // 상태 뱃지 설정
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  PLANNED:     { label: "예정",      className: "badge-planned" },
-  IN_PROGRESS: { label: "진행 중",   className: "badge-in-progress" },
-  DONE:        { label: "완료",      className: "badge-done" },
-  PENDING:     { label: "입고 예정", className: "badge-pending" },
-  DELIVERED:   { label: "입고 완료", className: "badge-done" },
+  PENDING: { label: "입고 예정", className: "badge-pending" },
+  ACCEPTED: { label: "진행 중", className: "badge-in-progress" },
+  END: { label: "입고 완료", className: "badge-done" },
+  CANCELED: { label: "취소", className: "badge-canceled" },
+
+  READY: {
+    label: "공사 예정",
+    className: "badge-pending",
+  },
+  IN_PROGRESS: {
+    label: "진행 중",
+    className: "badge-in-progress",
+  },
+  COMPLETED: {
+    label: "공사 완료",
+    className: "badge-done",
+  },
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_CONFIG[status] ?? { label: status, className: "badge-done" };
+  const cfg = STATUS_CONFIG[status] ?? {
+    label: status,
+    className: "badge-done",
+  };
   return <span className={`schedule-badge ${cfg.className}`}>{cfg.label}</span>;
 }
 
 function SchedulePage() {
   const navigate = useNavigate();
-  const companyId = 1; 
+
+  const companyId = Number(localStorage.getItem("companyId"));
 
   const today = new Date();
+
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
-
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEventResponse[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEventResponse[]>(
+    [],
+  );
   const [loading, setLoading] = useState(false);
 
-  const [modalDate, setModalDate] = useState<string | null>(null);  // "YYYY-MM-DD"
+  const [modalDate, setModalDate] = useState<string | null>(null);
   const [dayEvents, setDayEvents] = useState<CalendarEventResponse[]>([]);
   const [detail, setDetail] = useState<ScheduleResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -72,14 +94,12 @@ function SchedulePage() {
     start: ev.startDate,
     end: ev.endDate,
     className:
-      ev.eventType === "SITES"
-        ? "schedule-event-site"
-        : "schedule-event-stock",
+      ev.eventType === "SITES" ? "schedule-event-site" : "schedule-event-stock",
     extendedProps: { eventType: ev.eventType, status: ev.status },
   }));
 
   function handleDateClick(arg: DateClickArg) {
-    const clicked = arg.dateStr; 
+    const clicked = arg.dateStr;
     const eventsOnDay = calendarEvents.filter((ev) => {
       return clicked >= ev.startDate && clicked <= ev.endDate;
     });
@@ -88,31 +108,28 @@ function SchedulePage() {
     setDetail(null);
   }
 
-function handleEventClick(arg: EventClickArg) {
-  const eventId = Number(arg.event.id);
+  function handleEventClick(arg: EventClickArg) {
+    const eventId = Number(arg.event.id);
 
-  const ev = calendarEvents.find(
-    (e) => e.eventId === eventId
-  );
+    const ev = calendarEvents.find((e) => e.eventId === eventId);
 
-  if (!ev) return;
-  const dateStr = ev.startDate;
-  const eventsOnDay = calendarEvents.filter((e) => {
+    if (!ev) return;
+    const dateStr = ev.startDate;
+    const eventsOnDay = calendarEvents.filter((e) => {
+      const start = e.startDate;
+      const end = e.endDate ?? e.startDate;
 
-    const start = e.startDate;
-    const end = e.endDate ?? e.startDate;
+      return dateStr >= start && dateStr <= end;
+    });
 
-    return dateStr >= start && dateStr <= end;
-  });
+    setModalDate(dateStr);
+    setDayEvents(eventsOnDay);
+    setDetail(null);
 
-  setModalDate(dateStr);
-  setDayEvents(eventsOnDay);
-  setDetail(null);
-
-  if (ev.eventType === "SITES") {
-    openDetail(ev.eventId);
+    if (ev.eventType === "SITES") {
+      openDetail(ev.eventId);
+    }
   }
-}
 
   async function openDetail(scheduleId: number) {
     setDetailLoading(true);
@@ -145,9 +162,20 @@ function handleEventClick(arg: EventClickArg) {
   }
 
   const totalCount = calendarEvents.length;
-  const siteCount = calendarEvents.filter((e) => e.eventType === "SITES").length;
-  const materialCount = calendarEvents.filter((e) => e.eventType === "MATERIALS").length;
-  const doneCount = calendarEvents.filter((e) => e.status === "DONE").length;
+  const siteCount = calendarEvents.filter(
+    (e) => e.eventType === "SITES",
+  ).length;
+  const materialCount = calendarEvents.filter(
+    (e) => e.eventType === "MATERIAL",
+  ).length;
+  const doneCount = fcEvents.filter((event) => {
+    return (
+      (event.extendedProps.eventType === "SITES" &&
+        event.extendedProps.status === "COMPLETED") ||
+      (event.extendedProps.eventType === "MATERIAL" &&
+        event.extendedProps.status === "END")
+    );
+  }).length;
 
   return (
     <div className="schedule-page">
@@ -170,9 +198,13 @@ function handleEventClick(arg: EventClickArg) {
 
       <div className="schedule-stat-grid">
         <StatCard icon={<FiCalendar />} title="전체 일정" value={totalCount} />
-        <StatCard icon={<FiMapPin />}   title="공사 일정" value={siteCount} />
-        <StatCard icon={<FiTruck />}    title="입고 일정" value={materialCount} />
-        <StatCard icon={<FiCheckCircle />} title="완료 일정" value={doneCount} />
+        <StatCard icon={<FiMapPin />} title="공사 일정" value={siteCount} />
+        <StatCard icon={<FiTruck />} title="입고 일정" value={materialCount} />
+        <StatCard
+          icon={<FiCheckCircle />}
+          title="완료 일정"
+          value={doneCount}
+        />
       </div>
 
       <section className="schedule-calendar-card">
@@ -252,16 +284,20 @@ function ScheduleModal({
   onBack,
   onClose,
 }: ScheduleModalProps) {
+  const navigate = useNavigate();
   const dt = new Date(date);
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
   const dateLabel = `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일 (${weekDays[dt.getDay()]})`;
 
   const siteEvents = events.filter((e) => e.eventType === "SITES");
-  const materialEvents = events.filter((e) => e.eventType === "MATERIALS");
+  const materialEvents = events.filter((e) => e.eventType === "MATERIAL");
   const isDetail = !!detail || detailLoading;
 
   return (
-    <div className="schedule-modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="schedule-modal-backdrop"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="schedule-modal">
         <div className="schedule-modal-header">
           <div>
@@ -290,7 +326,9 @@ function ScheduleModal({
               </span>
             )}
             {events.length === 0 && (
-              <p className="schedule-modal-empty">이날 등록된 일정이 없습니다.</p>
+              <p className="schedule-modal-empty">
+                이날 등록된 일정이 없습니다.
+              </p>
             )}
           </div>
         )}
@@ -313,21 +351,17 @@ function ScheduleModal({
                   ))}
                 </div>
               )}
-            {materialEvents.length > 0 && (
-              <div className="schedule-modal-section">
-                <p className="schedule-modal-section-title">
-                  <FiTruck size={13} /> 자재 입고
-                </p>
+              {materialEvents.length > 0 && (
+                <div className="schedule-modal-section">
+                  <p className="schedule-modal-section-title">
+                    <FiTruck size={13} /> 자재 입고
+                  </p>
 
-                {materialEvents.map((ev) => (
-                  <EventRow
-                    key={ev.eventId}
-                    event={ev}
-                    clickable={false}
-                  />
-                ))}
-              </div>
-            )}
+                  {materialEvents.map((ev) => (
+                    <EventRow key={ev.eventId} event={ev} clickable={false} />
+                  ))}
+                </div>
+              )}
             </>
           )}
 
@@ -355,7 +389,6 @@ function ScheduleModal({
           )}
         </div>
 
-        {/* 푸터 */}
         <div className="schedule-modal-footer">
           <button
             className="schedule-modal-btn-secondary"
@@ -364,8 +397,11 @@ function ScheduleModal({
             {isDetail ? "목록으로" : "닫기"}
           </button>
           {detail && (
-            <button className="schedule-modal-btn-primary">
-              일정 편집
+            <button
+              className="schedule-modal-btn-primary"
+              onClick={() => navigate(`/site/edit/${detail.siteId}`)}
+            >
+              일정 수정
             </button>
           )}
         </div>
@@ -395,16 +431,18 @@ function EventRow({
         <div>
           <p className="schedule-event-row-title">{event.title}</p>
           <p className="schedule-event-row-sub">
-             {event.eventType === "SITES"
-                ? `현장 : ${event.siteName}`
-                : `공급 업체 : ${event.supplierName}`}
+            {event.eventType === "SITES"
+              ? `현장 : ${event.siteName}`
+              : `공급 업체 : ${event.supplierName}`}
           </p>
         </div>
         <StatusBadge status={event.status} />
       </div>
       <p className="schedule-event-row-date">
         {event.startDate} ~ {event.endDate}
-        {clickable && <span className="schedule-event-row-link">상세 보기 →</span>}
+        {clickable && (
+          <span className="schedule-event-row-link">상세 보기 →</span>
+        )}
       </p>
     </div>
   );
