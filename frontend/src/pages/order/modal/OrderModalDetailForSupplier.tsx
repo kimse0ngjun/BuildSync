@@ -1,4 +1,4 @@
-import { writeOrderApi } from "../../../api/orderApi";
+import { writeOrderApi } from "../../../api/OrderApi";
 import { STATUS_MAP } from "../../../constants/status";
 import type { ForCompanyProps } from "../../../types/Modal";
 

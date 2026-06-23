@@ -16,11 +16,14 @@ import { IoMdExit } from "react-icons/io";
 
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetailForSupplier } from "./modal/OrderModalDetailForSupplier";
-import { orderListApi } from "../../api/orderApi";
+import { orderListApi } from "../../api/OrderApi";
 import { STATUS_MAP } from "../../constants/status";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 export const OrderListForSupplier = () => {
   const navigate = useNavigate();
+  const { isLogin } = useAuth();
 
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
@@ -141,6 +144,10 @@ export const OrderListForSupplier = () => {
       style={{ cursor: "pointer" }}
     />
   );
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="order-list-page">

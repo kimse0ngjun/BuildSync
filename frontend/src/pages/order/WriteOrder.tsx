@@ -13,7 +13,7 @@ import {
   FiFileText,
   FiSave,
 } from "react-icons/fi";
-import { writeOrderApi } from "../../api/orderApi";
+import { writeOrderApi } from "../../api/OrderApi";
 import type {
   ContactInfo,
   MaterialSelectResponse,
@@ -24,10 +24,13 @@ import type {
 } from "../../types/Order";
 
 import "../../styles/WriteOrder.css";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 export const WriteOrder = () => {
   const navigate = useNavigate();
   const orderDate = new Date().toISOString().split("T")[0];
+  const { isLogin } = useAuth();
 
   const [supplierList, setSupplierList] = useState<SelectResponse[]>([]);
   const [siteList, setSiteList] = useState<SelectResponse[]>([]);
@@ -211,6 +214,10 @@ export const WriteOrder = () => {
       alert("서버 오류로 발주서 전송에 실패했습니다.");
     }
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="order-write-page">

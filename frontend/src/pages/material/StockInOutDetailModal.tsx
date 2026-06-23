@@ -3,6 +3,8 @@ import { FiX, FiInfo, FiEdit3 } from "react-icons/fi";
 import BaseModal from "../order/modal/BaseModal";
 import "../../styles/StockInOutDetailModal.css";
 import type { InOutDetailModalProps } from "../../types/InOut";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 export default function StockInOutDetailModal({
   isOpen,
@@ -10,6 +12,7 @@ export default function StockInOutDetailModal({
   data,
 }: InOutDetailModalProps) {
   const navigate = useNavigate();
+  const { isLogin } = useAuth();
 
   if (!isOpen || !data) return null;
 
@@ -19,6 +22,10 @@ export default function StockInOutDetailModal({
 
     navigate(`/stock/edit/${data.stockInoutId}`);
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const modalContent = (
     <div className="stock-detail-modal-body">

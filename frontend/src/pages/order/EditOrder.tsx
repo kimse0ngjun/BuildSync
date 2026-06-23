@@ -13,7 +13,7 @@ import {
   FiFileText,
   FiSave,
 } from "react-icons/fi";
-import { orderListApi, writeOrderApi } from "../../api/orderApi";
+import { orderListApi, writeOrderApi } from "../../api/OrderApi";
 import type {
   MaterialSelectResponse,
   OrderItemDto,
@@ -23,6 +23,8 @@ import type {
 } from "../../types/Order";
 
 import "../../styles/WriteOrder.css";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 export const EditOrder = () => {
   const navigate = useNavigate();
@@ -54,6 +56,8 @@ export const EditOrder = () => {
   // 백엔드 통신
   const [fixedSupplierId, setFixedSupplierId] = useState<number | null>(null);
   const [fixedContactId, setFixedContactId] = useState<number | null>(null);
+
+  const { isLogin } = useAuth();
 
   useEffect(() => {
     writeOrderApi
@@ -203,6 +207,10 @@ export const EditOrder = () => {
       alert("서버 오류로 발주서 수정에 실패했습니다.");
     }
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="order-write-page">
