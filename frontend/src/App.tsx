@@ -48,6 +48,7 @@ import SchedulePage from "./pages/schedule/SchedulePage";
 import { EditOrder } from "./pages/order/EditOrder";
 import { OrderListForSupplier } from "./pages/order/OrderListForSupplier";
 import { OrderListForConstruction } from "./pages/order/OrderListForConstruction";
+import StockInOutEdit from "./pages/material/StockInOutEdit";
 
 function App() {
   useEffect(() => {
@@ -91,8 +92,12 @@ function App() {
 
             <Route path="/stock" element={<StockInOutList />} />
             <Route path="/stock/write" element={<StockInOutWrite />} />
-            <Route path="/input/success-input" element={<SuccessInput />} />
-            <Route path="/output/success-output" element={<SuccessOutput />} />
+            <Route
+              path="/stock/edit/:stockInOutId"
+              element={<StockInOutEdit />}
+            />
+            <Route path="/stock/success-input" element={<SuccessInput />} />
+            <Route path="/stock/success-output" element={<SuccessOutput />} />
 
             <Route path="/order/write" element={<WriteOrder />} />
             <Route

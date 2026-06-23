@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   FiArrowLeft,
   FiCalendar,
@@ -9,7 +9,6 @@ import {
 } from "react-icons/fi";
 import "../../styles/StockInOutWrite.css";
 import type {
-  AutoFillItem,
   InOutRegItemDetail,
   InOutRegRequest,
   MaterialStockDetail,
@@ -17,30 +16,28 @@ import type {
 } from "../../types/InOut";
 import { inoutApi } from "../../api/inoutApi";
 
-function StockInOutWrite() {
+function StockInOutEdit() {
   const navigate = useNavigate();
-  const myCompanyId = Number(localStorage.getItem("companyId") || 0);
+  const { stockInOutId } = useParams<{ stockInOutId: string }>();
+  const inoutId = Number(stockInOutId);
+  const myCompanyId = Number(localStorage.getItem("companyId"));
 
-  // 셀렉트 옵션
-  const [orderOptions, setOrderOptions] = useState<SelectOption[]>([]);
-  const [siteOptions, setSiteOptions] = useState<SelectOption[]>([]);
   const [materialOptions, setMaterialOptions] = useState<SelectOption[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 폼 상태
   const [type, setType] = useState<"입고" | "출고">("입고");
   const [processedDate, setProcessedDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
   const [selectedOrderId, setSelectedOrderId] = useState<number | "">("");
   const [selectedSiteId, setSelectedSiteId] = useState<number | "">("");
+  const [siteNameDisplay, setSiteNameDisplay] = useState<string>("");
   const [contactInfo, setContactInfo] = useState<{
     id: number | null;
     name: string;
   }>({ id: null, name: "-" });
   const [memo, setMemo] = useState<string>("");
 
-  // 복수 품목
   const [gridItems, setGridItems] = useState<
     (InOutRegItemDetail & {
       materialName: string;
@@ -51,35 +48,69 @@ function StockInOutWrite() {
     })[]
   >([]);
 
-  // 자재 선택
+  const [originalInoutIds, setOriginalInoutIds] = useState<number[]>([]);
+
   const [currentSelectedMaterialId, setCurrentSelectedMaterialId] = useState<
     number | ""
   >("");
   const [currentQuantityInput, setCurrentQuantityInput] = useState<string>("");
-
-  // 단위 자동
   const [currentUnitDisplay, setCurrentUnitDisplay] = useState<string>("EA");
 
-  // 화면 우측 프리뷰
   const [activePreviewStock, setActivePreviewStock] =
     useState<MaterialStockDetail | null>(null);
 
   useEffect(() => {
-    // 공통 셀렉트
     inoutApi.getMaterials().then(setMaterialOptions).catch(console.error);
-    inoutApi.getSites().then(setSiteOptions).catch(console.error);
-  }, []);
 
-  useEffect(() => {
-    if (myCompanyId) {
+    if (inoutId) {
       inoutApi
-        .getOrders(myCompanyId)
-        .then((res) => {
-          setOrderOptions(res);
+        .getInoutDetail(inoutId)
+        .then((resData) => {
+          if (resData) {
+            setType(resData.type as "입고" | "출고");
+            setProcessedDate(
+              resData.processedDate ? resData.processedDate.split("T")[0] : "",
+            );
+            setSelectedOrderId(resData.orderId || "");
+            setSelectedSiteId(resData.siteId || "");
+            setSiteNameDisplay(resData.siteName || "본사재고");
+            setContactInfo({
+              id: resData.contactId,
+              name: resData.contactName
+                ? `${resData.contactName} (담당자)`
+                : "-",
+            });
+            setMemo(resData.memo || "");
+
+            if (resData.stockInoutId) {
+              setOriginalInoutIds([resData.stockInoutId]);
+            }
+
+            const mappedItems = resData.items
+              ? resData.items.map((item: any) => ({
+                  materialId: item.materialId,
+                  materialName: item.materialName,
+                  quantity: item.quantity,
+                  unit: item.unit || "EA",
+                  unitPrice: item.unitPrice || 0,
+                  currentQuantity: 0,
+                  minimumQuantity: 0,
+                }))
+              : [];
+            setGridItems(mappedItems);
+
+            if (mappedItems.length > 0) {
+              fetchRightStockDetail(mappedItems[0].materialId);
+            }
+          }
         })
-        .catch(console.error);
+        .catch((err) => {
+          console.error("수정 데이터 로드 실패:", err);
+          alert("존재하지 않거나 접근 권한이 없는 이력 전표입니다.");
+          navigate("/stock");
+        });
     }
-  }, [myCompanyId]);
+  }, [inoutId, navigate, myCompanyId]);
 
   useEffect(() => {
     if (currentSelectedMaterialId !== "") {
@@ -98,50 +129,6 @@ function StockInOutWrite() {
     }
   }, [currentSelectedMaterialId, myCompanyId]);
 
-  useEffect(() => {
-    if (type === "출고" && selectedOrderId !== "") {
-      inoutApi
-        .getAutoFillData(Number(selectedOrderId))
-        .then((res) => {
-          if (res) {
-            setSelectedSiteId(res.siteId ? res.siteId : "");
-
-            setContactInfo({
-              id: res.contactId || null,
-              name: res.contactName ? `${res.contactName} (담당자)` : "-",
-            });
-
-            const mappedItems = res.items
-              ? res.items.map((item: AutoFillItem) => ({
-                  materialId: item.materialId,
-                  materialName: item.materialName,
-                  quantity: item.quantity,
-                  unit: item.unit || "EA",
-                  unitPrice: item.unitPrice || 0,
-                  currentQuantity: 0,
-                  minimumQuantity: 0,
-                }))
-              : [];
-            setGridItems(mappedItems);
-
-            if (mappedItems.length > 0) {
-              fetchRightStockDetail(mappedItems[0].materialId);
-            }
-          }
-        })
-        .catch((err) => {
-          console.error("발주 정보 자동완성 실패:", err);
-          setContactInfo({ id: null, name: "-" });
-          setSelectedSiteId("");
-        });
-    } else if (selectedOrderId === "") {
-      setContactInfo({ id: null, name: "-" });
-      setSelectedSiteId("");
-      setGridItems([]);
-      setActivePreviewStock(null);
-    }
-  }, [selectedOrderId, type]);
-
   const fetchRightStockDetail = (materialId: number) => {
     if (!myCompanyId) return;
     inoutApi
@@ -154,7 +141,7 @@ function StockInOutWrite() {
       .catch(console.error);
   };
 
-  // 입고 시 수동 품목 자재 추가
+  // 자재 품목 추가
   const handleAddItemToGrid = () => {
     if (!currentSelectedMaterialId || !currentQuantityInput) return;
 
@@ -202,7 +189,7 @@ function StockInOutWrite() {
     if (gridItems.length <= 1) setActivePreviewStock(null);
   };
 
-  // 합계 연산
+  // 실시간 합계 지표 계산
   const totalGridAmount = gridItems.reduce(
     (acc, cur) => acc + cur.quantity * cur.unitPrice,
     0,
@@ -222,43 +209,40 @@ function StockInOutWrite() {
           ?.quantity || 0)
     : 0;
 
-  // 제출
+  // 폼 제출
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (gridItems.length === 0) {
-      alert("입출고 처리할 자재 품목을 최소 1개 이상 추가해 주세요.");
+      alert("수정 처리할 자재 품목을 최소 1개 이상 유지해 주세요.");
       return;
     }
 
     setIsSubmitting(true);
 
-    const myContactId = Number(localStorage.getItem("contactId"));
-
-    const requestPayload: InOutRegRequest = {
+    const requestPayload: InOutRegRequest & { deleteInoutIds: number[] } = {
       companyId: myCompanyId,
-      siteId: type === "출고" && selectedSiteId ? Number(selectedSiteId) : null,
-      orderId:
-        type === "출고" && selectedOrderId ? Number(selectedOrderId) : null,
-      contactId: type === "출고" ? contactInfo.id : myContactId || null,
+      siteId: selectedSiteId ? Number(selectedSiteId) : null,
+      orderId: selectedOrderId ? Number(selectedOrderId) : null,
+      contactId: contactInfo.id,
       type: type,
       memo: memo.trim() || null,
       items: gridItems.map((i) => ({
         materialId: i.materialId,
         quantity: i.quantity,
       })),
+      deleteInoutIds: originalInoutIds,
     };
 
     inoutApi
-      .registerStockInout(requestPayload)
+      .updateStockInout(inoutId, requestPayload)
       .then(() => {
-        navigate(
-          type === "입고" ? "/stock/success-input" : "/stock/success-output",
-        );
+        alert("입출고 이력 전표 수정이 완료되었습니다.");
+        navigate("/stock");
       })
       .catch((err) => {
-        console.error("입출고 등록 실패:", err);
+        console.error("입출고 수정 실패:", err);
         alert(
-          "처리 중 요류가 발생했습니다. 권한 또는 원천 제고 수량을 확인하세요.",
+          "수정 처리 중 오류가 발생했습니다. 타입 변경으로 인한 창고 잔량이 부족한지 재차 확인해 주세요.",
         );
       })
       .finally(() => setIsSubmitting(false));
@@ -272,12 +256,11 @@ function StockInOutWrite() {
         </button>
 
         <div className="stock-write-card">
-          <p className="stock-write-label">입출고 관리</p>
-          <h1 className="stock-write-title">
-            입출고 등록 ({type === "입고" ? "공급사 입고" : "공급사 출고"})
-          </h1>
+          <p className="stock-write-label">입출고 관리 시스템</p>
+          <h1 className="stock-write-title">입출고 이력 수정 (#{inoutId})</h1>
           <p className="stock-write-desc">
-            자재의 입고 또는 출고 내역을 등록하세요.
+            전표의 구분(입고/출고) 및 내부 자재 품목의 수량을 변경할 수
+            있습니다.
           </p>
         </div>
       </div>
@@ -285,7 +268,7 @@ function StockInOutWrite() {
       <div className="stock-write-layout">
         <form className="stock-write-main" onSubmit={handleSubmitForm}>
           <div className="stock-write-section">
-            <h2 className="basic-info-title">기본 정보</h2>
+            <h2 className="basic-info-title">기준 정보</h2>
 
             <div className="stock-form-grid">
               <FormField label="구분" required>
@@ -293,158 +276,119 @@ function StockInOutWrite() {
                   <button
                     type="button"
                     className={type === "입고" ? "active in" : ""}
-                    onClick={() => {
-                      setType("입고");
-                      setSelectedOrderId("");
-                      setGridItems([]);
-                    }}
+                    onClick={() => setType("입고")}
                   >
                     <FiArrowDown /> 입고
                   </button>
                   <button
                     type="button"
                     className={type === "출고" ? "active out" : ""}
-                    onClick={() => {
-                      setType("출고");
-                      setGridItems([]);
-                    }}
+                    onClick={() => setType("출고")}
                   >
                     <FiArrowUp /> 출고
                   </button>
                 </div>
               </FormField>
 
-              <FormField label="처리일" required>
+              <FormField label="처리일">
                 <div className="input-icon">
                   <input
                     type="date"
                     value={processedDate}
-                    onChange={(e) => setProcessedDate(e.target.value)}
+                    disabled
                     className="date-data"
                   />
                   <FiCalendar />
                 </div>
               </FormField>
 
-              {type === "출고" && (
-                <FormField label="발주서">
-                  <select
-                    value={selectedOrderId}
-                    onChange={(e) =>
-                      setSelectedOrderId(
-                        e.target.value === "" ? "" : Number(e.target.value),
-                      )
-                    }
-                    className="order-data"
-                  >
-                    <option value="">발주서 선택 (자동완성)</option>
-                    {orderOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <small className="order-explain">
-                    발주서 연동 시 현장정보와 자재목록이 자동으로 채워집니다.
-                  </small>
-                </FormField>
-              )}
-
-              {type === "출고" && (
-                <FormField label="공사 현장" required>
-                  <select
-                    value={selectedSiteId}
-                    onChange={(e) =>
-                      setSelectedSiteId(
-                        e.target.value === "" ? "" : Number(e.target.value),
-                      )
-                    }
-                    disabled={selectedOrderId !== ""}
-                    className="site-data"
-                  >
-                    <option value="">
-                      {selectedSiteId === "" ? "-" : "대상 공사 현장"}
-                    </option>
-                    {siteOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </FormField>
-              )}
-
-              {type === "출고" && (
-                <FormField label="우리 회사 담당자">
+              {selectedOrderId !== "" && (
+                <FormField label="연동 발주서 서류">
                   <input
                     type="text"
-                    value={contactInfo.name}
+                    value={`발주 번호 : ${selectedOrderId}`}
                     disabled
-                    className="contact-data"
+                    className="order-data"
                   />
                 </FormField>
               )}
+
+              <FormField label="귀속 공사 현장">
+                <input
+                  type="text"
+                  value={siteNameDisplay}
+                  disabled
+                  className="site-data"
+                />
+              </FormField>
+
+              <FormField label="귀속 등록 담당자">
+                <input
+                  type="text"
+                  value={contactInfo.name}
+                  disabled
+                  className="contact-data"
+                />
+              </FormField>
             </div>
           </div>
 
           <div className="stock-write-section">
             <h2 className="table-item-adder-header">
-              처리 자재 품목 내역 ({gridItems.length}건)
+              처리 자재 품목 목록 및 수량 조율 ({gridItems.length}건)
             </h2>
-            {(type === "입고" || selectedOrderId === "") && (
-              <div className="table-item-adder-zone">
-                <select
-                  value={currentSelectedMaterialId}
-                  onChange={(e) =>
-                    setCurrentSelectedMaterialId(
-                      e.target.value === "" ? "" : Number(e.target.value),
-                    )
-                  }
-                  className="material-data"
-                >
-                  <option value="">추가할 자재 품목</option>
-                  {materialOptions.map((m) => (
-                    <option key={m.value} value={m.value}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  placeholder="수량"
-                  value={currentQuantityInput}
-                  onChange={(e) => setCurrentQuantityInput(e.target.value)}
-                  className="quantity-data"
-                  min={0}
-                />
-                <div className="unit-display-box">{currentUnitDisplay}</div>
-                <button
-                  type="button"
-                  onClick={handleAddItemToGrid}
-                  className="material-add-btn"
-                >
-                  추가
-                </button>
-              </div>
-            )}
+
+            <div className="table-item-adder-zone">
+              <select
+                value={currentSelectedMaterialId}
+                onChange={(e) =>
+                  setCurrentSelectedMaterialId(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                className="material-data"
+              >
+                <option value="">추가 교체할 자재 품목 선택</option>
+                {materialOptions.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                placeholder="수량"
+                value={currentQuantityInput}
+                onChange={(e) => setCurrentQuantityInput(e.target.value)}
+                className="quantity-data"
+              />
+              <div className="unit-display-box">{currentUnitDisplay}</div>
+              <button
+                type="button"
+                onClick={handleAddItemToGrid}
+                className="material-add-btn"
+              >
+                품목 추가
+              </button>
+            </div>
 
             <table className="stock-write-table">
               <thead>
                 <tr className="material-table-tr">
                   <th>자재명</th>
-                  <th>수량</th>
+                  <th>수량 (변경 가능)</th>
                   <th>단위</th>
                   <th>단가</th>
                   <th>합계 금액</th>
-                  <th></th>
+                  <th>제거</th>
                 </tr>
               </thead>
               <tbody>
                 {gridItems.length === 0 ? (
                   <tr className="no-material-data">
                     <td colSpan={6} className="no-data-explain">
-                      등록된 자재 품목 내역이 없습니다. 위에서 자재를 선택하여
-                      추가해 주세요.
+                      전표 내 자재 품목이 비어있습니다. 품목을 최소 1개 이상
+                      채워 넣어 주세요.
                     </td>
                   </tr>
                 ) : (
@@ -453,6 +397,7 @@ function StockInOutWrite() {
                       key={`${item.materialId}-${idx}`}
                       onClick={() => fetchRightStockDetail(item.materialId)}
                       className="material-data-list"
+                      style={{ cursor: "pointer" }}
                     >
                       <td className="material-name">{item.materialName}</td>
                       <td>
@@ -467,8 +412,12 @@ function StockInOutWrite() {
                               ),
                             );
                           }}
-                          disabled={type === "출고" && selectedOrderId !== ""}
                           className="material-quantity"
+                          style={{
+                            border: "1px solid #2563eb",
+                            borderRadius: "4px",
+                            padding: "4px 8px",
+                          }}
                         />
                       </td>
                       <td className="material-unit">
@@ -483,7 +432,6 @@ function StockInOutWrite() {
                       <td className="action-btn">
                         <button
                           type="button"
-                          disabled={type === "출고" && selectedOrderId !== ""}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveItem(idx);
@@ -501,12 +449,12 @@ function StockInOutWrite() {
           </div>
 
           <div className="stock-write-section">
-            <h2 className="memo-title">추가 메모</h2>
-            <FormField label="비고/특이사항 내역 입력">
+            <h2 className="memo-title">추가 비고 메모 수정</h2>
+            <FormField label="비고/특이사항 내역">
               <textarea
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                placeholder="물류 배송 차량 크기 지정 또는 현장 적재 구역 등의 특이사항을 적어주세요."
+                placeholder="특이사항 메모 내역을 정정 입력하세요."
                 maxLength={200}
                 className="memo-data"
               />
@@ -520,14 +468,14 @@ function StockInOutWrite() {
               className="stock-cancel-btn"
               onClick={() => navigate("/stock")}
             >
-              등록 취소
+              수정 취소
             </button>
             <button
               type="submit"
               className="stock-submit-btn"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "처리 중..." : "등록"}
+              {isSubmitting ? "수정 반영 중..." : "수정 확정"}
             </button>
           </div>
         </form>
@@ -539,7 +487,6 @@ function StockInOutWrite() {
                 선택 자재 실시간 기준정보
               </h3>
             </div>
-
             {activePreviewStock ? (
               <>
                 <div className="preview-material">
@@ -548,7 +495,9 @@ function StockInOutWrite() {
                     <h4 className="preview-materialName">
                       {activePreviewStock.materialName}
                     </h4>
-                    <span className="preview-material-condition">
+                    <span
+                      className={`preview-material-condition ${activePreviewStock.currentQuantity >= activePreviewStock.minimumQuantity ? "" : "insufficient"}`}
+                    >
                       {activePreviewStock.currentQuantity >=
                       activePreviewStock.minimumQuantity
                         ? "정상"
@@ -574,13 +523,14 @@ function StockInOutWrite() {
               </>
             ) : (
               <p className="material-action-explain">
-                왼쪽 테이블 품목 행을 클릭하면 실시간 재고 정보가 연동됩니다.
+                품목 행을 클릭하면 정정 대상 자재의 실시간 재고 흐름을
+                점검합니다.
               </p>
             )}
           </div>
 
           <div className="preview-card">
-            <h3 className="dashboard-title">대시보드 실시간 집계 요약</h3>
+            <h3 className="dashboard-title">정정 전표 실시간 집계 요약</h3>
             <PreviewInfo
               label="변동 구분 연산"
               value={type}
@@ -604,7 +554,7 @@ function StockInOutWrite() {
 
           <div className="preview-card">
             <h3 className="expected-material-title">
-              자재 예상 예측 시뮬레이션
+              재고 롤백 시뮬레이션 결과
             </h3>
             {activePreviewStock ? (
               <>
@@ -613,7 +563,7 @@ function StockInOutWrite() {
                   value={`${activePreviewStock.currentQuantity.toLocaleString()} ${activePreviewStock.unit}`}
                 />
                 <PreviewInfo
-                  label="트랜잭션 변동량"
+                  label="트랜잭션 정정량"
                   value={`${type === "입고" ? "+" : "-"}${(gridItems.find((i) => i.materialId === activePreviewStock.materialId)?.quantity || 0).toLocaleString()} ${activePreviewStock.unit}`}
                   highlight={type === "입고" ? "in" : "out"}
                 />
@@ -636,7 +586,8 @@ function StockInOutWrite() {
               </>
             ) : (
               <p className="expected-material-explain">
-                자재가 추가되거나 선택되면 입출고 분석 결과가 표출됩니다.
+                자재 수량을 정정하면 창고에 미칠 예측 시뮬레이션 결과가
+                연동됩니다.
               </p>
             )}
           </div>
@@ -693,4 +644,4 @@ function PreviewInfo({
   );
 }
 
-export default StockInOutWrite;
+export default StockInOutEdit;
