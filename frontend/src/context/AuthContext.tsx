@@ -16,26 +16,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => localStorage.getItem("companyName") || "",
   );
 
+  const [companyType, setCompanyType] = useState(
+    () => localStorage.getItem("companyType") || "",
+  );
+
   // 로그인
   const login = (data: LoginResponse) => {
     localStorage.setItem("token", data.token);
     localStorage.setItem("ceoName", data.ceoName);
     localStorage.setItem("companyName", data.companyName);
+    localStorage.setItem("companyId", String(data.companyId));
+    localStorage.setItem("companyType", data.companyType);
 
     setIsLogin(true);
     setCeoName(data.ceoName);
     setCompanyName(data.companyName);
+    setCompanyType(data.companyType);
   };
 
   // 로그아웃
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("companyId");
     localStorage.removeItem("ceoName");
     localStorage.removeItem("companyName");
+    localStorage.removeItem("companyType");
 
     setIsLogin(false);
     setCeoName("");
     setCompanyName("");
+    setCompanyType("");
   };
 
   return (
@@ -44,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLogin,
         ceoName,
         companyName,
+        companyType,
         login,
         logout,
       }}
