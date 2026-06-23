@@ -146,7 +146,7 @@ export default function NotificationPage() {
       </div>
 
       {loading ? (
-        <p className="loading-message">알림을 로딩 중입니다 형님...</p>
+        <p className="loading-message">알림을 로딩 중입니다...</p>
       ) : (
         <table className="list-table">
           <thead>

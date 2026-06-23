@@ -16,10 +16,13 @@ import type {
   SelectOption,
 } from "../../types/InOut";
 import { inoutApi } from "../../api/inoutApi";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 function StockInOutWrite() {
   const navigate = useNavigate();
-  const myCompanyId = Number(localStorage.getItem("companyId") || 0);
+  const myCompanyId = Number(localStorage.getItem("companyId"));
+  const { isLogin } = useAuth();
 
   // 셀렉트 옵션
   const [orderOptions, setOrderOptions] = useState<SelectOption[]>([]);
@@ -263,6 +266,10 @@ function StockInOutWrite() {
       })
       .finally(() => setIsSubmitting(false));
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="stock-write-page">

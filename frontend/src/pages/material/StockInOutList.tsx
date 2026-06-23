@@ -28,9 +28,12 @@ import {
 } from "recharts";
 import { inoutApi } from "../../api/inoutApi";
 import StockInOutDetailModal from "./StockInOutDetailModal";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 function StockInOutList() {
   const navigate = useNavigate();
+  const { isLogin } = useAuth();
 
   const myCompanyId = Number(localStorage.getItem("companyId"));
 
@@ -224,6 +227,10 @@ function StockInOutList() {
     setSearchInput("");
     setPage(0);
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="stock-page">

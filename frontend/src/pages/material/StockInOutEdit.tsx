@@ -15,12 +15,15 @@ import type {
   SelectOption,
 } from "../../types/InOut";
 import { inoutApi } from "../../api/inoutApi";
+import LoginRequired from "../../components/LoginRequired";
+import { useAuth } from "../../context/AuthContext";
 
 function StockInOutEdit() {
   const navigate = useNavigate();
   const { stockInOutId } = useParams<{ stockInOutId: string }>();
   const inoutId = Number(stockInOutId);
   const myCompanyId = Number(localStorage.getItem("companyId"));
+  const { isLogin } = useAuth();
 
   const [materialOptions, setMaterialOptions] = useState<SelectOption[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -247,6 +250,10 @@ function StockInOutEdit() {
       })
       .finally(() => setIsSubmitting(false));
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="stock-write-page">

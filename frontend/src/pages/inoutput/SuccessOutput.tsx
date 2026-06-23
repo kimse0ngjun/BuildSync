@@ -1,9 +1,16 @@
 import { LuFileOutput } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import "../../styles/SuccessInOut.css";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 const SuccessOutput = () => {
   const nav = useNavigate();
+  const { isLogin } = useAuth();
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="suc-input">

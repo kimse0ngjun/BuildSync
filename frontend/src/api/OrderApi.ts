@@ -54,7 +54,7 @@ export const orderListApi = {
   // 발주 목록
   getOrderList: async (
     companyId: number,
-    partnerType: string, // 💡 "CONSTRUCTION" 또는 "SUPPLIER"가 들어옵니다.
+    partnerType: string,
     page: number = 0,
     size: number = 10,
   ): Promise<PageResponse<OrderListResponse>> => {
