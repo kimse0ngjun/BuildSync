@@ -1,6 +1,7 @@
 package com.buildsync.service.auth;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,9 @@ import com.buildsync.dto.auth.LoginResponse;
 import com.buildsync.dto.auth.SignupRequest;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.CompanyStatus;
+import com.buildsync.entity.Contact;
 import com.buildsync.repository.company.CompanyRepository;
+import com.buildsync.repository.company.ContactRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
 	private final CompanyRepository companyRepository;
+	private final ContactRepository contactRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final MailService mailService;
@@ -31,35 +35,43 @@ public class AuthService {
 	public LoginResponse login(LoginRequest req) {
 
 	    Company company = companyRepository.findByLoginId(req.getLoginId())
-	            .orElseThrow(() -> new RuntimeException("아이디가 존재하지 않습니다."));
+	            .orElseThrow(() -> 
+	                new RuntimeException("아이디가 존재하지 않습니다.")
+	            );
 
-	    if (!passwordEncoder.matches(req.getPassword(), company.getPassword())) {
+
+	    if (!passwordEncoder.matches(
+	            req.getPassword(),
+	            company.getPassword()
+	    )) {
 	        throw new RuntimeException("비밀번호가 일치하지 않습니다.");
 	    }
-	    
+
+
 	    if (company.getStatus() == CompanyStatus.PENDING) {
 	        throw new RuntimeException("관리자 승인 대기 중입니다.");
 	    }
+
 
 	    if (company.getStatus() == CompanyStatus.REJECTED) {
 	        throw new RuntimeException("가입 요청이 반려되었습니다.");
 	    }
 
+
 	    if (company.getStatus() == CompanyStatus.INACTIVE) {
 	        throw new RuntimeException("비활성 계정입니다.");
 	    }
 
-	    if (company.getStatus() != CompanyStatus.ACTIVE) {
-	        throw new RuntimeException("로그인할 수 없는 계정 상태입니다.");
-	    }
+	    String token =
+	            jwtUtil.generateToken(company.getLoginId());
 
-	    String token = jwtUtil.generateToken(company.getLoginId());
 
 	    return new LoginResponse(
 	            token,
 	            company.getId(),
 	            company.getCeoName(),
-	            company.getCompanyName()
+	            company.getCompanyName(),
+	            company.getCompanyType().name()
 	    );
 	}
 	
