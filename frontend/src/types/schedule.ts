@@ -1,4 +1,5 @@
 export type EventType = "SITES" | "MATERIAL";
+export type MaterialType = "IN" | "OUT";
 
 export interface CalendarEventResponse {
   eventId: number;
@@ -7,6 +8,7 @@ export interface CalendarEventResponse {
   endDate: string;
   status: string;
   eventType: EventType;
+  materialType?: MaterialType;
   siteId?: number;
   siteName?: string;
   supplierId?: number;

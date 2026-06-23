@@ -290,7 +290,15 @@ function ScheduleModal({
   const dateLabel = `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일 (${weekDays[dt.getDay()]})`;
 
   const siteEvents = events.filter((e) => e.eventType === "SITES");
-  const materialEvents = events.filter((e) => e.eventType === "MATERIAL");
+  const materialInEvents = events.filter(
+    (e) =>
+      e.eventType === "MATERIAL" &&
+      (!e.materialType || e.materialType === "IN"),
+  );
+
+  const materialOutEvents = events.filter(
+    (e) => e.eventType === "MATERIAL" && e.materialType === "OUT",
+  );
   const isDetail = !!detail || detailLoading;
 
   return (
@@ -320,9 +328,15 @@ function ScheduleModal({
                 공사 일정 {siteEvents.length}건
               </span>
             )}
-            {materialEvents.length > 0 && (
+            {materialInEvents.length > 0 && (
               <span className="schedule-type-badge badge-type-material">
-                입고 일정 {materialEvents.length}건
+                입고 일정 {materialInEvents.length}건
+              </span>
+            )}
+
+            {materialOutEvents.length > 0 && (
+              <span className="schedule-type-badge badge-type-material">
+                출고 일정 {materialOutEvents.length}건
               </span>
             )}
             {events.length === 0 && (
@@ -351,13 +365,25 @@ function ScheduleModal({
                   ))}
                 </div>
               )}
-              {materialEvents.length > 0 && (
+              {materialInEvents.length > 0 && (
                 <div className="schedule-modal-section">
                   <p className="schedule-modal-section-title">
                     <FiTruck size={13} /> 자재 입고
                   </p>
 
-                  {materialEvents.map((ev) => (
+                  {materialInEvents.map((ev) => (
+                    <EventRow key={ev.eventId} event={ev} clickable={false} />
+                  ))}
+                </div>
+              )}
+
+              {materialOutEvents.length > 0 && (
+                <div className="schedule-modal-section">
+                  <p className="schedule-modal-section-title">
+                    <FiTruck size={13} /> 자재 출고
+                  </p>
+
+                  {materialOutEvents.map((ev) => (
                     <EventRow key={ev.eventId} event={ev} clickable={false} />
                   ))}
                 </div>
