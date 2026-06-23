@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 import {
   FiPlus,
   FiSearch,
@@ -51,6 +53,7 @@ type CategoryItem = {
 
 function MaterialList() {
   const navigate = useNavigate();
+  const { isLogin } = useAuth();
 
   const [tab, setTab] = useState<"all" | "my">("all");
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
@@ -124,13 +127,20 @@ function MaterialList() {
   };
 
   useEffect(() => {
+    if (!isLogin) return;
     fetchCategories();
-  }, []);
+  }, [isLogin]);
 
   useEffect(() => {
+    if (!isLogin) return;
+
     setSelected(null);
     fetchMaterials();
-  }, [tab, page, category, status]);
+  }, [isLogin, tab, page, category, status]);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const handleSearch = () => {
     setSelected(null);

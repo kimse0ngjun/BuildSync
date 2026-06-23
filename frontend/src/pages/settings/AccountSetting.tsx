@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 import {
   FiUser,
   FiPhone,
@@ -14,6 +16,7 @@ import {
 import "../../styles/AccountSetting.css";
 
 function AccountSetting() {
+  const { isLogin } = useAuth();
   const [form, setForm] = useState({
     loginId: "supplier01",
     companyType: "건설업체",
@@ -37,6 +40,10 @@ function AccountSetting() {
     console.log("계정 설정 수정 데이터:", form);
     alert("계정 정보가 저장되었습니다.");
   };
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="account-setting-page">

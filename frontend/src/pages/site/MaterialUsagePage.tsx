@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 import {
   FiSearch,
   FiBox,
@@ -54,6 +56,8 @@ function MaterialUsagePage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  const { isLogin } = useAuth();
+
   const [summary, setSummary] = useState({
     totalUsageCount: 0,
     usedMaterialCount: 0,
@@ -105,12 +109,20 @@ function MaterialUsagePage() {
   };
 
   useEffect(() => {
+    if (!isLogin) return;
+
     fetchAllOptions();
-  }, []);
+  }, [isLogin]);
 
   useEffect(() => {
+    if (!isLogin) return;
+
     fetchUsages();
-  }, [page, siteId, materialId]);
+  }, [isLogin, page, siteId, materialId]);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const handleSearch = () => {
     setPage(0);

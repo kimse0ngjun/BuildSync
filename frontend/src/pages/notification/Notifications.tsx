@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 import type { NotificationResponse } from "../../types/Notification";
 import { notificationListApi } from "../../api/notificationApi";
 import { MdDeleteOutline } from "react-icons/md";
@@ -14,6 +16,8 @@ export default function NotificationPage() {
 
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
+
+  const { isLogin } = useAuth();
 
   // 모든 알림 조회 핸들러
   const handleGetAllNotifications = (page: number = 0) => {
@@ -101,8 +105,14 @@ export default function NotificationPage() {
   };
 
   useEffect(() => {
+    if (!isLogin) return;
+
     handleGetAllNotifications();
-  }, []);
+  }, [isLogin]);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const deleteIcon = <MdDeleteOutline />;
 

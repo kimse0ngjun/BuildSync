@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 import {
   FiPlus,
   FiSearch,
@@ -47,6 +49,7 @@ function SitePage() {
   const [selected, setSelected] = useState<Site | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const { isLogin } = useAuth();
 
   const [summary, setSummary] = useState({
     totalSiteCount: 0,
@@ -120,8 +123,14 @@ function SitePage() {
   };
 
   useEffect(() => {
+    if (!isLogin) return;
+
     fetchSites();
-  }, [page, constructionType, status]);
+  }, [isLogin, page, constructionType, status]);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const handleSearch = () => {
     setPage(0);
