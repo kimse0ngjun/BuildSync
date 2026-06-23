@@ -82,8 +82,8 @@ function CostAnalysisPage() {
             <thead>
               <tr>
                 <th>월</th>
-                <th>발주금액</th>
-                <th>자재비</th>
+                <th>총 입고량</th>
+                <th>발주 금액</th>
               </tr>
             </thead>
 
@@ -109,10 +109,10 @@ function CostAnalysisPage() {
           <table>
             <thead>
               <tr>
-                <th>현장</th>
-                <th>자재</th>
-                <th>입고</th>
-                <th>출고</th>
+                <th>현장명</th>
+                <th>자재명</th>
+                <th>입고량</th>
+                <th>출고량</th>
                 <th>재고</th>
               </tr>
             </thead>
