@@ -74,11 +74,14 @@ function SchedulePage() {
 
   const loadCalendar = useCallback(async () => {
     setLoading(true);
+
     try {
       const res = await getCalendarEvents(companyId, year, month);
-      setCalendarEvents(res.data);
+
+      setCalendarEvents(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
       console.error(e);
+      setCalendarEvents([]);
     } finally {
       setLoading(false);
     }
