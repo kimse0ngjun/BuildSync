@@ -13,7 +13,7 @@ import {
   FiFileText,
   FiSave,
 } from "react-icons/fi";
-import { orderListApi, writeOrderApi } from "../../api/OrderApi";
+import { orderListApi, writeOrderApi } from "../../api/orderApi";
 import type {
   MaterialSelectResponse,
   OrderItemDto,
@@ -25,11 +25,13 @@ import type {
 import "../../styles/WriteOrder.css";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 
 export const EditOrder = () => {
   const navigate = useNavigate();
   const { orderId } = useParams<{ orderId: string }>();
   const location = useLocation();
+  const myCompanyType = localStorage.getItem("companyType");
 
   const [supplierName, setSupplierName] = useState<string>("-");
 
@@ -58,6 +60,14 @@ export const EditOrder = () => {
   const [fixedContactId, setFixedContactId] = useState<number | null>(null);
 
   const { isLogin } = useAuth();
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (myCompanyType !== "CONSTUCTION") {
+    return <NoAccess targetRoleName="건설업체" />;
+  }
 
   useEffect(() => {
     writeOrderApi
@@ -207,10 +217,6 @@ export const EditOrder = () => {
       alert("서버 오류로 발주서 수정에 실패했습니다.");
     }
   };
-
-  if (!isLogin) {
-    return <LoginRequired />;
-  }
 
   return (
     <div className="order-write-page">

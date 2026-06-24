@@ -18,11 +18,13 @@ import type {
 import { inoutApi } from "../../api/inoutApi";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 
 function StockInOutWrite() {
   const navigate = useNavigate();
   const myCompanyId = Number(localStorage.getItem("companyId"));
   const { isLogin } = useAuth();
+  const companyType = localStorage.getItem("companyType");
 
   // 셀렉트 옵션
   const [orderOptions, setOrderOptions] = useState<SelectOption[]>([]);
@@ -66,6 +68,14 @@ function StockInOutWrite() {
   // 화면 우측 프리뷰
   const [activePreviewStock, setActivePreviewStock] =
     useState<MaterialStockDetail | null>(null);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (companyType !== "SUPPLIER") {
+    return <NoAccess targetRoleName="공급업체" />;
+  }
 
   useEffect(() => {
     // 공통 셀렉트
@@ -266,10 +276,6 @@ function StockInOutWrite() {
       })
       .finally(() => setIsSubmitting(false));
   };
-
-  if (!isLogin) {
-    return <LoginRequired />;
-  }
 
   return (
     <div className="stock-write-page">
