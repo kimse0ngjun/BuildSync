@@ -1,6 +1,6 @@
 export interface MonthlyMaterialCostResponse {
   month: string;
-  totalOrderAmount: number;
+  totalQuantity: number;
   totalMaterialCost: number;
 }
 
