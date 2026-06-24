@@ -4,8 +4,10 @@ import com.buildsync.dto.site.SiteRequest;
 import com.buildsync.dto.site.SiteDashboardResponse;
 import com.buildsync.dto.site.SiteResponse;
 import com.buildsync.entity.Company;
+import com.buildsync.entity.Schedule;
 import com.buildsync.entity.Site;
 import com.buildsync.repository.company.CompanyRepository;
+import com.buildsync.repository.schedule.ScheduleRepository;
 import com.buildsync.repository.site.SiteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.List;
 public class SiteService {
 
     private final SiteRepository siteRepository;
+    private final ScheduleRepository scheduleRepository;
     private final CompanyRepository companyRepository;
 
     // 공사 현장 등록
@@ -38,6 +41,18 @@ public class SiteService {
                 .build();
 
         Site savedSite = siteRepository.save(site);
+        
+        Schedule schedule = Schedule.builder()
+                .title(savedSite.getSiteName() + " 공사 일정")
+                .content("현장 공사 기간")
+                .startDate(savedSite.getStartDate())
+                .endDate(savedSite.getExpectedEndDate())
+                .companyId(company.getId())
+                .siteName(savedSite)
+                .build();
+
+
+        scheduleRepository.save(schedule);
 
         return SiteResponse.from(savedSite);
     }
