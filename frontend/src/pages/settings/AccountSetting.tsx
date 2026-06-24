@@ -198,7 +198,9 @@ function AccountSetting() {
       </section>
 
       <div className="account-actions">
-        <button className="account-cancel-btn">취소</button>
+        <button className="account-cancel-btn" onClick={() => navigate(-1)}>
+          취소
+        </button>
         <button className="account-save-btn" onClick={handleSave}>
           <FiSave />
           저장하기
