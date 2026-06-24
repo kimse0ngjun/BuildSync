@@ -38,59 +38,39 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 	Page<Company> findByStatus(CompanyStatus status, Pageable pageable);
 	
 	// Company
-    @Query(value = """
-        SELECT
-            c.company_id AS companyId,
-            c.company_type AS companyType,
-            c.company_name AS companyName,
-            c.ceo_name AS ceoName,
-            c.phone AS phone,
-            c.address AS address,
-            c.created_at AS createdAt
+	@Query(value = """
+		    SELECT
+		        c.company_id AS companyId,
+		        c.company_type AS companyType,
+		        c.company_name AS companyName,
+		        c.ceo_name AS ceoName,
+		        c.phone AS phone,
+		        c.address AS address,
+		        c.created_at AS createdAt
 
-        FROM company c
+		    FROM company c
 
-        WHERE
+		    WHERE
 
-        c.status = 'ACTIVE'
+		    c.status = 'ACTIVE'
 
-        AND
-        (
-            :type IS NULL
-            OR c.company_type = :type
-        )
+		    AND
+		    (
+		        :type IS NULL
+		        OR c.company_type = :type
+		    )
 
-        AND
-        (
-            :keyword IS NULL
-            OR c.company_name LIKE CONCAT('%',:keyword,'%')
-            OR c.ceo_name LIKE CONCAT('%',:keyword,'%')
-            OR c.phone LIKE CONCAT('%',:keyword,'%')
-        )
+		    AND
+		    (
+		        :keyword IS NULL
+		        OR c.company_name LIKE CONCAT('%',:keyword,'%')
+		        OR c.ceo_name LIKE CONCAT('%',:keyword,'%')
+		        OR c.phone LIKE CONCAT('%',:keyword,'%')
+		    )
 
-        """,
-            countQuery = """
-        SELECT COUNT(*)
-        FROM company c
+		    ORDER BY c.created_at DESC
 
-        WHERE
-
-        c.status = 'ACTIVE'
-
-        AND
-        (
-            :type IS NULL
-            OR c.company_type = :type
-        )
-
-        AND
-        (
-            :keyword IS NULL
-            OR c.company_name LIKE CONCAT('%',:keyword,'%')
-            OR c.ceo_name LIKE CONCAT('%',:keyword,'%')
-            OR c.phone LIKE CONCAT('%',:keyword,'%')
-        )
-        """,
+		    """,
             nativeQuery = true)
     Page<CompanyProjection> findCompanies(
             @Param("type") String type,
