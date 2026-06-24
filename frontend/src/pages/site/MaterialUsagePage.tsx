@@ -14,6 +14,7 @@ import {
 } from "react-icons/fi";
 import { materialUsageApi } from "../../api/materialUsageApi";
 import "../../styles/MaterialUsagePage.css";
+import NoAccess from "../../components/NoAccess";
 
 type Usage = {
   stockInoutId: number;
@@ -57,6 +58,10 @@ function MaterialUsagePage() {
   const [loading, setLoading] = useState(false);
 
   const { isLogin } = useAuth();
+
+  const companyType = localStorage.getItem("companyType");
+
+  const isSupplier = companyType === "SUPPLIER" || companyType === "공급업체";
 
   const [summary, setSummary] = useState({
     totalUsageCount: 0,
@@ -107,21 +112,35 @@ function MaterialUsagePage() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    if (!isLogin) return;
+    if (!isLogin || isSupplier) return;
 
     fetchAllOptions();
-  }, [isLogin]);
+  }, [isLogin, isSupplier]);
 
   useEffect(() => {
-    if (!isLogin) return;
+    if (!isLogin || isSupplier) return;
 
     fetchUsages();
-  }, [isLogin, page, siteId, materialId]);
+  }, [isLogin, isSupplier, page, siteId, materialId]);
 
   if (!isLogin) {
     return <LoginRequired />;
+  }
+
+  if (isSupplier) {
+    return (
+      <NoAccess
+        targetRoleName="건설업체"
+        description={
+          <>
+            해당 메뉴는 <strong>건설업체</strong> 전용 관리 화면입니다.
+            <br />
+            공급업체 계정은 자재 사용 현황을 조회하거나 관리할 수 없습니다.
+          </>
+        }
+      />
+    );
   }
 
   const handleSearch = () => {
