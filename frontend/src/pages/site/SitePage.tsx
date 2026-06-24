@@ -223,11 +223,17 @@ function SitePage() {
                 setSelected(null);
               }}
             >
-              <option value="">전체 유형</option>
-              <option value="오피스">오피스</option>
-              <option value="아파트">아파트</option>
-              <option value="상가">상가</option>
+              <option value="">전체 공사 유형</option>
               <option value="건축">건축</option>
+              <option value="토목">토목</option>
+              <option value="플랜트">플랜트</option>
+              <option value="전기">전기</option>
+              <option value="통신">통신</option>
+              <option value="조경">조경</option>
+              <option value="리모델링">리모델링</option>
+              <option value="증축">증축</option>
+              <option value="철거">철거</option>
+              <option value="기타">기타</option>
             </select>
 
             <select
