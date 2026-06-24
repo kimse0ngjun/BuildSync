@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.buildsync.dto.company.AccountDeleteRequest;
+import com.buildsync.dto.company.AccountPasswordChangeRequest;
 import com.buildsync.dto.company.AccountResponse;
 import com.buildsync.dto.company.AccountUpdateRequest;
 import com.buildsync.service.account.AccountService;
@@ -46,15 +48,36 @@ public class AccountController {
         return ResponseEntity.ok("업체 정보가 수정되었습니다.");
     }
     
-    // 거래처 정보 삭제(비활성화)
-    @DeleteMapping
-    public ResponseEntity<String> deleteCompanyAccount(
-            Authentication authentication) {
+    // 로그인 후 비밀번호 변경
+    @PutMapping("/password")
+    public ResponseEntity<String> changePassword(
+            Authentication authentication,
+            @RequestBody AccountPasswordChangeRequest request
+    ) {
 
         String loginId = authentication.getName();
 
-        accountService.deleteCompanyAccount(loginId);
+        accountService.changePassword(loginId, request);
 
-        return ResponseEntity.ok("거래처 정보가 삭제되었습니다.");
+        return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+    }
+    
+    // 거래처 정보 삭제(비활성화)
+    @DeleteMapping
+    public ResponseEntity<String> deleteCompanyAccount(
+            Authentication authentication,
+            @RequestBody AccountDeleteRequest request) {
+
+        String loginId = authentication.getName();
+
+
+        accountService.deleteCompanyAccount(
+                loginId,
+                request
+        );
+
+        return ResponseEntity.ok(
+                "거래처 정보가 삭제되었습니다."
+        );
     }
 }
