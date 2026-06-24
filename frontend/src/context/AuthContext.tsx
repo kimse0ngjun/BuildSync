@@ -20,6 +20,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => localStorage.getItem("companyType") || "",
   );
 
+  const [contactId, setContactId] = useState<number | null>(() => {
+    const id = localStorage.getItem("contactId");
+
+    return id ? Number(id) : null;
+  });
+
   // 로그인
   const login = (data: LoginResponse) => {
     localStorage.setItem("token", data.token);
@@ -27,12 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("companyName", data.companyName);
     localStorage.setItem("companyId", String(data.companyId));
     localStorage.setItem("companyType", data.companyType);
-    // localStorage.setItem("contactId", String(data.contactId));
+    localStorage.setItem("contactId", String(data.contactId));
 
     setIsLogin(true);
     setCeoName(data.ceoName);
     setCompanyName(data.companyName);
     setCompanyType(data.companyType);
+    setContactId(data.contactId);
   };
 
   // 로그아웃
@@ -42,12 +49,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("ceoName");
     localStorage.removeItem("companyName");
     localStorage.removeItem("companyType");
-    // localStorage.removeItem("contactId");
+    localStorage.removeItem("contactId");
 
     setIsLogin(false);
     setCeoName("");
     setCompanyName("");
     setCompanyType("");
+    setContactId(null);
+  };
+
+  // 계정 설정 - 수정
+  const updateCompanyInfo = (newCompanyName: string, newCeoName: string) => {
+    localStorage.setItem("companyName", newCompanyName);
+    localStorage.setItem("ceoName", newCeoName);
+
+    setCompanyName(newCompanyName);
+    setCeoName(newCeoName);
   };
 
   return (
@@ -57,9 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ceoName,
         companyName,
         companyType,
-        // contactId,
+        contactId,
         login,
         logout,
+        updateCompanyInfo,
       }}
     >
       {children}
