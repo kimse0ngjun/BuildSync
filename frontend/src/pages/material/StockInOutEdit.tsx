@@ -17,6 +17,7 @@ import type {
 import { inoutApi } from "../../api/inoutApi";
 import LoginRequired from "../../components/LoginRequired";
 import { useAuth } from "../../context/AuthContext";
+import NoAccess from "../../components/NoAccess";
 
 function StockInOutEdit() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ function StockInOutEdit() {
   const inoutId = Number(stockInOutId);
   const myCompanyId = Number(localStorage.getItem("companyId"));
   const { isLogin } = useAuth();
+  const companyType = localStorage.getItem("companyType");
 
   const [materialOptions, setMaterialOptions] = useState<SelectOption[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +63,14 @@ function StockInOutEdit() {
 
   const [activePreviewStock, setActivePreviewStock] =
     useState<MaterialStockDetail | null>(null);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (companyType !== "SUPPLIER") {
+    return <NoAccess targetRoleName="공급업체" />;
+  }
 
   useEffect(() => {
     inoutApi.getMaterials().then(setMaterialOptions).catch(console.error);
@@ -250,10 +260,6 @@ function StockInOutEdit() {
       })
       .finally(() => setIsSubmitting(false));
   };
-
-  if (!isLogin) {
-    return <LoginRequired />;
-  }
 
   return (
     <div className="stock-write-page">

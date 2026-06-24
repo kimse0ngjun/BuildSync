@@ -17,11 +17,12 @@ import { IoMdExit } from "react-icons/io";
 
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetail } from "./modal/OrderModalDetail";
-import { orderListApi } from "../../api/OrderApi";
+import { orderListApi } from "../../api/orderApi";
 import { STATUS_MAP } from "../../constants/status";
 import "../../styles/OrderList.css";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 
 export const OrderListForConstruction = () => {
   const navigate = useNavigate();
@@ -53,6 +54,15 @@ export const OrderListForConstruction = () => {
     | "CONSTRUCTION"
     | "SUPPLIER";
   const myCompanyId = Number(localStorage.getItem("companyId"));
+  const companyType = localStorage.getItem("companyType");
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (companyType !== "CONSTRUCTION") {
+    return <NoAccess targetRoleName="건설업체" />;
+  }
 
   const fetchCountsData = async () => {
     try {
@@ -147,10 +157,6 @@ export const OrderListForConstruction = () => {
       style={{ cursor: "pointer" }}
     />
   );
-
-  if (!isLogin) {
-    return <LoginRequired />;
-  }
 
   return (
     <div className="order-list-page">

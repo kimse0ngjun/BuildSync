@@ -5,6 +5,7 @@ import "../../styles/StockInOutDetailModal.css";
 import type { InOutDetailModalProps } from "../../types/InOut";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 
 export default function StockInOutDetailModal({
   isOpen,
@@ -15,6 +16,15 @@ export default function StockInOutDetailModal({
   const { isLogin } = useAuth();
 
   if (!isOpen || !data) return null;
+  const companyType = localStorage.getItem("companyType");
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (companyType !== "SUPPLIER") {
+    return <NoAccess targetRoleName="공급업체" />;
+  }
 
   // 수정 페이지 이동
   const handleGoToEdit = () => {
@@ -22,10 +32,6 @@ export default function StockInOutDetailModal({
 
     navigate(`/stock/edit/${data.stockInoutId}`);
   };
-
-  if (!isLogin) {
-    return <LoginRequired />;
-  }
 
   const modalContent = (
     <div className="stock-detail-modal-body">

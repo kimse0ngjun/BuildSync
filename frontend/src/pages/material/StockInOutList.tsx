@@ -30,10 +30,12 @@ import { inoutApi } from "../../api/inoutApi";
 import StockInOutDetailModal from "./StockInOutDetailModal";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 
 function StockInOutList() {
   const navigate = useNavigate();
   const { isLogin } = useAuth();
+  const companyType = localStorage.getItem("companyType");
 
   const myCompanyId = Number(localStorage.getItem("companyId"));
 
@@ -89,6 +91,14 @@ function StockInOutList() {
     null,
   );
   const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (companyType !== "SUPPLIER") {
+    return <NoAccess targetRoleName="공급업체" />;
+  }
 
   useEffect(() => {
     Promise.all([inoutApi.getMaterials(), inoutApi.getSites()])
@@ -227,10 +237,6 @@ function StockInOutList() {
     setSearchInput("");
     setPage(0);
   };
-
-  if (!isLogin) {
-    return <LoginRequired />;
-  }
 
   return (
     <div className="stock-page">
