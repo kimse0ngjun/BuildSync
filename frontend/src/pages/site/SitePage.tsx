@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 import {
   FiPlus,
   FiSearch,
@@ -42,6 +43,12 @@ type SiteResponse = {
 };
 
 function SitePage() {
+  const navigate = useNavigate();
+  const { isLogin } = useAuth();
+
+  const companyType = localStorage.getItem("companyType");
+  const isSupplier = companyType === "SUPPLIER" || companyType === "공급업체";
+
   const [keyword, setKeyword] = useState("");
   const [constructionType, setConstructionType] = useState("");
   const [status, setStatus] = useState("");
@@ -49,7 +56,6 @@ function SitePage() {
   const [selected, setSelected] = useState<Site | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const { isLogin } = useAuth();
 
   const [summary, setSummary] = useState({
     totalSiteCount: 0,
@@ -57,8 +63,6 @@ function SitePage() {
     plannedCount: 0,
     completedCount: 0,
   });
-
-  const navigate = useNavigate();
 
   const getProgress = (site: Site) => {
     if (site.status === "완료") return 100;
@@ -99,6 +103,8 @@ function SitePage() {
   };
 
   const fetchSites = async () => {
+    if (isSupplier) return;
+
     try {
       const data: SiteResponse = await siteApi.getSites({
         keyword,
@@ -110,10 +116,10 @@ function SitePage() {
 
       setSites(data.sites ?? []);
       setSummary({
-        totalSiteCount: data.totalSiteCount,
-        progressCount: data.progressCount,
-        plannedCount: data.plannedCount,
-        completedCount: data.completedCount,
+        totalSiteCount: data.totalSiteCount ?? 0,
+        progressCount: data.progressCount ?? 0,
+        plannedCount: data.plannedCount ?? 0,
+        completedCount: data.completedCount ?? 0,
       });
       setTotalPages(data.totalPages ?? 1);
       setSelected(null);
@@ -123,13 +129,28 @@ function SitePage() {
   };
 
   useEffect(() => {
-    if (!isLogin) return;
+    if (!isLogin || isSupplier) return;
 
     fetchSites();
-  }, [isLogin, page, constructionType, status]);
+  }, [isLogin, isSupplier, page, constructionType, status]);
 
   if (!isLogin) {
     return <LoginRequired />;
+  }
+
+  if (isSupplier) {
+    return (
+      <NoAccess
+        targetRoleName="건설업체"
+        description={
+          <>
+            해당 메뉴는 <strong>건설업체</strong> 전용 관리 화면입니다.
+            <br />
+            공급업체 계정은 공사 현장 목록을 조회하거나 관리할 수 없습니다.
+          </>
+        }
+      />
+    );
   }
 
   const handleSearch = () => {
@@ -271,7 +292,7 @@ function SitePage() {
                   <td className="site-name">{site.siteName}</td>
                   <td>{site.constructionType}</td>
                   <td>{site.address}</td>
-                  <td>{site.cost.toLocaleString()}원</td>
+                  <td>{(site.cost ?? 0).toLocaleString()}원</td>
                   <td>{site.startDate}</td>
                   <td>{site.expectedEndDate}</td>
                   <td>
@@ -374,7 +395,7 @@ function SitePage() {
               <Info label="현장 주소" value={selected.address} />
               <Info
                 label="공사 비용"
-                value={`${selected.cost.toLocaleString()}원`}
+                value={`${(selected.cost ?? 0).toLocaleString()}원`}
               />
               <Info label="착공일" value={selected.startDate} />
               <Info label="준공 예정일" value={selected.expectedEndDate} />

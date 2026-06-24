@@ -5,7 +5,7 @@ import "../styles/NoAccess.css";
 interface NoAccessProps {
   title?: string;
   targetRoleName: string;
-  description?: string;
+  description?: React.ReactNode;
 }
 
 function NoAccess({
