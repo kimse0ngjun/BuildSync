@@ -160,6 +160,7 @@ function StockInOutList() {
               } as InOutResponse & { displayKey: string });
             }
           });
+          flattenedList.sort((a, b) => b.stockInoutId - a.stockInoutId);
 
           setInoutList(flattenedList);
           setTotalPages(res.inOutList?.totalPages || 1);
