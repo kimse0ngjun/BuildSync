@@ -78,7 +78,7 @@ export const NotificationStock = () => {
         <div className="critical-card">
           <MdOutlineRemoveShoppingCart className="critical-icon" />
           <div className="critical-material-area">
-            <h4 className="critical-title">심각 유의 자재 (위험 등급)</h4>
+            <h4 className="critical-title">최소 재고량 30% 이하</h4>
             <p className="critical-data">
               {boardData ? boardData.criticalCount : 0} 품목
             </p>
@@ -88,7 +88,7 @@ export const NotificationStock = () => {
         <div className="warning-area">
           <FaExclamationCircle className="warning-icon" />
           <div className="warning-material-area">
-            <h4 className="warning-title">안전기준 미달 자재 (전체 주의건)</h4>
+            <h4 className="warning-title">최소 재고량 기준 미달 자재</h4>
             <p className="warning-data">
               {boardData ? boardData.warningCount : 0} 품목
             </p>
