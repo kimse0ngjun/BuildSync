@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import {
   FiArrowLeft,
-  FiEdit3,
   FiTrash2,
   FiBriefcase,
   FiUser,
@@ -152,19 +151,6 @@ function CompanyDetail() {
         <button className="back-btn" onClick={() => navigate("/company")}>
           <FiArrowLeft />
           목록
-        </button>
-
-        <button
-          className="edit-btn"
-          onClick={() => navigate(`/company/${companyId}/edit`)}
-        >
-          <FiEdit3 />
-          수정
-        </button>
-
-        <button className="delete-btn" onClick={() => setShowDeleteModal(true)}>
-          <FiTrash2 />
-          삭제
         </button>
       </div>
     </div>
