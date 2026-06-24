@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import LoginRequired from "../../components/LoginRequired";
+import { getAccount, updateAccount } from "../../api/account";
 import {
   FiUser,
   FiPhone,
@@ -16,29 +18,80 @@ import {
 import "../../styles/AccountSetting.css";
 
 function AccountSetting() {
-  const { isLogin } = useAuth();
+  const navigate = useNavigate();
+  const { isLogin, updateCompanyInfo } = useAuth();
+  const companyId = Number(localStorage.getItem("companyId"));
   const [form, setForm] = useState({
-    loginId: "supplier01",
-    companyType: "건설업체",
-    companyName: "대한건설",
-    ceoName: "김철수",
-    businessNumber: "123-45-67891",
-    phone: "010-1234-5678",
-    homepageUrl: "https://www.daehan.com",
-    address: "부산광역시 부산진구 중앙대로 708, 5층",
-    registeredDate: "2026-06-11",
+    loginId: "",
+    companyType: "",
+    companyName: "",
+    ceoName: "",
+    businessNumber: "",
+    phone: "",
+    homepageUrl: "",
+    address: "",
+    registeredDate: "",
   });
 
+  useEffect(() => {
+    const fetchAccount = async () => {
+      try {
+        const res = await getAccount(companyId);
+
+        const data = res.data;
+
+        setForm({
+          loginId: data.loginId,
+          companyType:
+            data.companyType === "CONSTRUCTION" ? "건설업체" : "공급업체",
+
+          companyName: data.companyName,
+          ceoName: data.ceoName,
+          businessNumber: data.businessNumber,
+          phone: data.phone,
+          homepageUrl: data.homepageUrl,
+          address: data.address,
+
+          registeredDate: data.createdAt?.slice(0, 10),
+        });
+      } catch (error) {
+        console.error("계정 조회 실패", error);
+      }
+    };
+
+    if (companyId) {
+      fetchAccount();
+    }
+  }, [companyId]);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSave = () => {
-    console.log("계정 설정 수정 데이터:", form);
-    alert("계정 정보가 저장되었습니다.");
+  const handleSave = async () => {
+    try {
+      await updateAccount(companyId, {
+        companyName: form.companyName,
+        ceoName: form.ceoName,
+        phone: form.phone,
+        homepageUrl: form.homepageUrl,
+        address: form.address,
+      });
+
+      updateCompanyInfo(form.companyName, form.ceoName);
+
+      alert("계정 정보가 저장되었습니다.");
+      navigate("/dashboard");
+    } catch (e) {
+      console.error(e);
+      alert("저장 실패");
+    }
   };
 
   if (!isLogin) {
@@ -85,16 +138,8 @@ function AccountSetting() {
             <input value={form.loginId} readOnly />
           </FormField>
 
-          <FormField icon={<FiBriefcase />} label="업체 유형" required>
-            <select
-              name="companyType"
-              value={form.companyType}
-              onChange={handleChange}
-              className="account-select"
-            >
-              <option value="건설업체">건설업체</option>
-              <option value="공급업체">공급업체</option>
-            </select>
+          <FormField icon={<FiBriefcase />} label="업체 유형">
+            <input value={form.companyType} readOnly />
           </FormField>
 
           <FormField icon={<FiBriefcase />} label="업체명" required>

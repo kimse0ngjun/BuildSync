@@ -32,6 +32,7 @@ function LoginPage() {
         companyName: res.data.companyName,
         companyId: res.data.companyId,
         companyType: res.data.companyType,
+        contactId: res.data.contactId,
       });
 
       localStorage.removeItem("isAdmin");

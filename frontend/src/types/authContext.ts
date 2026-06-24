@@ -3,6 +3,7 @@ export type AuthContextType = {
   ceoName: string;
   companyName: string;
   companyType: string;
+  contactId: number | null;
 
   login: (data: {
     token: string;
@@ -10,7 +11,10 @@ export type AuthContextType = {
     companyName: string;
     companyId: number;
     companyType: string;
+    contactId: number | null;
   }) => void;
 
   logout: () => void;
+
+  updateCompanyInfo: (companyName: string, ceoName: string) => void;
 };
