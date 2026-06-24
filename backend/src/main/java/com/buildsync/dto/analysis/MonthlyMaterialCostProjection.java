@@ -2,9 +2,10 @@ package com.buildsync.dto.analysis;
 
 public interface MonthlyMaterialCostProjection {
 
-	String getMonth();
-	
-	Integer getTotalOrderAmount();
-	
-	Integer getTotalMaterialCost();
+    String getMonth();
+
+    Integer getTotalQuantity();
+
+    Integer getTotalMaterialCost();
+
 }
