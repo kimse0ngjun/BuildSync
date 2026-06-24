@@ -12,36 +12,64 @@ import com.buildsync.dto.analysis.SiteMaterialUsageAnalysisProjection;
 import com.buildsync.entity.Orders;
 
 @Repository
-public interface AnalysisRepository extends JpaRepository<Orders, Long>{
+public interface AnalysisRepository extends JpaRepository<Orders, Long> {
 
 
-    // 월별 자재 구매 비용
 	@Query(value = """
-			SELECT
-			    DATE_FORMAT(s.processed_date,'%Y-%m') month,
-			
+		    SELECT
+		        DATE_FORMAT(si.processed_date, '%Y-%m') AS month,
+
+
+			COALESCE(
 			    SUM(
 			        CASE
-			            WHEN s.type='IN'
-			            THEN s.quantity
-			            ELSE -s.quantity
-			        END
-			    ) totalOrderAmount,
-			
-			    SUM(
-			        CASE
-			            WHEN s.type='IN'
-			            THEN s.quantity*m.price
+			            WHEN si.type = 'IN'
+			            THEN si.quantity
 			            ELSE 0
 			        END
-			    ) totalMaterialCost
+			    )
+			    -
+			    SUM(
+			        CASE
+			            WHEN si.type = 'OUT'
+			            THEN si.quantity
+			            ELSE 0
+			        END
+			    ),
+			    0
+			) AS totalQuantity,
 			
-			FROM stock_inout s
 			
-			JOIN material m
-			ON s.material_id=m.material_id
-			
-			GROUP BY DATE_FORMAT(s.processed_date,'%Y-%m')
+			COALESCE(
+			    SUM(
+			        CASE
+			            WHEN si.type = 'IN'
+			            THEN si.quantity * ss.unit_price
+			            ELSE 0
+			        END
+			    ),
+			    0
+			) AS totalMaterialCost
+
+
+		    FROM stock_inout si
+
+
+		    JOIN sites s
+		        ON si.site_id = s.site_id
+
+
+		    LEFT JOIN sup_stock ss
+		        ON ss.material_id = si.material_id
+		        AND ss.company_id = s.company_id
+
+
+		    WHERE s.company_id = :companyId
+
+
+		    GROUP BY
+		        DATE_FORMAT(si.processed_date, '%Y-%m')
+
 
 		    ORDER BY month
 
@@ -51,84 +79,99 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long>{
 		    @Param("companyId") Long companyId
 		);
 
-	// 현장별 자재 사용 비용 분석
-	@Query(value = """
+    // 현장별 자재 사용 비용
+    @Query(value = """
 
-			SELECT
+        SELECT
 
-			    s.site_id AS siteId,
+            s.site_id AS siteId,
 
-			    s.site_name AS siteName,
-
-			    m.material_name AS materialName,
-
-			    m.unit AS unit,
+            s.site_name AS siteName,
 
 
-			    COALESCE(SUM(
-			        CASE
-			            WHEN si.type='IN'
-			            THEN si.quantity
-			            ELSE 0
-			        END
-			    ),0) AS inboundQuantity,
+            m.material_name AS materialName,
+
+            m.unit AS unit,
 
 
-			    COALESCE(SUM(
-			        CASE
-			            WHEN si.type='OUT'
-			            THEN si.quantity
-			            ELSE 0
-			        END
-			    ),0) AS outboundQuantity,
+            COALESCE(SUM(
+                CASE
+                    WHEN si.type = 'IN'
+                    THEN si.quantity
+                    ELSE 0
+                END
+            ),0) AS inboundQuantity,
 
 
-			    COALESCE(
-			        SUM(
-			            CASE
-			                WHEN si.type='IN'
-			                THEN si.quantity
-			                ELSE 0
-			            END
-			        )
-			        -
-			        SUM(
-			            CASE
-			                WHEN si.type='OUT'
-			                THEN si.quantity
-			                ELSE 0
-			            END
-			        )
-			    ,0) AS currentStock,
+            COALESCE(SUM(
+                CASE
+                    WHEN si.type = 'OUT'
+                    THEN si.quantity
+                    ELSE 0
+                END
+            ),0) AS outboundQuantity,
 
 
-			    m.price AS unitPrice
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN si.type = 'IN'
+                        THEN si.quantity
+                        ELSE 0
+                    END
+                )
+                -
+                SUM(
+                    CASE
+                        WHEN si.type = 'OUT'
+                        THEN si.quantity
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS currentStock,
 
 
-			FROM stock_inout si
-
-			JOIN sites s
-			ON si.site_id = s.site_id
-
-			JOIN material m
-			ON si.material_id = m.material_id
+            ss.unit_price AS unitPrice
 
 
-			WHERE s.company_id = :companyId
+        FROM stock_inout si
 
 
-			GROUP BY
-			    s.site_id,
-			    s.site_name,
-			    m.material_name,
-			    m.unit,
-			    m.price
+        JOIN sites s
+            ON si.site_id = s.site_id
 
 
-			""", nativeQuery = true)
-			List<SiteMaterialUsageAnalysisProjection>
-			findSiteMaterialUsage(
-			    @Param("companyId") Long companyId
-			);
+        JOIN material m
+            ON si.material_id = m.material_id
+
+
+        LEFT JOIN sup_stock ss
+            ON ss.material_id = m.material_id
+            AND ss.company_id = s.company_id
+
+
+        WHERE s.company_id = :companyId
+
+
+        GROUP BY
+
+            s.site_id,
+            s.site_name,
+            m.material_name,
+            m.unit,
+            ss.unit_price
+
+
+        ORDER BY
+            s.site_name,
+            m.material_name
+
+
+        """, nativeQuery = true)
+    List<SiteMaterialUsageAnalysisProjection>
+    findSiteMaterialUsage(
+        @Param("companyId") Long companyId
+    );
 
 }

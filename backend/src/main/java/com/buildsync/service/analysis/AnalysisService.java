@@ -32,8 +32,8 @@ public class AnalysisService {
 
                     .month(item.getMonth())
 
-                    .totalOrderAmount(
-                        item.getTotalOrderAmount()
+                    .totalQuantity(
+                        item.getTotalQuantity()
                     )
 
                     .totalMaterialCost(
