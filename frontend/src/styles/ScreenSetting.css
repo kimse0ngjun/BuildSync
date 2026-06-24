@@ -1,0 +1,160 @@
+.screen-setting-page {
+  width: 100%;
+  min-height: 100%;
+  background: #fafafa;
+  padding: 0 40px;
+}
+
+.screen-setting-header {
+  max-width: 1180px;
+  margin: 0 auto 34px;
+}
+
+.screen-setting-label {
+  margin: 0 0 10px;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.screen-setting-header h1 {
+  margin: 0;
+  color: #10284a;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+}
+
+.screen-setting-desc {
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.screen-setting-section {
+  max-width: 1180px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #dbe6f4;
+  border-radius: 18px;
+  padding: 32px;
+}
+
+.screen-section-title {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 26px;
+  color: #2563eb;
+}
+
+.screen-section-title svg {
+  font-size: 22px;
+  margin-top: 3px;
+}
+
+.screen-section-title h2 {
+  margin: 0;
+  color: #10284a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.screen-section-title p {
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.theme-card {
+  border: 1px solid #dbe6f4;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.theme-info {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.theme-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: #e8f1ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.theme-info h3 {
+  margin: 0 0 8px;
+  color: #10284a;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.theme-info p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.switch {
+  position: relative;
+  width: 62px;
+  height: 34px;
+  flex: 0 0 62px;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background: #dbe6f4;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  left: 4px;
+  top: 4px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+  background: #2563eb;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(28px);
+}
+
+@media (max-width: 900px) {
+  .screen-setting-page {
+    padding: 0 24px;
+  }
+
+  .theme-card {
+    flex-direction: column;
+    gap: 24px;
+    align-items: flex-start;
+  }
+}

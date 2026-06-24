@@ -1,0 +1,404 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { FiArrowLeft, FiBox, FiCheckCircle, FiRefreshCw } from "react-icons/fi";
+import { materialApi } from "../../api/materialApi";
+import "../../styles/MaterialWrite.css";
+
+type CategoryItem = {
+  categoryId: number;
+  categoryName: string;
+  createdAt: string;
+};
+
+type MaterialResponse = {
+  id?: number;
+  materialId?: number;
+  supMaterialId?: number;
+  materialCode: string;
+  materialName: string;
+  materialCategory: string;
+  currentQuantity: number;
+  minimumQuantity: number;
+  unit: string;
+  unitPrice: number;
+  status: string;
+  supplierName: string;
+  specification: string;
+  createdAt: string;
+};
+
+function MaterialEdit() {
+  const navigate = useNavigate();
+  const { materialId } = useParams();
+
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState({
+    materialCode: "",
+    materialName: "",
+    materialCategory: "",
+    unit: "",
+    currentStock: "",
+    minimumStock: "",
+    price: "",
+    specification: "",
+  });
+
+  const isEnough =
+    Number(form.currentStock || 0) >= Number(form.minimumStock || 0);
+
+  const fetchCategories = async () => {
+    try {
+      const data: CategoryItem[] = await materialApi.getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchMaterial = async () => {
+    try {
+      if (!materialId) {
+        alert("자재 ID가 없습니다.");
+        navigate("/material");
+        return;
+      }
+
+      const data: MaterialResponse = await materialApi.getMaterial(materialId);
+
+      setForm({
+        materialCode: data.materialCode,
+        materialName: data.materialName,
+        materialCategory: data.materialCategory,
+        unit: data.unit,
+        currentStock: String(data.currentQuantity),
+        minimumStock: String(data.minimumQuantity),
+        price: String(data.unitPrice),
+        specification: data.specification || "",
+      });
+    } catch (error) {
+      console.error(error);
+      navigate("/material");
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    fetchMaterial();
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleReset = () => {
+    fetchMaterial();
+  };
+
+  const handleSubmit = async () => {
+    if (!materialId) {
+      alert("자재 ID가 없습니다.");
+      return;
+    }
+
+    if (
+      !form.materialCode ||
+      !form.materialName ||
+      !form.materialCategory ||
+      !form.unit ||
+      !form.currentStock ||
+      !form.minimumStock ||
+      !form.price
+    ) {
+      alert("필수 항목을 모두 입력해주세요.");
+      return;
+    }
+
+    if (
+      Number(form.currentStock) < 0 ||
+      Number(form.minimumStock) < 0 ||
+      Number(form.price) < 0
+    ) {
+      alert("수량과 단가는 0 이상으로 입력해주세요.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const requestBody = {
+        materialCode: form.materialCode,
+        materialName: form.materialName,
+        materialCategory: form.materialCategory,
+        unit: form.unit,
+        specification: form.specification,
+        currentQuantity: Number(form.currentStock),
+        minimumQuantity: Number(form.minimumStock),
+        unitPrice: Number(form.price),
+      };
+
+      await materialApi.updateCompanyMaterial(materialId, requestBody);
+
+      alert("자재가 수정되었습니다.");
+      navigate("/material");
+    } catch (error) {
+      console.error(error);
+      alert("자재 수정에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="material-write-page">
+      <div className="write-header">
+        <button className="back-icon-btn" onClick={() => navigate("/material")}>
+          <FiArrowLeft />
+        </button>
+
+        <div>
+          <p className="page-label">자재 관리</p>
+          <h1>자재 수정</h1>
+          <p className="page-desc">등록된 자재 정보를 수정하세요.</p>
+        </div>
+      </div>
+
+      <div className="write-layout">
+        <section className="write-main">
+          <div className="write-section">
+            <h2>기본 정보</h2>
+
+            <div className="form-grid">
+              <FormField label="자재 코드" required>
+                <input
+                  name="materialCode"
+                  value={form.materialCode}
+                  onChange={handleChange}
+                  placeholder="자재 코드를 입력하세요"
+                />
+                <small>예) MAT-001</small>
+              </FormField>
+
+              <FormField label="자재명" required>
+                <input
+                  name="materialName"
+                  value={form.materialName}
+                  onChange={handleChange}
+                  placeholder="자재명을 입력하세요"
+                />
+                <small>예) 철근 D13</small>
+              </FormField>
+
+              <FormField label="자재 분류" required>
+                <select
+                  name="materialCategory"
+                  value={form.materialCategory}
+                  onChange={handleChange}
+                >
+                  <option value="">자재 분류를 선택하세요</option>
+                  {categories.map((item) => (
+                    <option key={item.categoryId} value={item.categoryName}>
+                      {item.categoryName}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+
+              <FormField label="단위" required>
+                <select name="unit" value={form.unit} onChange={handleChange}>
+                  <option value="">단위를 선택하세요</option>
+                  <option value="EA">EA</option>
+                  <option value="KG">KG</option>
+                  <option value="M">M</option>
+                  <option value="포">포</option>
+                  <option value="롤">롤</option>
+                  <option value="통">통</option>
+                  <option value="장">장</option>
+                </select>
+                <small>예) EA, KG, 롤, 장, 통</small>
+              </FormField>
+
+              <FormField label="현재 재고 수량" required>
+                <div className="input-with-unit">
+                  <input
+                    name="currentStock"
+                    type="number"
+                    min="0"
+                    value={form.currentStock}
+                    onChange={handleChange}
+                    placeholder="현재 재고 수량을 입력하세요"
+                  />
+                  <span>{form.unit || "EA"}</span>
+                </div>
+                <small>0 이상의 숫자를 입력하세요</small>
+              </FormField>
+
+              <FormField label="최소 재고 수량" required>
+                <div className="input-with-unit">
+                  <input
+                    name="minimumStock"
+                    type="number"
+                    min="0"
+                    value={form.minimumStock}
+                    onChange={handleChange}
+                    placeholder="최소 재고 수량을 입력하세요"
+                  />
+                  <span>{form.unit || "EA"}</span>
+                </div>
+                <small>재고 부족 판단 기준이 됩니다</small>
+              </FormField>
+
+              <FormField label="가격(단가)" required>
+                <div className="input-with-unit">
+                  <input
+                    name="price"
+                    type="number"
+                    min="0"
+                    value={form.price}
+                    onChange={handleChange}
+                    placeholder="단가를 입력하세요"
+                  />
+                  <span>원</span>
+                </div>
+                <small>부가세 포함 여부를 확인해주세요</small>
+              </FormField>
+
+              <FormField label="규격">
+                <input
+                  name="specification"
+                  value={form.specification}
+                  onChange={handleChange}
+                  placeholder="규격을 입력하세요"
+                />
+                <small>예) D13, 40kg, 5T</small>
+              </FormField>
+            </div>
+          </div>
+
+          <div className="write-actions">
+            <button
+              className="cancel-btn"
+              onClick={() => navigate("/material")}
+            >
+              취소
+            </button>
+            <button
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "수정 중..." : "수정하기"}
+            </button>
+          </div>
+        </section>
+
+        <aside className="write-preview">
+          <div className="preview-card">
+            <div className="preview-title">
+              <h3>자재 미리보기</h3>
+              <button onClick={handleReset}>
+                <FiRefreshCw />
+                초기화
+              </button>
+            </div>
+
+            <div className="preview-material">
+              <div className="preview-thumb">
+                <FiBox />
+              </div>
+
+              <div>
+                <h4>{form.materialName || "자재명이 입력됩니다"}</h4>
+                <span>{form.materialCategory || "분류명"}</span>
+              </div>
+            </div>
+
+            <PreviewInfo label="자재 코드" value={form.materialCode || "-"} />
+            <PreviewInfo
+              label="현재 재고"
+              value={
+                form.currentStock
+                  ? `${form.currentStock} ${form.unit || ""}`
+                  : "-"
+              }
+            />
+            <PreviewInfo
+              label="최소 재고"
+              value={
+                form.minimumStock
+                  ? `${form.minimumStock} ${form.unit || ""}`
+                  : "-"
+              }
+            />
+            <PreviewInfo label="단위" value={form.unit || "-"} />
+            <PreviewInfo
+              label="단가"
+              value={
+                form.price ? `${Number(form.price).toLocaleString()} 원` : "-"
+              }
+            />
+            <PreviewInfo label="규격" value={form.specification || "-"} />
+          </div>
+
+          <div className="preview-card">
+            <h3>재고 상태 미리보기</h3>
+            <p className="preview-desc">
+              현재 재고와 최소 재고를 입력하면 상태가 표시됩니다.
+            </p>
+
+            <div
+              className={
+                isEnough ? "stock-status normal" : "stock-status warning"
+              }
+            >
+              <FiCheckCircle />
+              <div>
+                <strong>{isEnough ? "정상" : "부족"}</strong>
+                <p>
+                  {isEnough
+                    ? "재고가 충분합니다."
+                    : "최소 재고보다 부족합니다."}
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function FormField({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="form-field">
+      <span>
+        {label}
+        {required && <em>*</em>}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function PreviewInfo({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="preview-info">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+export default MaterialEdit;

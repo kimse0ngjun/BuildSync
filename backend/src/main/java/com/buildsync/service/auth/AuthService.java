@@ -62,6 +62,11 @@ public class AuthService {
 	        throw new RuntimeException("비활성 계정입니다.");
 	    }
 
+	    Contact contact = contactRepository
+	            .findFirstByCompany_Id(company.getId())
+	            .orElse(null);
+
+
 	    String token =
 	            jwtUtil.generateToken(company.getLoginId());
 
@@ -71,7 +76,8 @@ public class AuthService {
 	            company.getId(),
 	            company.getCeoName(),
 	            company.getCompanyName(),
-	            company.getCompanyType().name()
+	            company.getCompanyType().name(),
+	            contact != null ? contact.getContactId() : null
 	    );
 	}
 	

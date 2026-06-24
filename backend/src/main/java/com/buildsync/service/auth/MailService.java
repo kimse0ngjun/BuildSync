@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import org.springframework.scheduling.annotation.Async;
+
 @Service
 @RequiredArgsConstructor
 public class MailService {
@@ -52,6 +54,7 @@ public class MailService {
         mailSender.send(message);
     }
     
+    @Async
     public void sendApprovalMail(String to, String companyName) throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();
@@ -73,6 +76,7 @@ public class MailService {
         mailSender.send(message);
     }
 
+    @Async
     public void sendRejectMail(String to, String companyName) throws MessagingException {
 
         MimeMessage message = mailSender.createMimeMessage();

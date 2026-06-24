@@ -16,6 +16,8 @@ public interface SiteRepository extends JpaRepository<Site, Long> {
 
     Optional<Site> findByIdAndCompany(Long siteId, Company company);
 
+    List<Site> findAllByCompany(Company company);
+
     @Query("SELECT s FROM Site s " +
             "WHERE s.company = :company " +
             "AND (:keyword IS NULL OR :keyword = '' " +

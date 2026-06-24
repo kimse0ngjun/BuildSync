@@ -1,8 +1,11 @@
 package com.buildsync.service.account;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.buildsync.dto.company.AccountDeleteRequest;
+import com.buildsync.dto.company.AccountPasswordChangeRequest;
 import com.buildsync.dto.company.AccountResponse;
 import com.buildsync.dto.company.AccountUpdateRequest;
 import com.buildsync.entity.Company;
@@ -18,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class AccountServiceImpl implements AccountService {
 
 	private final CompanyRepository companyRepository;
+	private final PasswordEncoder passwordEncoder;
 	
 	// 거래처 정보 조회
 	@Override
@@ -59,17 +63,67 @@ public class AccountServiceImpl implements AccountService {
         company.setAddress(request.getAddress());
 	}
 	
-	// 거래처 정보 삭제
+	// 로그인 후 비밀번호 변경
 	@Transactional
 	@Override
-	public void deleteCompanyAccount(String loginId) {
+	public void changePassword(
+	        String loginId,
+	        AccountPasswordChangeRequest request
+	) {
 
 	    Company company = companyRepository.findByLoginId(loginId)
 	            .orElseThrow(() ->
-	                    new IllegalArgumentException("회사를 찾을 수 없습니다."));
+	                new IllegalArgumentException("회사를 찾을 수 없습니다.")
+	            );
 
-	    company.setStatus(CompanyStatus.INACTIVE);
 
-	    companyRepository.save(company);
+	    if(!passwordEncoder.matches(
+	            request.getCurrentPassword(),
+	            company.getPassword()
+	    )) {
+	        throw new IllegalArgumentException(
+	                "현재 비밀번호가 일치하지 않습니다."
+	        );
+	    }
+
+
+	    company.setPassword(
+	        passwordEncoder.encode(
+	            request.getNewPassword()
+	        )
+	    );
+	}
+	
+	// 거래처 정보 삭제
+	@Transactional
+	@Override
+	public void deleteCompanyAccount(
+	        String loginId,
+	        AccountDeleteRequest request
+	) {
+
+	    Company company =
+	            companyRepository.findByLoginId(loginId)
+	            .orElseThrow(() ->
+	                new IllegalArgumentException(
+	                    "회사를 찾을 수 없습니다."
+	                )
+	            );
+
+	    if(!passwordEncoder.matches(
+	            request.getPassword(),
+	            company.getPassword()
+	    )) {
+
+	        throw new IllegalArgumentException(
+	            "비밀번호가 일치하지 않습니다."
+	        );
+
+	    }
+
+	    company.setStatus(
+	        CompanyStatus.INACTIVE
+	    );
+
 	}
 }
