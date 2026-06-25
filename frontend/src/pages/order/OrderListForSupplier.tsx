@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   FiSearch,
   FiFileText,
@@ -16,7 +15,7 @@ import { IoMdExit } from "react-icons/io";
 
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetailForSupplier } from "./modal/OrderModalDetailForSupplier";
-import { orderListApi } from "../../api/orderApi";
+import { orderListApi } from "../../api/OrderApi";
 import { STATUS_MAP } from "../../constants/status";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
@@ -140,7 +139,7 @@ export const OrderListForSupplier = () => {
         setSelectedOrderId(detailData);
         setIsModalOpen(true);
       })
-      .catch((err) => alert("상세 정보 조회에 실패했습니다."));
+      .catch(() => alert("상세 정보 조회에 실패했습니다."));
   };
 
   const icon = <FaRegCircleCheck />;

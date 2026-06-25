@@ -17,7 +17,7 @@ import { IoMdExit } from "react-icons/io";
 
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetail } from "./modal/OrderModalDetail";
-import { orderListApi } from "../../api/orderApi";
+import { orderListApi } from "../../api/OrderApi";
 import { STATUS_MAP } from "../../constants/status";
 import "../../styles/OrderList.css";
 import { useAuth } from "../../context/AuthContext";
