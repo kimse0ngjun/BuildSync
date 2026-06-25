@@ -14,57 +14,51 @@ import com.buildsync.entity.Orders;
 @Repository
 public interface AnalysisRepository extends JpaRepository<Orders, Long> {
 
-    // 월별 자재 비용 분석
+
+    // 건설업체 월별 자재 구매 비용
     @Query(value = """
 
         SELECT
-            DATE_FORMAT(si.processed_date, '%Y-%m') AS month,
 
-			COALESCE(
-			    SUM(
-			        CASE
-			            WHEN si.type = '입고'
-			            THEN si.quantity
-			            ELSE 0
-			        END
-			    )
-			    -
-			    SUM(
-			        CASE
-			            WHEN si.type = '출고'
-			            THEN si.quantity
-			            ELSE 0
-			        END
-			    ),
-			    0
-			) AS totalQuantity,
+            DATE_FORMAT(
+                o.order_date,
+                '%Y-%m'
+            ) AS month,
 
-			COALESCE(
-			    SUM(
-			        CASE
-			            WHEN si.type = '입고'
-			            THEN si.quantity * COALESCE(ss.unit_price,0)
-			            ELSE 0
-			        END
-			    ),
-			    0
-			) AS totalMaterialCost
 
-        FROM stock_inout si
+            COALESCE(
+                SUM(o.total_amount),
+                0
+            ) AS totalMaterialCost,
+
+
+            COALESCE(
+                COUNT(o.order_id),
+                0
+            ) AS totalQuantity
+
+
+        FROM orders o
+
 
         JOIN sites s
-            ON si.site_id = s.site_id
+        ON o.site_id = s.site_id
 
-        LEFT JOIN sup_stock ss
-            ON ss.material_id = si.material_id
-            AND ss.company_id = s.company_id
 
         WHERE s.company_id = :companyId
 
+        AND o.status IN ('ACCEPTED','PENDING')
+
+
         GROUP BY
-            DATE_FORMAT(si.processed_date, '%Y-%m')
+            DATE_FORMAT(
+                o.order_date,
+                '%Y-%m'
+            )
+
 
         ORDER BY month
+
 
         """, nativeQuery = true)
     List<MonthlyMaterialCostProjection>
@@ -73,7 +67,8 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long> {
     );
 
 
-    // 현장별 자재 사용 비용
+
+    // 건설업체 현장별 자재 구매 비용
     @Query(value = """
 
         SELECT
@@ -86,6 +81,7 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long> {
 
             m.unit AS unit,
 
+
             COALESCE(
                 SUM(
                     CASE
@@ -97,6 +93,7 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long> {
                 0
             ) AS inboundQuantity,
 
+
             COALESCE(
                 SUM(
                     CASE
@@ -107,6 +104,7 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long> {
                 ),
                 0
             ) AS outboundQuantity,
+
 
             COALESCE(
                 SUM(
@@ -127,42 +125,55 @@ public interface AnalysisRepository extends JpaRepository<Orders, Long> {
                 0
             ) AS currentStock,
 
+
             COALESCE(
                 MAX(oi.unit_price),
                 MAX(ss.unit_price),
                 0
             ) AS unitPrice
 
+
         FROM stock_inout si
 
+
         JOIN sites s
-            ON si.site_id = s.site_id
+        ON si.site_id = s.site_id
+
 
         JOIN material m
-            ON si.material_id = m.material_id
+        ON si.material_id = m.material_id
+
 
         LEFT JOIN order_items oi
-            ON oi.material_id = m.material_id
+        ON oi.material_id = m.material_id
+
 
         LEFT JOIN sup_stock ss
-            ON ss.material_id = m.material_id
+        ON ss.material_id = m.material_id
+
 
         WHERE s.company_id = :companyId
 
+
         GROUP BY
+
             s.site_id,
             s.site_name,
             m.material_id,
             m.material_name,
             m.unit
 
+
         ORDER BY
+
             s.site_name,
             m.material_name
+
 
         """, nativeQuery = true)
     List<SiteMaterialUsageAnalysisProjection>
     findSiteMaterialUsage(
         @Param("companyId") Long companyId
     );
+
 }

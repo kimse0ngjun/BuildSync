@@ -254,7 +254,7 @@ public class ScheduleService {
     private CalendarEventResponse toConstructionEvent(Schedule s) {
         return CalendarEventResponse.builder()
                 .eventId(s.getId())
-                .title(s.getTitle())
+                .title(s.getSiteName().getSiteName())
                 .startDate(s.getStartDate())
                 .endDate(s.getEndDate())
                 .eventType("SITES")
