@@ -1,7 +1,10 @@
 import axios from "axios";
+
 import type {
-  MonthlyMaterialCostResponse,
-  SiteMaterialUsageAnalysisResponse,
+  MonthlyPurchase,
+  SiteUsage,
+  MonthlySales,
+  SiteCost,
 } from "../types/analysis";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -14,24 +17,68 @@ const getAuthHeader = () => {
   };
 };
 
-// 월별 자재 구매 비용 분석
-export const getMonthlyMaterialCost = (companyId: number) => {
-  return axios.get<MonthlyMaterialCostResponse[]>(
-    `${API_URL}/analysis/material/monthly`,
-    {
-      params: { companyId },
-      headers: getAuthHeader(),
-    },
-  );
+const getCompanyId = () => {
+  return localStorage.getItem("companyId");
 };
 
-// 현장별 자재 사용 분석
-export const getSiteMaterialUsage = (companyId: number) => {
-  return axios.get<SiteMaterialUsageAnalysisResponse[]>(
-    `${API_URL}/analysis/material/site`,
-    {
-      params: { companyId },
-      headers: getAuthHeader(),
+// 건설업체
+// 월별 자재 구매 비용 합계
+export const getCompanyMonthlyPurchase = async (): Promise<
+  MonthlyPurchase[]
+> => {
+  const companyId = getCompanyId();
+
+  const res = await axios.get(`${API_URL}/analysis/company/monthly-purchase`, {
+    params: {
+      companyId,
     },
-  );
+    headers: getAuthHeader(),
+  });
+
+  return res.data;
+};
+
+// 건설업체
+// 현장별 자재 사용 합계
+export const getCompanySiteUsage = async (): Promise<SiteUsage[]> => {
+  const companyId = getCompanyId();
+
+  const res = await axios.get(`${API_URL}/analysis/company/site-usage`, {
+    params: {
+      companyId,
+    },
+    headers: getAuthHeader(),
+  });
+
+  return res.data;
+};
+
+// 공급업체
+// 월별 자재 판매 비용 합계
+export const getSupplierMonthlySales = async (): Promise<MonthlySales[]> => {
+  const companyId = getCompanyId();
+
+  const res = await axios.get(`${API_URL}/analysis/supplier/monthly-sales`, {
+    params: {
+      companyId,
+    },
+    headers: getAuthHeader(),
+  });
+
+  return res.data;
+};
+
+// 공급업체
+// 현장별 자재 비용 상세
+export const getSupplierSiteCost = async (): Promise<SiteCost[]> => {
+  const companyId = getCompanyId();
+
+  const res = await axios.get(`${API_URL}/analysis/supplier/site-cost`, {
+    params: {
+      companyId,
+    },
+    headers: getAuthHeader(),
+  });
+
+  return res.data;
 };
