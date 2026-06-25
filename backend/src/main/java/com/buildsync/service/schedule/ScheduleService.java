@@ -61,7 +61,7 @@ public class ScheduleService {
         // 자재 입고 (orders)
         if (isMaterial) {
             orderRepository
-            .findDeliveriesByCompanyAndMonth(
+            .findCalendarOrders(
                 companyId,
                 firstDay,
                 lastDay
