@@ -65,7 +65,7 @@ export const EditOrder = () => {
     return <LoginRequired />;
   }
 
-  if (myCompanyType !== "CONSTUCTION") {
+  if (myCompanyType !== "CONSTRUCTION") {
     return <NoAccess targetRoleName="건설업체" />;
   }
 
@@ -353,10 +353,12 @@ export const EditOrder = () => {
                 : "-"}
             </span>
 
-            <button type="button" onClick={handleAddMaterial}>
-              <FiPlus />
-              추가
-            </button>
+            {basketList.length === 0 && (
+              <button type="button" onClick={handleAddMaterial}>
+                <FiPlus />
+                추가
+              </button>
+            )}
           </div>
 
           <p className="order-table-help">

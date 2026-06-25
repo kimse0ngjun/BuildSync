@@ -115,6 +115,7 @@ function StockInOutEdit() {
             if (mappedItems.length > 0) {
               fetchRightStockDetail(mappedItems[0].materialId);
             }
+            console.log("상세 응답", resData);
           }
         })
         .catch((err) => {
@@ -136,6 +137,7 @@ function StockInOutEdit() {
             setActivePreviewStock(liveMat);
           }
         })
+
         .catch(console.error);
     } else {
       setCurrentUnitDisplay("EA");
@@ -374,15 +376,17 @@ function StockInOutEdit() {
                 value={currentQuantityInput}
                 onChange={(e) => setCurrentQuantityInput(e.target.value)}
                 className="quantity-data"
+                min={1}
               />
               <div className="unit-display-box">{currentUnitDisplay}</div>
-              <button
-                type="button"
-                onClick={handleAddItemToGrid}
-                className="material-add-btn"
-              >
-                품목 추가
-              </button>
+              {gridItems.length === 0 && (
+                <button
+                  onClick={handleAddItemToGrid}
+                  className="material-add-btn"
+                >
+                  추가
+                </button>
+              )}
             </div>
 
             <table className="stock-write-table">

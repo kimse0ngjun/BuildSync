@@ -360,10 +360,12 @@ export const WriteOrder = () => {
                 : "-"}
             </span>
 
-            <button type="button" onClick={handleAddMaterial}>
-              <FiPlus />
-              추가
-            </button>
+            {basketList.length === 0 && (
+              <button type="button" onClick={handleAddMaterial}>
+                <FiPlus />
+                추가
+              </button>
+            )}
           </div>
 
           <p className="order-table-help">

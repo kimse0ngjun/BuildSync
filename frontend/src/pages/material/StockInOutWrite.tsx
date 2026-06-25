@@ -431,13 +431,16 @@ function StockInOutWrite() {
                   min={0}
                 />
                 <div className="unit-display-box">{currentUnitDisplay}</div>
-                <button
-                  type="button"
-                  onClick={handleAddItemToGrid}
-                  className="material-add-btn"
-                >
-                  추가
-                </button>
+
+                {gridItems.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={handleAddItemToGrid}
+                    className="material-add-btn"
+                  >
+                    추가
+                  </button>
+                )}
               </div>
             )}
 
