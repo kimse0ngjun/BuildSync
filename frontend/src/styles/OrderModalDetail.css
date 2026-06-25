@@ -1,14 +1,30 @@
 .order-modal-detail-container {
   width: 100%;
+  max-height: calc(85vh - 120px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .detail-info-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 10px 5px;
+  gap: 14px;
+  padding: 10px 4px;
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 8px;
+}
+
+.detail-info-section::-webkit-scrollbar {
+  width: 6px;
+}
+.detail-info-section::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.detail-info-section::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .detail-row {
@@ -62,6 +78,15 @@
   border: 1px solid #e2e8f0;
 }
 
+.material-items-scroll-area {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
 .total-amount-text {
   font-size: 16px;
   font-weight: 800;
@@ -107,8 +132,10 @@
 .modal-action-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
-  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
 }
 
 .modal-action-buttons button {
@@ -320,4 +347,9 @@ body.dark-mode .base-modal-header p {
   color: #475569 !important;
   font-size: 13px !important;
   font-weight: 500 !important;
+}
+
+body.dark-mode .modal-action-buttons {
+  background: #1e293b;
+  border-top-color: #334155;
 }
