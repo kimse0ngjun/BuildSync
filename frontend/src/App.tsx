@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 
 import CompanyList from "./pages/company/CompanyList";
 import CompanyDetail from "./pages/company/CompanyDetail";
-import CompanyEdit from "./pages/company/CompanyEdit";
 
 import MaterialList from "./pages/material/MeterialList";
 import MaterialWrite from "./pages/material/MaterialWrite";
@@ -94,7 +93,6 @@ function App() {
 
             <Route path="/company" element={<CompanyList />} />
             <Route path="/company/:companyId" element={<CompanyDetail />} />
-            <Route path="/company/:companyId/edit" element={<CompanyEdit />} />
 
             <Route path="/material" element={<MaterialList />} />
             <Route path="/material/write" element={<MaterialWrite />} />

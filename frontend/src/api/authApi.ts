@@ -18,23 +18,19 @@ interface SignupRequest {
   email: string;
 }
 
-interface ResetPasswordRequest {
-  email: string;
-  password: string;
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
 }
 
 const authApi = {
-  login: (data: LoginRequest) =>
-    api.post("/auth/login", data),
+  login: (data: LoginRequest) => api.post("/auth/login", data),
 
-  signup: (data: SignupRequest) =>
-    api.post("/auth/signup", data),
+  signup: (data: SignupRequest) => api.post("/auth/signup", data),
 
-  findId: (phone: string) =>
-    api.post("/auth/find-id", { phone }),
+  findId: (phone: string) => api.post("/auth/find-id", { phone }),
 
-  findPassword: (email: string) =>
-    api.post("/auth/find-password", { email }),
+  findPassword: (email: string) => api.post("/auth/find-password", { email }),
 
   resetPassword: (data: ResetPasswordRequest) =>
     api.post("/auth/reset-password", data),

@@ -139,7 +139,6 @@ function StockInOutList() {
       .getInoutDashboard(apiParams)
       .then((res) => {
         if (res) {
-          console.log("백엔드 수신 차트 데이터 구조 검증:", res.chartData);
           const rawGroupList = res.inOutList?.list || [];
           const flattenedList: InOutResponse[] = [];
 

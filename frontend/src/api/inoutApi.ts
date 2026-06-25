@@ -48,7 +48,6 @@ export const inoutApi = {
     };
 
     return api.get<InOutSumResponse>("/dashboard", { params }).then((res) => {
-      console.log("입출고 API 수신", res.data);
       return res.data;
     });
   },
@@ -58,14 +57,12 @@ export const inoutApi = {
     return api
       .get<AutoFillResponse>("/auto-fill", { params: { orderId } })
       .then((res) => {
-        console.log("발주 자동완성 데이터", res.data);
         return res.data;
       });
   },
 
   registerStockInout: (regData: InOutRegRequest): Promise<string> => {
     return api.post<string>("/regist", regData).then((res) => {
-      console.log("입출고 등록 성공");
       return res.data;
     });
   },
@@ -82,7 +79,6 @@ export const inoutApi = {
         },
       })
       .then((res) => {
-        console.log("자재 실시간 기준정보", res.data);
         return res.data;
       });
   },
@@ -100,7 +96,6 @@ export const inoutApi = {
     regData: InOutRegRequest,
   ): Promise<string> => {
     return api.patch<string>(`/update/${stockInoutId}`, regData).then((res) => {
-      console.log("입출고 수정 처리 성공:", res.data);
       return res.data;
     });
   },
