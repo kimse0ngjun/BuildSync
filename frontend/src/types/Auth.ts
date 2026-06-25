@@ -19,8 +19,8 @@ export interface SignupRequest {
 }
 
 export interface ResetPasswordRequest {
-  email: string;
-  password: string;
+  token: string;
+  newPassWord: string;
 }
 
 export interface LoginResponse {

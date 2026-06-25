@@ -29,7 +29,6 @@ function CompanyDetail() {
     const loadCompany = async () => {
       try {
         const res = await getCompany(Number(companyId));
-        console.log("상세 응답:", res.data);
         setCompany(res.data);
       } catch (e) {
         console.error("상세 조회 실패", e);

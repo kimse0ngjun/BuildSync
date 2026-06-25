@@ -65,7 +65,7 @@ export const EditOrder = () => {
     return <LoginRequired />;
   }
 
-  if (myCompanyType !== "CONSTUCTION") {
+  if (myCompanyType !== "CONSTRUCTION") {
     return <NoAccess targetRoleName="건설업체" />;
   }
 

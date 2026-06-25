@@ -35,9 +35,6 @@ function CostAnalysisPage() {
         getSiteMaterialUsage(companyId),
       ]);
 
-      console.log("monthly", monthly.data);
-      console.log("site", site.data);
-
       setMonthlyData(monthly.data);
       setSiteData(site.data);
     } catch (e) {
@@ -131,7 +128,7 @@ function CostAnalysisPage() {
                     {item.unit}
                   </td>
 
-                  <td>{item.unitPrice.toLocaleString()}원</td>
+                  <td>{(item.unitPrice ?? 0).toLocaleString()}원</td>
                 </tr>
               ))}
             </tbody>
