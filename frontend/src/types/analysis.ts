@@ -1,16 +1,24 @@
-export interface MonthlyMaterialCostResponse {
+// 건설업체
+export interface MonthlyPurchase {
   month: string;
-  totalQuantity: number;
-  totalMaterialCost: number;
+  totalCost: number;
 }
 
-export interface SiteMaterialUsageAnalysisResponse {
-  siteId: number;
+export interface SiteUsage {
+  siteName: string;
+  totalQuantity: number;
+}
+
+// 공급업체
+export interface MonthlySales {
+  month: string;
+  totalSales: number;
+}
+
+export interface SiteCost {
   siteName: string;
   materialName: string;
-  inboundQuantity: number;
-  outboundQuantity: number;
-  currentStock: number;
+  quantity: number;
   unitPrice: number;
-  unit: string;
+  totalPrice: number;
 }
