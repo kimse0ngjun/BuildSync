@@ -3,7 +3,6 @@ import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
 import type { NotificationResponse } from "../../types/Notification";
 import { notificationListApi } from "../../api/notificationApi";
-import { MdDeleteOutline } from "react-icons/md";
 import "../../styles/Notifications.css";
 
 export default function NotificationPage() {
@@ -113,8 +112,6 @@ export default function NotificationPage() {
   if (!isLogin) {
     return <LoginRequired />;
   }
-
-  const deleteIcon = <MdDeleteOutline />;
 
   return (
     <div className="container">

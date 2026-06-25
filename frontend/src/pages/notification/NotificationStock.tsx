@@ -3,7 +3,6 @@ import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
 import { FaBoxes, FaExclamationCircle } from "react-icons/fa";
 import { MdOutlineRemoveShoppingCart } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
 import type {
   MaterialShortageResponse,
   StockShortageResponse,
@@ -12,7 +11,6 @@ import { stockShortageApi } from "../../api/stockStortageApi";
 import "../../styles/Notifications.css";
 
 export const NotificationStock = () => {
-  const nav = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const companyId = Number(localStorage.getItem("companyId"));
   const { isLogin } = useAuth();

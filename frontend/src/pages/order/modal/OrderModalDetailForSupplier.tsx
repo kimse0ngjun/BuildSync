@@ -1,4 +1,4 @@
-import { writeOrderApi } from "../../../api/orderApi";
+import { writeOrderApi } from "../../../api/OrderApi";
 import LoginRequired from "../../../components/LoginRequired";
 import NoAccess from "../../../components/NoAccess";
 import { STATUS_MAP } from "../../../constants/status";

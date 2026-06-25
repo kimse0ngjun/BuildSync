@@ -119,22 +119,4 @@ function QuickCard({
   );
 }
 
-function ProcessCard({
-  step,
-  title,
-  desc,
-}: {
-  step: string;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="process-card">
-      <span>{step}</span>
-      <h3>{title}</h3>
-      <p>{desc}</p>
-    </div>
-  );
-}
-
 export default UserDashboard;
