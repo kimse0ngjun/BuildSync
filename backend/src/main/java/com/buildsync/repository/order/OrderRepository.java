@@ -119,17 +119,21 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
 	
 	// 자재 조회
 	@Query("""
-		    SELECT o FROM Orders o
-		    JOIN FETCH o.company c
-		    WHERE o.company.id = :companyId
-		      AND o.expectedDeliveryDate BETWEEN :firstDay AND :lastDay
-		      AND o.status <> 'CANCELED'
-		""")
-        List<Orders> findDeliveriesByCompanyAndMonth(
-            @Param("companyId") Long companyId,
-            @Param("firstDay")  LocalDate firstDay,
-            @Param("lastDay")   LocalDate lastDay
-        );
+			SELECT DISTINCT o
+			FROM Orders o
+			LEFT JOIN o.contact ct
+			LEFT JOIN ct.company supplier
+			WHERE (
+			       o.company.id = :companyId
+			       OR supplier.id = :companyId
+			      )
+			  AND o.expectedDeliveryDate BETWEEN :firstDay AND :lastDay
+			  AND o.status <> 'CANCELED'
+			""")
+			List<Orders> findCalendarOrders(
+			        @Param("companyId") Long companyId,
+			        @Param("firstDay") LocalDate firstDay,
+			        @Param("lastDay") LocalDate lastDay);
 	
 	@Query("""
 		    SELECT DISTINCT new com.buildsync.dto.inout.SelectResponse(
