@@ -1,0 +1,70 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: buildsync-mysql
+
+    environment:
+      MYSQL_DATABASE: buildsync
+      MYSQL_ROOT_PASSWORD: root
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+
+  backend:
+
+    build:
+      context: ./backend
+
+    container_name: buildsync-backend
+
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/buildsync
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "8080:8080"
+
+
+
+  frontend:
+
+    build:
+      context: ./frontend
+
+    container_name: buildsync-frontend
+
+    depends_on:
+      - backend
+
+
+
+  nginx:
+
+    image: nginx:latest
+
+    container_name: buildsync-nginx
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+
+    depends_on:
+      - frontend
+      - backend
+
+
+
+volumes:
+
+  mysql-data:
