@@ -11,9 +11,9 @@ import com.buildsync.dto.inout.SelectResponse;
 import com.buildsync.dto.order.ContactResponse;
 import com.buildsync.dto.order.MaterialSelectResponse;
 import com.buildsync.dto.order.OrderDetailResponse;
+import com.buildsync.dto.order.OrderListResponse;
 import com.buildsync.dto.order.OrderRequest;
 import com.buildsync.dto.order.OrderStatusResponse;
-import com.buildsync.dto.order.OrderListResponse;
 import com.buildsync.dto.paging.PageResponse;
 import com.buildsync.entity.Company;
 import com.buildsync.entity.CompanyType;
@@ -44,6 +44,7 @@ public class OrderService {
 	private final CompanyRepository companyRepository;
 	private final ContactRepository contactRepository;
 	private final SupStockRepository supStockRepository;
+
 	
 	// 발주서 작성 등록
 	@Transactional
@@ -93,9 +94,13 @@ public class OrderService {
 	    orders.modifyOrderDetails(req.getMemo(), items);
 
 	    Orders saved = orderRepository.save(orders);
+	    
+	    Long supplierId = contactRepository.findById(req.getContactId())
+	            .map(contact -> contact.getCompany().getId())
+	            .orElseThrow(() -> new IllegalArgumentException("해당 담당자의 업체 정보를 찾을 수 없습니다."));
 
 	    notificationService.sendNotification(
-	            req.getCompanyId(),
+	    		supplierId,
 	            "NEW_ORDER",
 	            "신규 발주 요청 건",
 	            "새로운 자재 발주서가 접수되었습니다.",
