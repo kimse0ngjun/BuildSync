@@ -115,7 +115,6 @@ function StockInOutEdit() {
             if (mappedItems.length > 0) {
               fetchRightStockDetail(mappedItems[0].materialId);
             }
-            console.log("상세 응답", resData);
           }
         })
         .catch((err) => {
