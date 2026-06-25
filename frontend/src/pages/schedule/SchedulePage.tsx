@@ -89,6 +89,16 @@ function SchedulePage() {
 
   useEffect(() => {
     loadCalendar();
+
+    const handleFocus = () => {
+      loadCalendar();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [loadCalendar]);
 
   const fcEvents = calendarEvents.map((ev) => ({
