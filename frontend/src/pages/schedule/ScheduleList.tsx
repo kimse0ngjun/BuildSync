@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSchedules } from "../../api/schedule";
 import type { ScheduleResponse } from "../../types/schedule";
 import "../../styles/ScheduleList.css";
@@ -6,18 +6,28 @@ import "../../styles/ScheduleList.css";
 function ScheduleList() {
   const [list, setList] = useState<ScheduleResponse[]>([]);
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const res = await getSchedules(1);
       setList(res.data.list);
     } catch (e) {
       console.error(e);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    load();
+
+    const handleFocus = () => {
+      load();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [load]);
 
   return (
     <div className="schedule-list-page">
