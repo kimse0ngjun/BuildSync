@@ -107,30 +107,9 @@ public class StockInoutService {
 	    // 그룹핑
 	    Map<String, List<StockInout>> groupedMap =
 	            slicedList.stream()
-	                    .collect(Collectors.groupingBy(si -> {
-
-	                        if (si.getOrders() != null) {
-	                            return "ORDER_" + si.getOrders().getOrderId();
-	                        }
-
-	                        Long siteKey =
-	                                si.getSite() != null
-	                                        ? si.getSite().getId()
-	                                        : 0L;
-
-	                        Long contactKey =
-	                                si.getContact() != null
-	                                        ? si.getContact().getContactId()
-	                                        : 0L;
-
-	                        return String.valueOf(si.getProcessedDate())
-	                                + "_"
-	                                + siteKey
-	                                + "_"
-	                                + contactKey
-	                                + "_"
-	                                + si.getType();
-	                    }));
+	                    .collect(Collectors.groupingBy(
+	                    		si -> String.valueOf(si.getId())
+	                    ));
 
 	    // DTO 변환
 	    List<InOutResponse> dtoList =
@@ -378,119 +357,96 @@ public class StockInoutService {
 	@Transactional
 	public void updateInoutStock(Long stockInoutId, InOutRegRequest req) {
 
-		if (req.getItems() == null || req.getItems().isEmpty()) {
-			throw new IllegalArgumentException("수정할 자재가 없습니다.");
-		}
-
-		Site site = req.getSiteId() != null
-				? siteRepository.findById(req.getSiteId()).orElse(null)
-				: null;
-
-		Orders orders = req.getOrderId() != null
-				? orderRepository.findById(req.getOrderId()).orElse(null)
-				: null;
-
-		Contact contact = req.getContactId() != null
-				? contactRepository.findById(req.getContactId()).orElse(null)
-				: null;
-
-		Long companyId = req.getCompanyId();
-
-		if (stockInoutId != null) {
-
-			StockInout baseInout = stockInoutRepository.findById(stockInoutId)
-					.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 입출고 마스터 전표입니다."));
-
-			List<StockInout> oldInoutList;
-			if (baseInout.getOrders() != null) {
-				oldInoutList = stockInoutRepository.findByOrderId(baseInout.getOrders().getOrderId());
-			} else {
-				oldInoutList = stockInoutRepository.findByProcessedDateAndSiteAndContactIdAndType(
-						baseInout.getProcessedDate(),
-						baseInout.getSite() != null ? baseInout.getSite().getId() : null,
-						baseInout.getContact() != null ? baseInout.getContact().getContactId() : null,
-						baseInout.getType()
-				);
-			}
-
-			for (StockInout stockInout : oldInoutList) {
-
-				SupStock oldStock = supStockRepository
-						.findByCompanyIdAndMaterialId(
-								companyId,
-								stockInout.getMaterial().getId())
-						.orElseThrow(() ->
-								new IllegalArgumentException("기존 자재의 정보를 찾을 수 없습니다."));
-
-				int rollbackQty = oldStock.getCurrentQuantity();
-
-				if ("입고".equals(stockInout.getType())) {
-					rollbackQty -= stockInout.getQuantity();
-				} else if ("출고".equals(stockInout.getType())) {
-					rollbackQty += stockInout.getQuantity();
-				} else {
-					throw new IllegalArgumentException("기존 입출고 데이터의 타입이 올바르지 않습니다.");
-				}
-
-				oldStock.changeCurStock(rollbackQty);
-			}
-
-			stockInoutRepository.deleteAll(oldInoutList);
-			stockInoutRepository.flush();
-		}
-
-	    // 신규 입출고 등록
-	    for (InOutRegRequest.ItemDetail item : req.getItems()) {
-
-	        Material material = materialRepository.findById(item.getMaterialId())
-	                .orElseThrow(() ->
-	                        new IllegalArgumentException("존재하지 않은 자재입니다."));
-
-	        SupStock newSupStock = supStockRepository
-	                .findByCompanyIdAndMaterialId(companyId, material.getId())
-	                .orElseThrow(() ->
-	                        new IllegalArgumentException("해당 회사가 취급하지 않는 자재입니다."));
-
-	        int updatedStock = newSupStock.getCurrentQuantity();
-
-	        if ("입고".equals(req.getType())) {
-
-	            updatedStock += item.getQuantity();
-
-	        } else if ("출고".equals(req.getType())) {
-
-	            updatedStock -= item.getQuantity();
-
-	            if (updatedStock < 0) {
-	                throw new IllegalStateException(
-	                        material.getMaterialName()
-	                                + "의 재고가 부족하여 수정할 수 없습니다."
-	                                + "\n현재 재고 ("
-	                                + newSupStock.getCurrentQuantity()
-	                                + material.getUnit()
-	                                + ")");
-	            }
-
-	        } else {
-
-	            throw new IllegalArgumentException("입출고 타입이 올바르지 않습니다.");
-	        }
-
-	        newSupStock.changeCurStock(updatedStock);
-
-	        StockInout newStockInout = StockInout.builder()
-	                .site(site)
-	                .material(material)
-	                .orders(orders)
-	                .contact(contact)
-	                .type(req.getType())
-	                .quantity(item.getQuantity())
-	                .processedDate(java.sql.Date.valueOf(LocalDate.now()))
-	                .memo(req.getMemo())
-	                .build();
-
-	        stockInoutRepository.save(newStockInout);
+	    if (req.getItems() == null || req.getItems().isEmpty()) {
+	        throw new IllegalArgumentException("수정할 자재가 없습니다.");
 	    }
+
+	    Long companyId = req.getCompanyId();
+
+	    Site site = req.getSiteId() != null
+	            ? siteRepository.findById(req.getSiteId()).orElse(null)
+	            : null;
+
+	    Orders orders = req.getOrderId() != null
+	            ? orderRepository.findById(req.getOrderId()).orElse(null)
+	            : null;
+
+	    Contact contact = req.getContactId() != null
+	            ? contactRepository.findById(req.getContactId()).orElse(null)
+	            : null;
+
+	    StockInout oldInout = stockInoutRepository.findById(stockInoutId)
+	            .orElseThrow(() ->
+	                    new IllegalArgumentException("존재하지 않는 입출고 내역입니다."));
+
+	    SupStock oldStock = supStockRepository
+	            .findByCompanyIdAndMaterialId(
+	                    companyId,
+	                    oldInout.getMaterial().getId())
+	            .orElseThrow(() ->
+	                    new IllegalArgumentException("기존 자재의 정보를 찾을 수 없습니다."));
+
+	    int rollbackQty = oldStock.getCurrentQuantity();
+
+	    if ("입고".equals(oldInout.getType())) {
+	        rollbackQty -= oldInout.getQuantity();
+	    } else if ("출고".equals(oldInout.getType())) {
+	        rollbackQty += oldInout.getQuantity();
+	    }
+
+	    oldStock.changeCurStock(rollbackQty);
+
+	    stockInoutRepository.delete(oldInout);
+	    stockInoutRepository.flush();
+
+	    InOutRegRequest.ItemDetail item = req.getItems().get(0);
+
+	    Material material = materialRepository.findById(item.getMaterialId())
+	            .orElseThrow(() ->
+	                    new IllegalArgumentException("존재하지 않는 자재입니다."));
+
+	    SupStock newStock = supStockRepository
+	            .findByCompanyIdAndMaterialId(companyId, material.getId())
+	            .orElseThrow(() ->
+	                    new IllegalArgumentException("해당 회사가 취급하지 않는 자재입니다."));
+
+	    int updatedQty = newStock.getCurrentQuantity();
+
+	    if ("입고".equals(req.getType())) {
+
+	        updatedQty += item.getQuantity();
+
+	    } else if ("출고".equals(req.getType())) {
+
+	        updatedQty -= item.getQuantity();
+
+	        if (updatedQty < 0) {
+	            throw new IllegalStateException(
+	                    material.getMaterialName()
+	                            + "의 재고가 부족합니다."
+	                            + "\n현재 재고("
+	                            + newStock.getCurrentQuantity()
+	                            + material.getUnit()
+	                            + ")");
+	        }
+	    } else {
+	        throw new IllegalArgumentException("입출고 타입이 올바르지 않습니다.");
+	    }
+
+	    newStock.changeCurStock(updatedQty);
+
+	    StockInout newInout = StockInout.builder()
+	            .site(site)
+	            .material(material)
+	            .orders(orders)
+	            .contact(contact)
+	            .type(req.getType())
+	            .quantity(item.getQuantity())
+	            .processedDate(java.sql.Date.valueOf(LocalDate.now()))
+	            .memo(req.getMemo())
+	            .build();
+
+	    stockInoutRepository.save(newInout);
 	}
 	
 	// 입출고 상세
@@ -588,43 +544,33 @@ public class StockInoutService {
 	
 	@Transactional(readOnly = true)
 	public InOutResponse getInoutDetailById(Long stockInoutId) {
-		
-			StockInout baseInout = stockInoutRepository.findById(stockInoutId)
-					.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 입출고 이력 전표입니다."));
 
-			List<StockInout> relatedGroup;
-			if (baseInout.getOrders() != null) {
-				relatedGroup = stockInoutRepository.findByOrderId(baseInout.getOrders().getOrderId());
-			} else {
-				relatedGroup = stockInoutRepository.findByProcessedDateAndSiteAndContactIdAndType(
-						baseInout.getProcessedDate(),
-						baseInout.getSite() != null ? baseInout.getSite().getId() : null,
-						baseInout.getContact() != null ? baseInout.getContact().getContactId() : null,
-						baseInout.getType()
-				);
-			}
+	    StockInout baseInout = stockInoutRepository.findById(stockInoutId)
+	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 입출고 이력 전표입니다."));
 
-			List<InOutResponse.ItemInfo> itemInfos = relatedGroup.stream()
-					.map(item -> InOutResponse.ItemInfo.builder()
-							.materialId(item.getMaterial().getId())
-							.materialName(item.getMaterial().getMaterialName())
-							.quantity(item.getQuantity())
-							.unit(item.getMaterial().getUnit())
-							.build())
-					.collect(Collectors.toList());
+	    List<InOutResponse.ItemInfo> itemInfos = List.of(
+	            InOutResponse.ItemInfo.builder()
+	                    .materialId(baseInout.getMaterial().getId())
+	                    .materialName(baseInout.getMaterial().getMaterialName())
+	                    .quantity(baseInout.getQuantity())
+	                    .unit(baseInout.getMaterial().getUnit())
+	                    .build()
+	    );
 
-			return InOutResponse.builder()
-					.stockInoutId(baseInout.getId())
-					.siteId(baseInout.getSite() != null ? baseInout.getSite().getId() : null)
-					.siteName(baseInout.getSite() != null ? baseInout.getSite().getSiteName() : "본사재고")
-					.orderId(baseInout.getOrders() != null ? baseInout.getOrders().getOrderId() : null)
-					.contactId(baseInout.getContact() != null ? baseInout.getContact().getContactId() : null)
-					.contactName(baseInout.getContact() != null ? baseInout.getContact().getContactName() : "-")
-					.type(baseInout.getType())
-					.processedDate(baseInout.getProcessedDate() != null ? baseInout.getProcessedDate().toString() : null)
-					.memo(baseInout.getMemo())
-					.items(itemInfos)
-					.build();
-		}
+	    return InOutResponse.builder()
+	            .stockInoutId(baseInout.getId())
+	            .siteId(baseInout.getSite() != null ? baseInout.getSite().getId() : null)
+	            .siteName(baseInout.getSite() != null ? baseInout.getSite().getSiteName() : "본사재고")
+	            .orderId(baseInout.getOrders() != null ? baseInout.getOrders().getOrderId() : null)
+	            .contactId(baseInout.getContact() != null ? baseInout.getContact().getContactId() : null)
+	            .contactName(baseInout.getContact() != null ? baseInout.getContact().getContactName() : "-")
+	            .type(baseInout.getType())
+	            .processedDate(baseInout.getProcessedDate() != null
+	                    ? baseInout.getProcessedDate().toString()
+	                    : null)
+	            .memo(baseInout.getMemo())
+	            .items(itemInfos)
+	            .build();
+	}
 
 }
