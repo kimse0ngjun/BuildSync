@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCompanies } from "../../api/company";
 import type { Company } from "../../types/company";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 function CompanyList() {
   const navigate = useNavigate();
+  const { isLogin } = useAuth();
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -15,6 +18,10 @@ function CompanyList() {
   const [type, setType] = useState("");
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const loadCompanies = async () => {
     try {

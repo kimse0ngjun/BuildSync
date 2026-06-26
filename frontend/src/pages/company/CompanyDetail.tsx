@@ -15,13 +15,20 @@ import { useEffect, useState } from "react";
 import "../../styles/CompanyDetail.css";
 import { deleteCompany, getCompany } from "../../api/company";
 import type { CompanyDetail as CompanyDetailType } from "../../types/company";
+import LoginRequired from "../../components/LoginRequired";
+import { useAuth } from "../../context/AuthContext";
 
 function CompanyDetail() {
   const navigate = useNavigate();
   const { companyId } = useParams();
+  const { isLogin } = useAuth();
 
   const [company, setCompany] = useState<CompanyDetailType | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   useEffect(() => {
     if (!companyId) return;
