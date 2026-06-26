@@ -59,6 +59,30 @@ function JoinPage() {
     setError("");
   };
 
+  const handleBusinessNumberChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const number = e.target.value.replace(/[^0-9]/g, "");
+
+    let formatted = number;
+
+    if (number.length > 3 && number.length <= 5) {
+      formatted = `${number.slice(0, 3)}-${number.slice(3)}`;
+    } else if (number.length > 5) {
+      formatted = `${number.slice(0, 3)}-${number.slice(3, 5)}-${number.slice(
+        5,
+        10,
+      )}`;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      businessNumber: formatted,
+    }));
+
+    setError("");
+  };
+
   const handleSubmit = async () => {
     if (!form.loginId) return setError("아이디를 입력하세요.");
     if (!form.password) return setError("비밀번호를 입력하세요.");
@@ -77,12 +101,18 @@ function JoinPage() {
       await authApi.signup({
         ...form,
         phone: form.phone.replace(/-/g, ""),
+        businessNumber: form.businessNumber.replace(/-/g, ""),
       });
 
       alert("회원가입이 완료되었습니다.");
       navigate("/login");
-    } catch {
-      setError("회원가입에 실패했습니다.");
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message ||
+        err.response?.data ||
+        "회원가입에 실패했습니다.";
+
+      setError(message);
     }
   };
 
@@ -188,8 +218,9 @@ function JoinPage() {
               <input
                 name="businessNumber"
                 value={form.businessNumber}
-                onChange={handleChange}
+                onChange={handleBusinessNumberChange}
                 placeholder="예) 123-45-67891"
+                maxLength={12}
               />
             </FormField>
 
