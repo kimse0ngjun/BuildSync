@@ -4,6 +4,7 @@ import LoginRequired from "../../components/LoginRequired";
 import type { NotificationResponse } from "../../types/Notification";
 import { notificationListApi } from "../../api/notificationApi";
 import "../../styles/Notifications.css";
+import { useNavigate } from "react-router-dom";
 
 export default function NotificationPage() {
   const [notifications, setNotifications] = useState<NotificationResponse[]>(
@@ -17,6 +18,7 @@ export default function NotificationPage() {
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const { isLogin } = useAuth();
+  const nav = useNavigate();
 
   // 모든 알림 조회 핸들러
   const handleGetAllNotifications = (page: number = 0) => {
@@ -163,7 +165,11 @@ export default function NotificationPage() {
               </tr>
             ) : (
               notifications.map((notice) => (
-                <tr key={notice.noticeId}>
+                <tr
+                  key={notice.noticeId}
+                  onClick={() => nav("/order/list")}
+                  style={{ cursor: "pointer" }}
+                >
                   <td className="type-data">{notice.type}</td>
 
                   <td
