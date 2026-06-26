@@ -15,9 +15,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -34,12 +36,6 @@ public class Contact {
 	
 	@Column(nullable = false, length = 50)
 	private String contactName;
-	
-	@Column(nullable = true, length = 50)
-	private String department;
-	
-	@Column(nullable = true, length = 50)
-	private String position;
 	
 	@Column(nullable = true, length = 30)
 	private String phone;
