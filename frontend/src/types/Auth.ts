@@ -29,5 +29,5 @@ export interface LoginResponse {
   companyName: string;
   companyId: number;
   companyType: string;
-  contactId: number;
+  contactId: number | null;
 }
