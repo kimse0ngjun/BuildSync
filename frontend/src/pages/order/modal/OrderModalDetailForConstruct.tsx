@@ -1,4 +1,4 @@
-import { writeOrderApi } from "../../../api/OrderApi";
+import { writeOrderApi } from "../../../api/orderApi";
 import type { ForCompanyProps } from "../../../types/Modal";
 import { STATUS_MAP } from "../../../constants/status";
 import { useNavigate } from "react-router-dom";

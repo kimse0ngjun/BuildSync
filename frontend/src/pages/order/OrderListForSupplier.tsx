@@ -15,7 +15,7 @@ import { IoMdExit } from "react-icons/io";
 
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetailForSupplier } from "./modal/OrderModalDetailForSupplier";
-import { orderListApi } from "../../api/OrderApi";
+import { orderListApi } from "../../api/orderApi";
 import { STATUS_MAP } from "../../constants/status";
 import { useAuth } from "../../context/AuthContext";
 import LoginRequired from "../../components/LoginRequired";
@@ -56,6 +56,7 @@ export const OrderListForSupplier = () => {
   }
 
   const myCompanyId = Number(localStorage.getItem("companyId"));
+  const ceoName = localStorage.getItem("ceoName");
 
   const fetchCountsData = async () => {
     try {
@@ -229,7 +230,7 @@ export const OrderListForSupplier = () => {
             <tr>
               <th>발주 번호</th>
               <th>발주 건설사</th>
-              <th>건설사 담당자</th>
+              <th>건설 담당자</th>
               <th>요청 품목</th>
               <th>진행 상태</th>
               <th>요청 등록일</th>
@@ -246,7 +247,6 @@ export const OrderListForSupplier = () => {
             ) : orders.length > 0 ? (
               orders.map((order, index) => {
                 const representativeItem = order.mainItemName || "품목 없음";
-                const extraCount = order.extraItemCount || 0;
 
                 return (
                   <tr
@@ -256,11 +256,10 @@ export const OrderListForSupplier = () => {
                   >
                     <td className="order-number">{order.orderId}</td>
                     <td className="order-company">{order.partnerName}</td>
-                    <td>{order.managerName || "-"}</td>
-                    <td className="order-material">
-                      {representativeItem}
-                      {extraCount > 0 && <span> 외 {extraCount}건</span>}
+                    <td>
+                      {order.managerName || order.orderManagerName || "-"}
                     </td>
+                    <td className="order-material">{representativeItem}</td>
                     <td>
                       <span className={`order-status ${order.status}`}>
                         {STATUS_MAP[order.status] ??
