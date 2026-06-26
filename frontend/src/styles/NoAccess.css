@@ -1,0 +1,122 @@
+.no-access-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 140px);
+  padding: 20px;
+  background-color: #f8fafc;
+}
+
+.no-access-card {
+  max-width: 480px;
+  width: 100%;
+  background: #ffffff;
+  padding: 40px 32px;
+  border-radius: 16px;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.05),
+    0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.no-access-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background-color: #fef2f2;
+  border-radius: 50%;
+  margin-bottom: 24px;
+}
+
+.no-access-icon {
+  font-size: 28px;
+  color: #ef4444;
+}
+
+.no-access-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.no-access-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+  margin-bottom: 32px;
+}
+
+.no-access-desc strong {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.no-access-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #0f172a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.no-access-back-btn:hover {
+  background-color: #1e293b;
+}
+
+/* dark mode */
+body.dark-mode .no-access-container {
+  background-color: #0f172a;
+}
+
+body.dark-mode .no-access-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .no-access-icon-wrapper {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+body.dark-mode .no-access-icon {
+  color: #f87171;
+}
+
+body.dark-mode .no-access-title {
+  color: #f1f5f9;
+}
+
+body.dark-mode .no-access-desc {
+  color: #94a3b8;
+}
+
+body.dark-mode .no-access-desc strong {
+  color: #38bdf8;
+}
+
+body.dark-mode .no-access-back-btn {
+  background-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode .no-access-back-btn:not(:disabled):hover {
+  background-color: #2563eb;
+  box-shadow: 0 4px 12px -1px rgba(59, 130, 246, 0.4);
+}

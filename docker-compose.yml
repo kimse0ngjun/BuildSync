@@ -1,0 +1,71 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: buildsync-mysql
+
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+
+  backend:
+    build:
+      context: ./backend
+
+    container_name: buildsync-backend
+
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+    depends_on:
+      - mysql
+
+    ports:
+      - "8080:8080"
+
+
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: buildsync-frontend
+
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+
+    depends_on:
+      - backend
+
+
+  nginx:
+    image: nginx:latest
+
+    container_name: buildsync-nginx
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+    depends_on:
+      - frontend
+      - backend
+
+    restart: unless-stopped
+
+
+volumes:
+  mysql-data:
