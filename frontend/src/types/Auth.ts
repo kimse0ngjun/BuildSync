@@ -19,12 +19,15 @@ export interface SignupRequest {
 }
 
 export interface ResetPasswordRequest {
-  email: string;
-  password: string;
+  token: string;
+  newPassWord: string;
 }
 
 export interface LoginResponse {
   token: string;
   ceoName: string;
   companyName: string;
+  companyId: number;
+  companyType: string;
+  contactId: number;
 }

@@ -9,7 +9,6 @@ import Dashboard from "./pages/Dashboard";
 
 import CompanyList from "./pages/company/CompanyList";
 import CompanyDetail from "./pages/company/CompanyDetail";
-import CompanyEdit from "./pages/company/CompanyEdit";
 
 import MaterialList from "./pages/material/MeterialList";
 import MaterialWrite from "./pages/material/MaterialWrite";
@@ -49,6 +48,7 @@ import SchedulePage from "./pages/schedule/SchedulePage";
 import { EditOrder } from "./pages/order/EditOrder";
 import { OrderListForSupplier } from "./pages/order/OrderListForSupplier";
 import { OrderListForConstruction } from "./pages/order/OrderListForConstruction";
+import StockInOutEdit from "./pages/material/StockInOutEdit";
 
 import MaterialCategoryCreatePage from "./pages/admin/MaterialCategoryCreatePage";
 import MaterialCategoryEditPage from "./pages/admin/MaterialCategoryEditPage";
@@ -93,7 +93,6 @@ function App() {
 
             <Route path="/company" element={<CompanyList />} />
             <Route path="/company/:companyId" element={<CompanyDetail />} />
-            <Route path="/company/:companyId/edit" element={<CompanyEdit />} />
 
             <Route path="/material" element={<MaterialList />} />
             <Route path="/material/write" element={<MaterialWrite />} />
@@ -104,8 +103,12 @@ function App() {
 
             <Route path="/stock" element={<StockInOutList />} />
             <Route path="/stock/write" element={<StockInOutWrite />} />
-            <Route path="/input/success-input" element={<SuccessInput />} />
-            <Route path="/output/success-output" element={<SuccessOutput />} />
+            <Route
+              path="/stock/edit/:stockInOutId"
+              element={<StockInOutEdit />}
+            />
+            <Route path="/stock/success-input" element={<SuccessInput />} />
+            <Route path="/stock/success-output" element={<SuccessOutput />} />
 
             <Route path="/order/write" element={<WriteOrder />} />
             <Route

@@ -1,8 +1,4 @@
-import {
-  FiSearch,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
+import { FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import "../../styles/CompanyList.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -23,11 +19,16 @@ function CompanyList() {
   const loadCompanies = async () => {
     try {
       const response = await getCompanies(page, keyword, type);
-      setCompanies(response.data.list);
-      setTotalElements(response.data.totalElements);
-      setTotalPages(response.data.totalPages);
+
+      const data = response.data;
+
+      setCompanies(data?.list ?? []);
+      setTotalElements(data?.totalElements ?? 0);
+      setTotalPages(data?.totalPages ?? 1);
     } catch (error: any) {
       console.error(error);
+
+      setCompanies([]);
     }
   };
 
@@ -55,7 +56,7 @@ function CompanyList() {
           onClick={() => setPage(i)}
         >
           {i + 1}
-        </button>
+        </button>,
       );
     }
     return pages;
@@ -137,7 +138,9 @@ function CompanyList() {
                         : "type-badge builder"
                     }
                   >
-                    {company.companyType === "SUPPLIER" ? "공급업체" : "건설업체"}
+                    {company.companyType === "SUPPLIER"
+                      ? "공급업체"
+                      : "건설업체"}
                   </span>
                 </td>
                 <td className="company-name">{company.companyName}</td>

@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 import {
   FiPlus,
   FiSearch,
@@ -36,9 +39,6 @@ type MaterialListResponse = {
   normalStockCount: number;
   shortageStockCount: number;
   incomingCount: number;
-  currentPage?: number;
-  pageSize?: number;
-  totalElements?: number;
   totalPages?: number;
   materials: MaterialItem[];
 };
@@ -51,6 +51,14 @@ type CategoryItem = {
 
 function MaterialList() {
   const navigate = useNavigate();
+  const { isLogin } = useAuth();
+
+  const companyType = localStorage.getItem("companyType");
+  const companyName = localStorage.getItem("companyName") ?? "";
+
+  const isSupplier = companyType === "SUPPLIER" || companyType === "공급업체";
+  const isConstruction =
+    companyType === "CONSTRUCTION" || companyType === "건설업체";
 
   const [tab, setTab] = useState<"all" | "my">("all");
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
@@ -72,17 +80,17 @@ function MaterialList() {
   });
 
   const [loading, setLoading] = useState(false);
-
-  const filteredMaterials = materials;
   const size = 10;
 
-  const myCompanyName = "테스트건설";
-
-  const getSelectedMaterialId = () => {
-    return selected?.materialId ?? selected?.id;
-  };
+  const getSelectedMaterialId = () => selected?.materialId ?? selected?.id;
 
   const fetchMaterials = async () => {
+    if (tab === "my" && !isSupplier) {
+      setMaterials([]);
+      setSelected(null);
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -101,10 +109,10 @@ function MaterialList() {
 
       setMaterials(data.materials ?? []);
       setSummary({
-        totalMaterialCount: data.totalMaterialCount,
-        normalStockCount: data.normalStockCount,
-        shortageStockCount: data.shortageStockCount,
-        incomingCount: data.incomingCount,
+        totalMaterialCount: data.totalMaterialCount ?? 0,
+        normalStockCount: data.normalStockCount ?? 0,
+        shortageStockCount: data.shortageStockCount ?? 0,
+        incomingCount: data.incomingCount ?? 0,
       });
       setTotalPages(data.totalPages ?? 1);
     } catch (error) {
@@ -124,13 +132,20 @@ function MaterialList() {
   };
 
   useEffect(() => {
+    if (!isLogin) return;
     fetchCategories();
-  }, []);
+  }, [isLogin]);
 
   useEffect(() => {
+    if (!isLogin) return;
+
     setSelected(null);
     fetchMaterials();
-  }, [tab, page, category, status]);
+  }, [isLogin, tab, page, category, status]);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const handleSearch = () => {
     setSelected(null);
@@ -144,21 +159,6 @@ function MaterialList() {
     setSelected(null);
   };
 
-  const handlePrevPage = () => {
-    if (page > 0) {
-      setPage(page - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (page < totalPages - 1) {
-      setPage(page + 1);
-    }
-  };
-
-  const canManageSelected =
-    selected !== null && selected.supplierName === myCompanyName;
-
   const handleDeleteMaterial = async () => {
     if (!selected) return;
 
@@ -169,15 +169,12 @@ function MaterialList() {
       return;
     }
 
-    const confirmDelete = window.confirm(
-      `${selected.materialName} 자재를 삭제하시겠습니까?`,
-    );
-
-    if (!confirmDelete) return;
+    if (!window.confirm(`${selected.materialName} 자재를 삭제하시겠습니까?`)) {
+      return;
+    }
 
     try {
       await materialApi.deleteCompanyMaterial(materialId);
-
       alert("자재가 삭제되었습니다.");
       setSelected(null);
       fetchMaterials();
@@ -186,6 +183,9 @@ function MaterialList() {
       alert("자재 삭제에 실패했습니다.");
     }
   };
+
+  const canManageSelected =
+    isSupplier && selected !== null && selected.supplierName === companyName;
 
   return (
     <div className="material-page">
@@ -198,13 +198,15 @@ function MaterialList() {
           </p>
         </div>
 
-        <button
-          className="material-add-btn"
-          onClick={() => navigate("/material/write")}
-        >
-          <FiPlus />
-          자재 등록
-        </button>
+        {isSupplier && (
+          <button
+            className="material-add-btn"
+            onClick={() => navigate("/material/write")}
+          >
+            <FiPlus />
+            자재 등록
+          </button>
+        )}
       </div>
 
       <div className="material-stat-grid">
@@ -244,6 +246,7 @@ function MaterialList() {
             >
               전체 자재
             </button>
+
             <button
               className={tab === "my" ? "active" : ""}
               onClick={() => handleTabChange("my")}
@@ -252,127 +255,135 @@ function MaterialList() {
             </button>
           </div>
 
-          <div className="material-toolbar">
-            <div className="material-search">
-              <input
-                placeholder="자재명, 코드, 규격 검색..."
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
-                }}
-              />
-              <FiSearch onClick={handleSearch} />
-            </div>
+          {tab === "my" && isConstruction ? (
+            <NoAccess targetRoleName="공급업체" />
+          ) : (
+            <>
+              <div className="material-toolbar">
+                <div className="material-search">
+                  <input
+                    placeholder="자재명, 코드, 규격 검색..."
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSearch();
+                    }}
+                  />
+                  <FiSearch onClick={handleSearch} />
+                </div>
 
-            <select
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
-                setPage(0);
-              }}
-            >
-              <option value="">전체 분류</option>
-              {categories.map((item) => (
-                <option key={item.categoryId} value={item.categoryName}>
-                  {item.categoryName}
-                </option>
-              ))}
-            </select>
+                <select
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    setPage(0);
+                  }}
+                >
+                  <option value="">전체 분류</option>
+                  {categories.map((item) => (
+                    <option key={item.categoryId} value={item.categoryName}>
+                      {item.categoryName}
+                    </option>
+                  ))}
+                </select>
 
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(0);
-              }}
-            >
-              <option value="">전체 상태</option>
-              <option value="정상">정상</option>
-              <option value="부족">부족</option>
-            </select>
-          </div>
+                <select
+                  value={status}
+                  onChange={(e) => {
+                    setStatus(e.target.value);
+                    setPage(0);
+                  }}
+                >
+                  <option value="">전체 상태</option>
+                  <option value="정상">정상</option>
+                  <option value="부족">부족</option>
+                </select>
+              </div>
 
-          <table className="material-table">
-            <thead>
-              <tr>
-                <th>자재 코드</th>
-                <th>자재명</th>
-                <th>분류</th>
-                <th>현재 재고</th>
-                <th>최소 재고</th>
-                <th>단위</th>
-                <th>단가</th>
-                <th>상태</th>
-                <th>{tab === "all" ? "공급업체" : "관리 업체"}</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={9}>자재 목록을 불러오는 중입니다.</td>
-                </tr>
-              ) : filteredMaterials.length === 0 ? (
-                <tr>
-                  <td colSpan={9}>등록된 자재가 없습니다.</td>
-                </tr>
-              ) : (
-                filteredMaterials.map((item, index) => (
-                  <tr
-                    key={`${item.materialCode}-${index}`}
-                    onClick={() => setSelected(item)}
-                    className={
-                      selected?.materialId === item.materialId &&
-                      selected?.materialCode === item.materialCode
-                        ? "selected-row"
-                        : ""
-                    }
-                  >
-                    <td>{item.materialCode}</td>
-                    <td className="material-name">{item.materialName}</td>
-                    <td>{item.materialCategory}</td>
-                    <td>{item.currentQuantity}</td>
-                    <td>{item.minimumQuantity}</td>
-                    <td>{item.unit}</td>
-                    <td>{item.unitPrice.toLocaleString()}</td>
-                    <td>
-                      <span
-                        className={
-                          item.status === "정상"
-                            ? "status normal"
-                            : "status low"
-                        }
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td>{item.supplierName}</td>
+              <table className="material-table">
+                <thead>
+                  <tr>
+                    <th>자재 코드</th>
+                    <th>자재명</th>
+                    <th>분류</th>
+                    <th>현재 재고</th>
+                    <th>최소 재고</th>
+                    <th>단위</th>
+                    <th>단가</th>
+                    <th>상태</th>
+                    <th>{tab === "all" ? "공급업체" : "관리 업체"}</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
 
-          <div className="pagination">
-            <button onClick={handlePrevPage} disabled={page === 0}>
-              <FiChevronLeft />
-            </button>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={9}>자재 목록을 불러오는 중입니다.</td>
+                    </tr>
+                  ) : materials.length === 0 ? (
+                    <tr>
+                      <td colSpan={9}>등록된 자재가 없습니다.</td>
+                    </tr>
+                  ) : (
+                    materials.map((item, index) => (
+                      <tr
+                        key={`${item.materialCode}-${index}`}
+                        onClick={() => setSelected(item)}
+                      >
+                        <td>{item.materialCode}</td>
+                        <td className="material-name">{item.materialName}</td>
+                        <td>{item.materialCategory}</td>
+                        <td>{item.currentQuantity ?? 0}</td>
+                        <td>{item.minimumQuantity ?? 0}</td>
+                        <td>{item.unit}</td>
+                        <td>{(item.unitPrice ?? 0).toLocaleString()}</td>
+                        <td>
+                          <span
+                            className={
+                              item.status === "정상"
+                                ? "status normal"
+                                : "status low"
+                            }
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td>{item.supplierName}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
 
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                className={page === index ? "active" : ""}
-                onClick={() => setPage(index)}
-              >
-                {index + 1}
-              </button>
-            ))}
+              <div className="pagination">
+                <button
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                >
+                  <FiChevronLeft />
+                </button>
 
-            <button onClick={handleNextPage} disabled={page >= totalPages - 1}>
-              <FiChevronRight />
-            </button>
-          </div>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index}
+                    className={page === index ? "active" : ""}
+                    onClick={() => setPage(index)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() =>
+                    setPage((p) => Math.min(totalPages - 1, p + 1))
+                  }
+                  disabled={page >= totalPages - 1}
+                >
+                  <FiChevronRight />
+                </button>
+              </div>
+            </>
+          )}
         </section>
 
         {selected && (
@@ -404,15 +415,15 @@ function MaterialList() {
             <div className="detail-list">
               <Info
                 label="현재 재고"
-                value={`${selected.currentQuantity} ${selected.unit}`}
+                value={`${selected.currentQuantity ?? 0} ${selected.unit}`}
               />
               <Info
                 label="최소 재고"
-                value={`${selected.minimumQuantity} ${selected.unit}`}
+                value={`${selected.minimumQuantity ?? 0} ${selected.unit}`}
               />
               <Info
                 label="단가"
-                value={`${selected.unitPrice.toLocaleString()} 원`}
+                value={`${(selected.unitPrice ?? 0).toLocaleString()} 원`}
               />
               <Info label="단위" value={selected.unit} />
               <Info label="분류" value={selected.materialCategory} />

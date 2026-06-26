@@ -112,6 +112,15 @@ public class AuthService {
 	        company.setStatus(CompanyStatus.PENDING);
 	        
 	        companyRepository.save(company);
+	        
+	        Contact contact = new Contact();
+	        
+	        contact.setCompany(company);
+	        contact.setContactName(company.getCeoName());
+	        contact.setPhone(company.getPhone());
+	        contact.setEmail(company.getEmail());
+	        
+	        contactRepository.save(contact);
 	    }
 	 
 	 // 아이디 찾기

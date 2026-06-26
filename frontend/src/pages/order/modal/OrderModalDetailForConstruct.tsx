@@ -1,8 +1,11 @@
-import { writeOrderApi } from "../../../api/orderApi";
+import { writeOrderApi } from "../../../api/OrderApi";
 import type { ForCompanyProps } from "../../../types/Modal";
 import { STATUS_MAP } from "../../../constants/status";
 import { useNavigate } from "react-router-dom";
 import "../../../styles/OrderModalDetail.css";
+import NoAccess from "../../../components/NoAccess";
+import { useAuth } from "../../../context/AuthContext";
+import LoginRequired from "../../../components/LoginRequired";
 
 // 건설업체 발주 상세 화면
 export const OrderModalDetailForConstruct = ({
@@ -10,6 +13,16 @@ export const OrderModalDetailForConstruct = ({
   onClose,
 }: ForCompanyProps) => {
   const nav = useNavigate();
+  const isLogin = useAuth();
+  const myCompanyType = localStorage.getItem("companyType");
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (myCompanyType !== "CONSTRUCTION") {
+    return <NoAccess targetRoleName="건설업체" />;
+  }
 
   // 수정
   const handleEditClick = () => {

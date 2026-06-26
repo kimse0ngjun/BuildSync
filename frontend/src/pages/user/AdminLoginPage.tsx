@@ -30,6 +30,9 @@ function AdminLoginPage() {
         token: res.data.token,
         ceoName: res.data.adminName,
         companyName: "관리자",
+        companyId: 0,
+        companyType: "ADMIN",
+        contactId: 0,
       });
 
       localStorage.setItem("isAdmin", "true");

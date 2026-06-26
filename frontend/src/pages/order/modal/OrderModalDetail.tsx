@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { OrderModalDetailForConstruct } from "./OrderModalDetailForConstruct";
 import { OrderModalDetailForSupplier } from "./OrderModalDetailForSupplier";
-import { orderListApi } from "../../../api/orderApi";
+import { orderListApi } from "../../../api/OrderApi";
 import type { OrderModalDetailProps } from "../../../types/Modal";
 import type { OrderDetailResponse } from "../../../types/Order";
 

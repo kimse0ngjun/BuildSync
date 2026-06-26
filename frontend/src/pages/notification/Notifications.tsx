@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 import type { NotificationResponse } from "../../types/Notification";
 import { notificationListApi } from "../../api/notificationApi";
-import { MdDeleteOutline } from "react-icons/md";
 import "../../styles/Notifications.css";
 
 export default function NotificationPage() {
@@ -14,6 +15,8 @@ export default function NotificationPage() {
 
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
+
+  const { isLogin } = useAuth();
 
   // 모든 알림 조회 핸들러
   const handleGetAllNotifications = (page: number = 0) => {
@@ -101,10 +104,14 @@ export default function NotificationPage() {
   };
 
   useEffect(() => {
-    handleGetAllNotifications();
-  }, []);
+    if (!isLogin) return;
 
-  const deleteIcon = <MdDeleteOutline />;
+    handleGetAllNotifications();
+  }, [isLogin]);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   return (
     <div className="container">
@@ -136,7 +143,7 @@ export default function NotificationPage() {
       </div>
 
       {loading ? (
-        <p className="loading-message">알림을 로딩 중입니다 형님...</p>
+        <p className="loading-message">알림을 로딩 중입니다...</p>
       ) : (
         <table className="list-table">
           <thead>

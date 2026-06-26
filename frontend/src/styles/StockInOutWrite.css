@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. 입출고 등록 메인 페이지 레이아웃 및 헤더 구조
+   ========================================================================== */
 .stock-write-page {
   width: 100%;
   min-height: 100%;
@@ -24,6 +27,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.stock-back-btn:hover {
+  background: #e1edff;
+}
+
+.stock-write-card {
+  display: flex;
+  flex-direction: column;
 }
 
 .stock-write-label {
@@ -33,7 +47,7 @@
   font-weight: 700;
 }
 
-.stock-write-header h1 {
+.stock-write-header h1.stock-write-title {
   margin: 0;
   color: #10284a;
   font-size: 34px;
@@ -48,6 +62,7 @@
   font-weight: 500;
 }
 
+/* 메인 그리드 분할 (폼 영역 + 우측 프리뷰 스피드 패널) */
 .stock-write-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
@@ -59,15 +74,21 @@
   min-width: 0;
 }
 
+/* ==========================================================================
+   2. 섹션 컨테이너 및 폼 컨트롤 기본 컨트롤 정의
+   ========================================================================== */
 .stock-write-section {
   background: white;
   border: 1px solid #dbe6f4;
   border-radius: 18px;
   padding: 28px;
   margin-bottom: 18px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
 }
 
-.stock-write-section h2 {
+.stock-write-section h2.basic-info-title,
+.stock-write-section h2.table-item-adder-header,
+.stock-write-section h2.memo-title {
   margin: 0 0 22px;
   color: #10284a;
   font-size: 20px;
@@ -98,6 +119,7 @@
   font-style: normal;
 }
 
+/* 공통 입력 컨트롤 */
 .stock-form-field input,
 .stock-form-field select,
 .stock-form-field textarea {
@@ -110,6 +132,9 @@
   outline: none;
   font-size: 14px;
   font-weight: 500;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .stock-form-field input,
@@ -127,14 +152,20 @@
 .stock-form-field select:focus,
 .stock-form-field textarea:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
+.stock-form-field small.order-explain,
 .stock-form-field small {
   color: #94a3b8;
   font-size: 12px;
   font-weight: 500;
+  margin-top: 2px;
 }
 
+/* ==========================================================================
+   3. 입출고 구분 전환 컴포넌트 & 달력 인풋 처리
+   ========================================================================== */
 .type-toggle {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -155,6 +186,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .type-toggle button:first-child {
@@ -180,6 +213,8 @@
 
 .input-icon {
   position: relative;
+  display: flex; /* 🔵 추가: 내부 인풋창과 높이를 맞추기 위해 flex로 설정 */
+  align-items: center; /* 🔵 추가: 수직 중앙 정렬 기둥 장착 */
 }
 
 .input-icon svg {
@@ -188,66 +223,180 @@
   top: 50%;
   transform: translateY(-50%);
   color: #64748b;
+  pointer-events: none;
 }
 
-.select-with-thumb {
-  height: 54px;
+.table-item-adder-zone {
   display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
   align-items: center;
-  gap: 10px;
-  border: 1px solid #dbe6f4;
-  border-radius: 12px;
-  background: #fff;
-  padding: 0 12px;
 }
 
-.material-mini-thumb {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  border-radius: 8px;
-  background: #e8f1ff;
-  color: #2563eb;
+.table-item-adder-zone select.material-data {
+  flex: 2;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #dbe6f4;
+  padding: 0 14px;
+  color: #10284a;
+  font-weight: 500;
+  background-color: #fff;
+  outline: none;
+}
+
+.table-item-adder-zone input.quantity-data {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #dbe6f4;
+  border-radius: 12px 0 0 12px; /* 오른쪽 결합 단면 개방 */
+  outline: none;
+  color: #10284a;
+  font-weight: 600;
+}
+
+/* 인풋창 우측에 밀착 고정되는 단위 디스플레이 상자 */
+.unit-display-box {
+  height: 44px;
+  padding: 0 16px;
+  background: #f8fafc;
+  border: 1px solid #dbe6f4;
+  border-left: none; /* 중복 경계선 탈거 */
+  border-radius: 0 12px 12px 0; /* 우측면 마감 */
+  margin-left: -13px; /* 인풋창 내부로 마이너스 마진 밀착 */
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.select-with-thumb select {
-  border: none;
-  height: 100%;
-  padding: 0;
-}
-
-.select-with-thumb svg {
+  font-weight: 700;
   color: #64748b;
+  font-size: 14px;
+  white-space: nowrap;
+  user-select: none;
 }
 
-.quantity-input {
-  display: flex;
-  border: 1px solid #dbe6f4;
+.table-item-adder-zone button.material-add-btn {
+  height: 44px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0 22px;
   border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
 }
 
-.quantity-input input {
-  border: none;
-  border-radius: 0;
+.table-item-adder-zone button.material-add-btn:hover {
+  background: #1d4ed8;
 }
 
-.quantity-input select {
-  width: 74px;
-  border: none;
-  border-left: 1px solid #dbe6f4;
-  border-radius: 0;
+/* ==========================================================================
+   5. 수집 자재 그리드 데이터 테이블 스타일링
+   ========================================================================== */
+.stock-write-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  margin-top: 8px;
 }
 
-.quantity-input:focus-within,
-.select-with-thumb:focus-within {
+.stock-write-table thead tr.material-table-tr {
+  background: #f4f8ff;
+  border-bottom: 1px solid #e5e7eb;
+  height: 44px;
+}
+
+.stock-write-table th {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 14px;
+}
+
+.stock-write-table tbody tr.material-data-list {
+  border-bottom: 1px solid #eef2f7;
+  height: 54px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.stock-write-table tbody tr.material-data-list:hover {
+  background-color: #f8fbc640; /* 경량 마우스 오버 포인트 채도 보정 */
+}
+
+.stock-write-table td {
+  padding: 0 14px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.stock-write-table td.material-name {
+  color: #10284a;
+  font-weight: 700;
+}
+
+.stock-write-table input.material-quantity {
+  width: 84px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  color: #10284a;
+  font-weight: 600;
+  outline: none;
+}
+
+.stock-write-table input.material-quantity:focus {
   border-color: #2563eb;
 }
 
+.badge-unit {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 데이터 부재 시 안내 구역 */
+.stock-write-table tr.no-material-data {
+  height: 120px;
+}
+
+.stock-write-table td.no-data-explain {
+  text-align: center;
+  color: #94a3b8;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+/* 리스트 개별 행 삭제 제어 버튼 */
+.stock-write-table td.action-btn button.remove-item-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.stock-write-table td.action-btn button.remove-item-btn:hover {
+  background-color: #fef2f2;
+}
+
+/* ==========================================================================
+   6. 최하단 액션 영역 제어 킷 및 글자수 피드백
+   ========================================================================== */
 .memo-count {
   margin-top: -2px;
   color: #94a3b8;
@@ -270,6 +419,7 @@
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .stock-cancel-btn {
@@ -277,6 +427,11 @@
   border: 1px solid #dbe6f4;
   background: #fff;
   color: #64748b;
+}
+
+.stock-cancel-btn:hover {
+  background: #f8fafc;
+  color: #475569;
 }
 
 .stock-submit-btn {
@@ -289,8 +444,19 @@
 
 .stock-submit-btn:hover {
   background: #1d4ed8;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.25);
 }
 
+.stock-submit-btn:disabled {
+  background: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   7. 우측 프리뷰 고속 서브 패널 컨테이너
+   ========================================================================== */
 .stock-write-preview {
   display: flex;
   flex-direction: column;
@@ -302,6 +468,7 @@
   border: 1px solid #dbe6f4;
   border-radius: 18px;
   padding: 22px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
 }
 
 .preview-title {
@@ -311,7 +478,9 @@
   margin-bottom: 22px;
 }
 
-.preview-card h3 {
+.preview-card h3.selected-material-data-title,
+.preview-card h3.dashboard-title,
+.preview-card h3.expected-material-title {
   margin: 0;
   color: #10284a;
   font-size: 17px;
@@ -327,6 +496,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  cursor: pointer;
 }
 
 .preview-material {
@@ -346,16 +516,17 @@
   align-items: center;
   justify-content: center;
   font-size: 32px;
+  user-select: none;
 }
 
-.preview-material h4 {
+.preview-material h4.preview-materialName {
   margin: 0 0 8px;
   color: #10284a;
   font-size: 18px;
   font-weight: 700;
 }
 
-.preview-material span {
+.preview-material span.preview-material-condition {
   height: 26px;
   padding: 0 10px;
   border-radius: 999px;
@@ -367,13 +538,25 @@
   align-items: center;
 }
 
-.preview-material p {
-  margin-top: 8px;
+.preview-material p.preview-material-code {
+  margin: 10px 0 0 0;
   color: #64748b;
   font-size: 13px;
   font-weight: 500;
 }
 
+/* 프리뷰 내부 테이블 및 그리드 데이터 공백 안내 설명 */
+.preview-card p.material-action-explain,
+.preview-card p.expected-material-explain {
+  color: #94a3b8;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 정보 가로 정렬 처리 */
 .preview-info-row {
   height: 42px;
   border-bottom: 1px solid #eef2f7;
@@ -402,6 +585,7 @@
   color: #f97316 !important;
 }
 
+/* 하단 최종 하이라이트 행 연출 */
 .total-row,
 .expected-row {
   height: 56px;
@@ -411,21 +595,21 @@
   align-items: center;
 }
 
-.total-row span,
-.expected-row span {
+.total-row span.total-amount-explain,
+.expected-row span.expected-sub-explain {
   color: #10284a;
   font-size: 14px;
   font-weight: 700;
 }
 
-.total-row strong,
-.expected-row strong {
+.total-row strong.total-amount-data,
+.expected-row strong.expected-material-stock {
   color: #2563eb;
   font-size: 22px;
   font-weight: 700;
 }
 
-/* dark mode */
+/* dark-mode */
 body.dark-mode .stock-write-page {
   background: #0f172a;
 }
@@ -435,27 +619,37 @@ body.dark-mode .stock-back-btn {
   color: #f8fafc;
 }
 
+body.dark-mode .stock-back-btn:hover {
+  background: #334155;
+}
+
 body.dark-mode .stock-write-label {
   color: #93c5fd;
 }
 
-body.dark-mode .stock-write-header h1,
-body.dark-mode .stock-write-section h2,
+body.dark-mode .stock-write-header h1.stock-write-title,
+body.dark-mode .stock-write-section h2.basic-info-title,
+body.dark-mode .stock-write-section h2.table-item-adder-header,
+body.dark-mode .stock-write-section h2.memo-title,
 body.dark-mode .stock-form-field > span,
-body.dark-mode .preview-card h3,
-body.dark-mode .preview-material h4,
+body.dark-mode .preview-card h3.selected-material-data-title,
+body.dark-mode .preview-card h3.dashboard-title,
+body.dark-mode .preview-card h3.expected-material-title,
+body.dark-mode .preview-material h4.preview-materialName,
 body.dark-mode .preview-info-row strong,
-body.dark-mode .total-row span,
-body.dark-mode .expected-row span {
-  color: #f8fafc;
+body.dark-mode .total-row span.total-amount-explain,
+body.dark-mode .expected-row span.expected-sub-explain,
+body.dark-mode .stock-write-table td.material-name {
+  color: #f8fafc !important;
 }
 
 body.dark-mode .stock-write-desc,
 body.dark-mode .stock-form-field small,
 body.dark-mode .memo-count,
 body.dark-mode .preview-title button,
-body.dark-mode .preview-material p,
-body.dark-mode .preview-info-row span {
+body.dark-mode .preview-material p.preview-material-code,
+body.dark-mode .preview-info-row span,
+body.dark-mode .stock-write-table th {
   color: #94a3b8;
 }
 
@@ -467,14 +661,17 @@ body.dark-mode .preview-card {
 
 body.dark-mode .stock-form-field input,
 body.dark-mode .stock-form-field select,
-body.dark-mode .stock-form-field textarea {
+body.dark-mode .stock-form-field textarea,
+body.dark-mode .table-item-adder-zone select.material-data,
+body.dark-mode .table-item-adder-zone input.quantity-data {
   background: #111827;
   border-color: #334155;
   color: #f8fafc;
 }
 
 body.dark-mode .stock-form-field input::placeholder,
-body.dark-mode .stock-form-field textarea::placeholder {
+body.dark-mode .stock-form-field textarea::placeholder,
+body.dark-mode .table-item-adder-zone input.quantity-data::placeholder {
   color: #64748b;
 }
 
@@ -482,6 +679,7 @@ body.dark-mode .stock-form-field input:focus,
 body.dark-mode .stock-form-field select:focus,
 body.dark-mode .stock-form-field textarea:focus {
   border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
 }
 
 body.dark-mode .type-toggle {
@@ -510,15 +708,14 @@ body.dark-mode .type-toggle button.active.out {
   border-color: #fb923c;
 }
 
-body.dark-mode .input-icon svg,
-body.dark-mode .select-with-thumb svg {
+body.dark-mode .input-icon svg {
   color: #94a3b8;
 }
 
-body.dark-mode .select-with-thumb,
-body.dark-mode .quantity-input {
+body.dark-mode .unit-display-box {
   background: #111827;
   border-color: #334155;
+  color: #f8fafc;
 }
 
 body.dark-mode .material-mini-thumb,
@@ -527,20 +724,40 @@ body.dark-mode .preview-thumb {
   color: #60a5fa;
 }
 
-body.dark-mode .select-with-thumb select,
-body.dark-mode .quantity-input input,
-body.dark-mode .quantity-input select {
+body.dark-mode .stock-write-table {
+  background: transparent;
+}
+
+body.dark-mode .stock-write-table thead tr.material-table-tr {
   background: #111827;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .stock-write-table tbody tr.material-data-list {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .stock-write-table tbody tr.material-data-list:hover {
+  background-color: #243247;
+}
+
+body.dark-mode .stock-write-table td {
+  color: #cbd5e1;
+}
+
+body.dark-mode .stock-write-table input.material-quantity {
+  background-color: #111827;
+  border-color: #334155;
   color: #f8fafc;
 }
 
-body.dark-mode .quantity-input select {
-  border-left-color: #334155;
+body.dark-mode .badge-unit {
+  background: #334155;
+  color: #cbd5e1;
 }
 
-body.dark-mode .quantity-input:focus-within,
-body.dark-mode .select-with-thumb:focus-within {
-  border-color: #60a5fa;
+body.dark-mode .stock-write-table td.action-btn button.remove-item-btn:hover {
+  background-color: rgba(239, 68, 68, 0.15);
 }
 
 body.dark-mode .stock-cancel-btn {
@@ -564,7 +781,7 @@ body.dark-mode .stock-submit-btn:hover {
   background: #1d4ed8;
 }
 
-body.dark-mode .preview-material span {
+body.dark-mode .preview-material span.preview-material-condition {
   background: rgba(16, 185, 129, 0.16);
   color: #34d399;
 }
@@ -581,11 +798,14 @@ body.dark-mode .preview-out {
   color: #fb923c !important;
 }
 
-body.dark-mode .total-row strong,
-body.dark-mode .expected-row strong {
+body.dark-mode .total-row strong.total-amount-data,
+body.dark-mode .expected-row strong.expected-material-stock {
   color: #93c5fd;
 }
 
+/* ==========================================================================
+   9. 반응형 모바일 최적화 브레이크 포인트 미디어 쿼리
+   ========================================================================== */
 @media (max-width: 1100px) {
   .stock-write-layout {
     grid-template-columns: 1fr;

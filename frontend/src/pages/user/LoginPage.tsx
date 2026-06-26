@@ -30,6 +30,9 @@ function LoginPage() {
         token: res.data.token,
         ceoName: res.data.ceoName,
         companyName: res.data.companyName,
+        companyId: res.data.companyId,
+        companyType: res.data.companyType,
+        contactId: res.data.contactId,
       });
 
       localStorage.removeItem("isAdmin");

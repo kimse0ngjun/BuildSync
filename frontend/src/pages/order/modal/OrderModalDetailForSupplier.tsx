@@ -1,5 +1,8 @@
-import { writeOrderApi } from "../../../api/orderApi";
+import { writeOrderApi } from "../../../api/OrderApi";
+import LoginRequired from "../../../components/LoginRequired";
+import NoAccess from "../../../components/NoAccess";
 import { STATUS_MAP } from "../../../constants/status";
+import { useAuth } from "../../../context/AuthContext";
 import type { ForCompanyProps } from "../../../types/Modal";
 
 export const OrderModalDetailForSupplier = ({
@@ -31,6 +34,17 @@ export const OrderModalDetailForSupplier = ({
       }
     }
   };
+
+  const isLogin = useAuth();
+  const myCompanyType = localStorage.getItem("companyType");
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (myCompanyType !== "SUPPLIER") {
+    return <NoAccess targetRoleName="공급업체" />;
+  }
 
   const siteData = selectedOrder.siteName
     ? selectedOrder.siteName.split("|")

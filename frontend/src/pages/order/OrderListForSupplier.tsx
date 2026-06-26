@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   FiSearch,
   FiFileText,
@@ -16,11 +15,15 @@ import { IoMdExit } from "react-icons/io";
 
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetailForSupplier } from "./modal/OrderModalDetailForSupplier";
-import { orderListApi } from "../../api/orderApi";
+import { orderListApi } from "../../api/OrderApi";
 import { STATUS_MAP } from "../../constants/status";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 
 export const OrderListForSupplier = () => {
-  const navigate = useNavigate();
+  const { isLogin } = useAuth();
+  const companyType = localStorage.getItem("companyType");
 
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
@@ -44,9 +47,14 @@ export const OrderListForSupplier = () => {
 
   const pageSize = 10;
 
-  const myCompanyType = localStorage.getItem("companyType") as
-    | "CONSTRUCTION"
-    | "SUPPLIER";
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (companyType !== "SUPPLIER") {
+    return <NoAccess targetRoleName="공급업체" />;
+  }
+
   const myCompanyId = Number(localStorage.getItem("companyId"));
 
   const fetchCountsData = async () => {
@@ -131,7 +139,7 @@ export const OrderListForSupplier = () => {
         setSelectedOrderId(detailData);
         setIsModalOpen(true);
       })
-      .catch((err) => alert("상세 정보 조회에 실패했습니다."));
+      .catch(() => alert("상세 정보 조회에 실패했습니다."));
   };
 
   const icon = <FaRegCircleCheck />;

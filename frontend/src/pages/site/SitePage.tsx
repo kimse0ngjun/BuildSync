@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 import {
   FiPlus,
   FiSearch,
@@ -40,6 +43,12 @@ type SiteResponse = {
 };
 
 function SitePage() {
+  const navigate = useNavigate();
+  const { isLogin } = useAuth();
+
+  const companyType = localStorage.getItem("companyType");
+  const isSupplier = companyType === "SUPPLIER" || companyType === "공급업체";
+
   const [keyword, setKeyword] = useState("");
   const [constructionType, setConstructionType] = useState("");
   const [status, setStatus] = useState("");
@@ -54,8 +63,6 @@ function SitePage() {
     plannedCount: 0,
     completedCount: 0,
   });
-
-  const navigate = useNavigate();
 
   const getProgress = (site: Site) => {
     if (site.status === "완료") return 100;
@@ -96,6 +103,8 @@ function SitePage() {
   };
 
   const fetchSites = async () => {
+    if (isSupplier) return;
+
     try {
       const data: SiteResponse = await siteApi.getSites({
         keyword,
@@ -107,10 +116,10 @@ function SitePage() {
 
       setSites(data.sites ?? []);
       setSummary({
-        totalSiteCount: data.totalSiteCount,
-        progressCount: data.progressCount,
-        plannedCount: data.plannedCount,
-        completedCount: data.completedCount,
+        totalSiteCount: data.totalSiteCount ?? 0,
+        progressCount: data.progressCount ?? 0,
+        plannedCount: data.plannedCount ?? 0,
+        completedCount: data.completedCount ?? 0,
       });
       setTotalPages(data.totalPages ?? 1);
       setSelected(null);
@@ -120,8 +129,29 @@ function SitePage() {
   };
 
   useEffect(() => {
+    if (!isLogin || isSupplier) return;
+
     fetchSites();
-  }, [page, constructionType, status]);
+  }, [isLogin, isSupplier, page, constructionType, status]);
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (isSupplier) {
+    return (
+      <NoAccess
+        targetRoleName="건설업체"
+        description={
+          <>
+            해당 메뉴는 <strong>건설업체</strong> 전용 관리 화면입니다.
+            <br />
+            공급업체 계정은 공사 현장 목록을 조회하거나 관리할 수 없습니다.
+          </>
+        }
+      />
+    );
+  }
 
   const handleSearch = () => {
     setPage(0);
@@ -214,11 +244,17 @@ function SitePage() {
                 setSelected(null);
               }}
             >
-              <option value="">전체 유형</option>
-              <option value="오피스">오피스</option>
-              <option value="아파트">아파트</option>
-              <option value="상가">상가</option>
+              <option value="">전체 공사 유형</option>
               <option value="건축">건축</option>
+              <option value="토목">토목</option>
+              <option value="플랜트">플랜트</option>
+              <option value="전기">전기</option>
+              <option value="통신">통신</option>
+              <option value="조경">조경</option>
+              <option value="리모델링">리모델링</option>
+              <option value="증축">증축</option>
+              <option value="철거">철거</option>
+              <option value="기타">기타</option>
             </select>
 
             <select
@@ -256,7 +292,7 @@ function SitePage() {
                   <td className="site-name">{site.siteName}</td>
                   <td>{site.constructionType}</td>
                   <td>{site.address}</td>
-                  <td>{site.cost.toLocaleString()}원</td>
+                  <td>{(site.cost ?? 0).toLocaleString()}원</td>
                   <td>{site.startDate}</td>
                   <td>{site.expectedEndDate}</td>
                   <td>
@@ -359,7 +395,7 @@ function SitePage() {
               <Info label="현장 주소" value={selected.address} />
               <Info
                 label="공사 비용"
-                value={`${selected.cost.toLocaleString()}원`}
+                value={`${(selected.cost ?? 0).toLocaleString()}원`}
               />
               <Info label="착공일" value={selected.startDate} />
               <Info label="준공 예정일" value={selected.expectedEndDate} />

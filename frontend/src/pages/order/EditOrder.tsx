@@ -13,7 +13,7 @@ import {
   FiFileText,
   FiSave,
 } from "react-icons/fi";
-import { orderListApi, writeOrderApi } from "../../api/orderApi";
+import { orderListApi, writeOrderApi } from "../../api/OrderApi";
 import type {
   MaterialSelectResponse,
   OrderItemDto,
@@ -23,11 +23,15 @@ import type {
 } from "../../types/Order";
 
 import "../../styles/WriteOrder.css";
+import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
+import NoAccess from "../../components/NoAccess";
 
 export const EditOrder = () => {
   const navigate = useNavigate();
   const { orderId } = useParams<{ orderId: string }>();
   const location = useLocation();
+  const myCompanyType = localStorage.getItem("companyType");
 
   const [supplierName, setSupplierName] = useState<string>("-");
 
@@ -54,6 +58,16 @@ export const EditOrder = () => {
   // 백엔드 통신
   const [fixedSupplierId, setFixedSupplierId] = useState<number | null>(null);
   const [fixedContactId, setFixedContactId] = useState<number | null>(null);
+
+  const { isLogin } = useAuth();
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
+
+  if (myCompanyType !== "CONSTRUCTION") {
+    return <NoAccess targetRoleName="건설업체" />;
+  }
 
   useEffect(() => {
     writeOrderApi
@@ -339,10 +353,12 @@ export const EditOrder = () => {
                 : "-"}
             </span>
 
-            <button type="button" onClick={handleAddMaterial}>
-              <FiPlus />
-              추가
-            </button>
+            {basketList.length === 0 && (
+              <button type="button" onClick={handleAddMaterial}>
+                <FiPlus />
+                추가
+              </button>
+            )}
           </div>
 
           <p className="order-table-help">
