@@ -1,4 +1,4 @@
-import { writeOrderApi } from "../../../api/OrderApi";
+import { writeOrderApi } from "../../../api/orderApi";
 import LoginRequired from "../../../components/LoginRequired";
 import NoAccess from "../../../components/NoAccess";
 import { STATUS_MAP } from "../../../constants/status";
@@ -71,7 +71,7 @@ export const OrderModalDetailForSupplier = ({
         <hr className="inner-divider" />
 
         <div className="detail-row">
-          <span className="detail-label">발주 건설사</span>
+          <span className="detail-label">발주 공급사</span>
           <span className="detail-value font-bold">
             {selectedOrder.companyName}
           </span>

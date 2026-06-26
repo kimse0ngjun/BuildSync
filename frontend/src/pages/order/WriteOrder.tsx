@@ -13,7 +13,7 @@ import {
   FiFileText,
   FiSave,
 } from "react-icons/fi";
-import { writeOrderApi } from "../../api/OrderApi";
+import { writeOrderApi } from "../../api/orderApi";
 import type {
   ContactInfo,
   MaterialSelectResponse,
@@ -212,8 +212,8 @@ export const WriteOrder = () => {
         siteId: selectedSiteId ? Number(selectedSiteId) : null,
         contactId: selectedContactId ? Number(selectedContactId) : null,
         memo: formattedMemo,
-        orderManagerName: orderManagerName.trim(),
         items: orderItemsPayload,
+        orderManagerName: formattedMemo,
       };
 
       await writeOrderApi.registOrder(orderPayload);

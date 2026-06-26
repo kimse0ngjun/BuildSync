@@ -17,7 +17,7 @@ import { IoMdExit } from "react-icons/io";
 
 import BaseModal from "./modal/BaseModal";
 import { OrderModalDetail } from "./modal/OrderModalDetail";
-import { orderListApi } from "../../api/OrderApi";
+import { orderListApi } from "../../api/orderApi";
 import { STATUS_MAP } from "../../constants/status";
 import "../../styles/OrderList.css";
 import { useAuth } from "../../context/AuthContext";
@@ -55,6 +55,7 @@ export const OrderListForConstruction = () => {
     | "SUPPLIER";
   const myCompanyId = Number(localStorage.getItem("companyId"));
   const companyType = localStorage.getItem("companyType");
+  const ceoName = localStorage.getItem("ceoName");
 
   if (!isLogin) {
     return <LoginRequired />;
@@ -257,7 +258,6 @@ export const OrderListForConstruction = () => {
             ) : orders.length > 0 ? (
               orders.map((order, index) => {
                 const representativeItem = order.mainItemName || "품목 없음";
-                const extraCount = order.extraItemCount || 0;
 
                 return (
                   <tr
@@ -268,10 +268,7 @@ export const OrderListForConstruction = () => {
                     <td className="order-number">{order.orderId}</td>
                     <td className="order-company">{order.partnerName}</td>
                     <td>{order.managerName || "-"}</td>
-                    <td className="order-material">
-                      {representativeItem}
-                      {extraCount > 0 && <span> 외 {extraCount}건</span>}
-                    </td>
+                    <td className="order-material">{representativeItem}</td>
                     <td>
                       <span className={`order-status ${order.status}`}>
                         {STATUS_MAP[order.status] ??
