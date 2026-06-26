@@ -123,8 +123,6 @@ public class OrderService {
 				.map(c -> new ContactResponse(
 						c.getContactId(),
 						c.getContactName(),
-						c.getDepartment(),
-						c.getPosition(),
 						c.getPhone(),
 						c.getEmail()
 				))
