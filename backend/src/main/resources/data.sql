@@ -14,4 +14,6 @@ VALUES
 '관리자',
 'ADMIN',
 NOW()
-);
+)
+ON DUPLICATE KEY UPDATE
+login_id = login_id;
