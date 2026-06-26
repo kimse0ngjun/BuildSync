@@ -56,7 +56,6 @@ export const OrderListForSupplier = () => {
   }
 
   const myCompanyId = Number(localStorage.getItem("companyId"));
-  const ceoName = localStorage.getItem("ceoName");
 
   const fetchCountsData = async () => {
     try {

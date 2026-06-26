@@ -10,7 +10,7 @@ import type {
 } from "../types/InOut";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/inout",
+  baseURL: `${import.meta.env.VITE_API_URL}/inout`,
   headers: {
     "Content-Type": "application/json",
   },

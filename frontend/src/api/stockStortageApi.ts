@@ -6,7 +6,7 @@ import type {
 } from "../types/Notification";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/shortage",
+  baseURL: `${import.meta.env.VITE_API_URL}/shortage`,
   headers: {
     "Content-Type": "application/json",
   },

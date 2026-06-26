@@ -11,7 +11,7 @@ import type {
 } from "../types/Order";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/order",
+  baseURL: `${import.meta.env.VITE_API_URL}/order`,
   headers: {
     "Content-Type": "application/json",
   },

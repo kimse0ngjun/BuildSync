@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { ChangeEvent } from "react";
 import authApi from "../../api/authApi";
 import "../../styles/FindIdPage.css";
 
@@ -9,14 +10,16 @@ export default function FindIdPage() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
-  const handlePhoneChange = (e) => {
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     const number = e.target.value.replace(/[^0-9]/g, "");
     let formatted = number;
+
     if (number.length > 3 && number.length <= 7) {
       formatted = `${number.slice(0, 3)}-${number.slice(3)}`;
     } else if (number.length > 7) {
       formatted = `${number.slice(0, 3)}-${number.slice(3, 7)}-${number.slice(7, 11)}`;
     }
+
     setPhone(formatted);
     setError("");
   };

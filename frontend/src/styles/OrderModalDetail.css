@@ -238,7 +238,6 @@
   cursor: not-allowed;
 }
 
-// 공급업체 전용
 .modal-action-buttons.supplier-buttons {
   gap: 10px;
 }

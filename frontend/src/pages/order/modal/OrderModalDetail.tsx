@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { OrderModalDetailForConstruct } from "./OrderModalDetailForConstruct";
 import { OrderModalDetailForSupplier } from "./OrderModalDetailForSupplier";
-import { orderListApi } from "../../../api/OrderApi";
+import { orderListApi } from "../../../api/orderApi";
 import type { OrderModalDetailProps } from "../../../types/Modal";
 import type { OrderDetailResponse } from "../../../types/Order";
 
@@ -19,11 +19,11 @@ export const OrderModalDetail = ({
       setLoading(true);
       orderListApi
         .getOrderDetail(selectedOrder)
-        .then((data) => {
+        .then((data: any) => {
           setFullOrderDetail(data);
           setLoading(false);
         })
-        .catch((err) => {
+        .catch((err: any) => {
           console.error("발주서 상세 조회 실패:", err);
           setLoading(false);
         });

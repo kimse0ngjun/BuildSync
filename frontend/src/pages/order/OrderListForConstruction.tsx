@@ -55,7 +55,6 @@ export const OrderListForConstruction = () => {
     | "SUPPLIER";
   const myCompanyId = Number(localStorage.getItem("companyId"));
   const companyType = localStorage.getItem("companyType");
-  const ceoName = localStorage.getItem("ceoName");
 
   if (!isLogin) {
     return <LoginRequired />;

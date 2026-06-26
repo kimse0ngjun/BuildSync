@@ -188,6 +188,11 @@ export const EditOrder = () => {
   const handleUpdateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!fixedSupplierId) {
+      alert("거래처 정보가 없습니다.");
+      return;
+    }
+
     if (basketList.length === 0) {
       alert("발주할 품목을 최소 1개 이상 유지해 주세요.");
       return;

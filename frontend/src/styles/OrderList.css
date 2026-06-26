@@ -377,7 +377,6 @@ body.dark-mode .order-pagination button:hover:not(:disabled) {
   color: #ffffff;
 }
 
-// 모달
 .base-modal-overlay,
 .modal-overlay,
 .modal-backdrop {

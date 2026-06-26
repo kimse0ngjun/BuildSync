@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
 
     try {
       await authApi.resetPassword({
-        token,
+        token: token!,
         newPassword: form.password,
       });
 

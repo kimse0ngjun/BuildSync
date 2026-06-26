@@ -121,9 +121,9 @@ export interface InOutDetailModalProps {
     stockInoutId: number;
     type: string;
     processedDate: string | null;
-    siteName: string;
+    siteName: string | null;
     orderId: number | null;
-    contactName: string;
+    contactName: string | null;
     memo: string | null;
     items?: {
       materialId: number;
