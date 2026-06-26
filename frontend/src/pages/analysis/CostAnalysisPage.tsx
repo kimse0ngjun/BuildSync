@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import LoginRequired from "../../components/LoginRequired";
 
 import {
   getCompanyMonthlyPurchase,
@@ -21,6 +22,11 @@ function CostAnalysisPage() {
   const { companyType } = useAuth();
   console.log("companyType:", companyType);
   const [selected, setSelected] = useState("monthly");
+  const { isLogin } = useAuth();
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   // 건설업체
   const [monthlyData, setMonthlyData] = useState<MonthlyPurchase[]>([]);

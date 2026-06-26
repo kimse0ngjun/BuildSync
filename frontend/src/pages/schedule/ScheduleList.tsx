@@ -2,9 +2,16 @@ import { useEffect, useState, useCallback } from "react";
 import { getSchedules } from "../../api/schedule";
 import type { ScheduleResponse } from "../../types/schedule";
 import "../../styles/ScheduleList.css";
+import LoginRequired from "../../components/LoginRequired";
+import { useAuth } from "../../context/AuthContext";
 
 function ScheduleList() {
   const [list, setList] = useState<ScheduleResponse[]>([]);
+  const { isLogin } = useAuth();
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const load = useCallback(async () => {
     try {

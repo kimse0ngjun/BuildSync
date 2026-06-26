@@ -5,6 +5,9 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { DateClickArg } from "@fullcalendar/interaction";
 import type { EventClickArg } from "@fullcalendar/core";
 import { useNavigate } from "react-router-dom";
+import LoginRequired from "../../components/LoginRequired";
+import { useAuth } from "../../context/AuthContext";
+
 import {
   FiArrowLeft,
   FiCalendar,
@@ -57,6 +60,11 @@ function SchedulePage() {
   const navigate = useNavigate();
 
   const companyId = Number(localStorage.getItem("companyId"));
+  const { isLogin } = useAuth();
+
+  if (!isLogin) {
+    return <LoginRequired />;
+  }
 
   const today = new Date();
 
